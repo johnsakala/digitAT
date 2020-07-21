@@ -57,7 +57,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
               margin: EdgeInsets.only(top:12.0,right:12.0,left:12.0),
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(13.0),
               ),
               child: Column(
                 children:[
