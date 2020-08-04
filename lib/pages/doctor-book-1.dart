@@ -108,7 +108,7 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
                           ),
                           Container(
                             child: Text(
-                              'Tomorrow,9 Dec',
+                              'Tomorrow',
                               style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 12.0,
@@ -293,7 +293,7 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: (){
-                      Navigator.of(context).pushNamed("/secondeDoctorBook");
+                      Navigator.of(context).pushNamed("/secondeDoctorBook" ,arguments: [widget.doctor, selectedChoice]);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -324,7 +324,7 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(100.0),
-        image: DecorationImage(image: AssetImage(image), fit: BoxFit.cover,)
+        image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover,)
       ),
     );
   }

@@ -5,6 +5,8 @@ import 'package:digitAT/models/user.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class AcountWidget extends StatefulWidget {
 
@@ -21,8 +23,15 @@ class _AcountWidgetState extends State<AcountWidget> {
   String fullname; 
   void _getResults() async{
       _user= await _fetchUser(this.widget.acountInfos);
-   
+   await setId(_user[0]['ID']);
     print('**********************'+_user[0]['NAME']);
+  }
+
+
+  setId(String id)async{
+    SharedPreferences preferences= await SharedPreferences.getInstance();
+    preferences.setString("id", id);
+
   }
   @override
   void initState(){

@@ -1,15 +1,94 @@
+import 'dart:convert';
+
+import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 class DoctorBookSecondeStep extends StatefulWidget {
+  final List<dynamic> value;
+  const DoctorBookSecondeStep({Key key,this.value}) : super(key: key);
   @override
   _DoctorBookSecondeStepState createState() => _DoctorBookSecondeStepState();
 }
 
 class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
+
+  String aid, number;
+  Future< List< dynamic >> _fetchAids() async {
+
+    final http.Response response = await http
+        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/department.get?PARENT=72',
+    )  .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+     List<dynamic> medicalAids=[]; 
+    if (response.statusCode == 200) {
+    
+
+      try {
+        if (responseBody["result"] != null) {
+          
+            medicalAids = responseBody["result"];
+        
+          print('********************'+medicalAids.toString());     
+            
+        } else {
+          
+          print('-----------------'+response.body);
+        }
+      } catch (error) {
+        print('-----------------'+error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    return medicalAids;
+  }
+   Future _createAppointment() async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  String id= preferences.getString('id');
+ 
+     final http.Response response = await http.post(
+        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":"appointment booking",
+   "DESCRIPTION":widget.value[1]+ " "+ nameController.text+" "+ emailController.text+" "+ phoneNumberController.text+" "+"payment $aid $number",
+   "CREATED_BY":id,
+   "RESPONSIBLE_ID":widget.value[0].userId
+  }
+
+}),).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           print('***********************zvaita');
+        
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+      
+  }
+
   User currentUser=new User.init().getCurrentUser();
   Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
+  TextEditingController emailController= new TextEditingController();
+  TextEditingController nameController= new TextEditingController();
+  TextEditingController phoneNumberController= new TextEditingController();
   @override
   Widget build(BuildContext context) {
    return Scaffold(
@@ -21,7 +100,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
              
          ,
           onPressed: (){
-            Navigator.of(context).pushNamed('/firstDoctorBook');
+            Navigator.of(context).pop();
           },
         ),
         backgroundColor: Theme.of(context).accentColor,
@@ -36,7 +115,11 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
         ),
 
       ),
-      body: SingleChildScrollView(
+      body: FutureBuilder(
+        future: _fetchAids(),
+        builder:(BuildContext context, AsyncSnapshot<List<dynamic>> snapshot){
+          if(snapshot.hasData){
+          return SingleChildScrollView(
         child: Column(
           children: <Widget>[
             Stack(
@@ -63,12 +146,12 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            ball(currentDoctor.avatar, Colors.transparent),
+                            ball(widget.value[0].avatar, Colors.transparent),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 Text(
-                                  currentDoctor.name,
+                                  widget.value[0].name,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14.0,
@@ -79,7 +162,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                 Container(
                                   width: 200,
                                   child:Text(
-                                    currentDoctor.description,
+                                    widget.value[0].description,
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 12.0,
@@ -109,7 +192,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                   ),
                                   SizedBox(height: 15.0,),
                                   Text(
-                                    "9 Dec 4:45PM",
+                                    "Tomorrow ${widget.value[1]}",
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14.0,
@@ -159,6 +242,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                             ),
                             child:FormBuilderTextField(
                               attribute: "Full Name",
+                              controller: nameController,
                               initialValue: '',//for testing
                               decoration: InputDecoration(
                                 hintText: "Name",
@@ -187,6 +271,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                             ),
                             child:FormBuilderTextField(
                               attribute: "Email",
+                              controller:emailController ,
                               initialValue: '',//for testing
                               decoration: InputDecoration(
                                 hintText: "E-mail",
@@ -215,6 +300,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                             ),
                             child: FormBuilderTextField(
                               attribute: "phone Number",
+                              controller: phoneNumberController,
                               initialValue: '',//for testing
                               decoration: InputDecoration(border: InputBorder.none,hintText: "Phone Number",hintStyle: TextStyle(fontFamily: 'Poppins'),prefixText: "+",),
                               keyboardType: TextInputType.number,
@@ -227,6 +313,70 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                           ],
                         ),
                       ),
+                        Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                           
+                            ),
+                            child:DropDownFormField(
+                  titleText: 'Medical Aid',
+                  value: aid,
+                  onSaved: (value) {
+                    setState(() {
+                      aid = value;
+                    });
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                     aid = value;
+                    });
+                  },
+                  dataSource: [
+                         {
+                          "display": "${snapshot.data[0]['NAME']}",
+                      "value": "${snapshot.data[0]['NAME']}",
+                         },
+                           {
+                          "display": "${snapshot.data[1]['NAME']}",
+                      "value": "${snapshot.data[1]['NAME']}",
+                         }
+                  ],
+                  textField: 'display',
+                  valueField: 'value',
+                ),
+                          ),
+      Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                          
+                            ),
+                            child:
+                            
+                            TextFormField(
+                                  decoration: InputDecoration(
+                               labelText: 'Medical aid Number'
+                                            ),
+                                            
+                             onChanged: (value){
+                               setState(() {
+                                 number=value;
+                               });  
+                               },     
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Number can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )),
                         SizedBox(height: 25.0,),
                         Container(
                           child: Text(
@@ -247,8 +397,14 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomAppBar(
+      );
+      }
+      else{
+        return CircularProgressIndicator();
+      }
+      
+        }),
+        bottomNavigationBar: BottomAppBar(
         elevation: 0,
         color: Colors.transparent,
         child: Container(
@@ -278,8 +434,14 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                   RaisedButton(
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onPressed: (){
-                      Navigator.of(context).pushNamed("/home",arguments: [currentUser.name,currentUser.phoneNumber]);
+                    onPressed: () async{
+                       await _createAppointment();
+                        SharedPreferences preferences= await SharedPreferences.getInstance();
+                       String id= preferences.getString('id');
+                     /*  if(result!=null){
+                       print('*********************************appointment created');
+                      }*/
+                      Navigator.of(context).pushNamed("/account",arguments:int.parse(id));
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -301,8 +463,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                 ],
               )
             ),
-      ),
-    );
+      ));
   }
   Widget ball(String image,Color color){
     return Container(
@@ -310,7 +471,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(100.0),
-        image: DecorationImage(image: AssetImage(image), fit: BoxFit.cover,)
+        image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover,)
       ),
     );
   }

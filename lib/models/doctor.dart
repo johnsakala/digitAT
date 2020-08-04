@@ -6,14 +6,15 @@ class Doctor{
   String name;
   String description;
   String state;
+  String userId;
   Color color;
   String avatar;
 
   Doctor.init();
-  Doctor(this.name,this.description,this.avatar,this.state,this.color);
+  Doctor(this.name,this.description,this.avatar,this.state,this.color,this.userId);
   Doctor getCurrentDoctor() {
     return Doctor("Dr.Alina james", "B.Sc DDVL Demilitologist",
-                  "images/asset-1.png","Closed To day", Colors.red);
+                  "images/asset-1.png","Closed To day", Colors.red,"1");
   }
 }
 class DoctorsList{

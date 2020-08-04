@@ -54,7 +54,7 @@ class RouteGenerator {
       case '/firstDoctorBook':
         return MaterialPageRoute(builder: (_) => DoctorBookFirstStep(doctor: args,));
       case '/secondeDoctorBook':
-        return MaterialPageRoute(builder: (_) => DoctorBookSecondeStep());
+        return MaterialPageRoute(builder: (_) => DoctorBookSecondeStep(value: args));
       case '/offers':
         return MaterialPageRoute(builder: (_) => OffersList());
       case '/bookTest':

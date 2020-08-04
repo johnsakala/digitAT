@@ -7,7 +7,16 @@ class Medecine{
   Medecine.init();
   Medecine(this.name,this.price);
 
+@override
+  String toString() {
+    // TODO: implement toString
+    return this.id+" "+ this.name+" "+this.price;
+  }
+
 }
+
+
+
 class MedecinesList{
   List<Medecine> medecinesMist;
   MedecinesList(){

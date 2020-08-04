@@ -1,8 +1,14 @@
+import 'dart:convert';
+
 import 'package:digitAT/models/medecine.dart';
 import 'package:digitAT/pages/medecines.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/medecine.dart' as model;
 import 'package:digitAT/models/user.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MedecinesSlected extends StatefulWidget {
    final List<dynamic> value;
@@ -12,6 +18,66 @@ class MedecinesSlected extends StatefulWidget {
 }
 
 class _MedecinesSlectedState extends State<MedecinesSlected> {
+  Future _createOrder() async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  String id= preferences.getString('id');
+ //int result=0;
+     final http.Response response = await http.post(
+        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":"medicine order",
+   "DESCRIPTION":medicines.toString()+" "+widget.value[3],
+   "CREATED_BY":id,
+   "RESPONSIBLE_ID":widget.value[2]
+  }
+
+}),).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita');
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
+  }
+
+  Future _createPaymentOrder() async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  String id= preferences.getString('id');
+ //int result=0;
+     final http.Response response = await http.post(
+        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":"payment",
+   "DESCRIPTION":"pay for medicines",
+   "CREATED_BY":id,
+   "RESPONSIBLE_ID":widget.value[3]
+  }
+
+}),).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita');
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
+  }
+
   User currentUser=User.init().getCurrentUser();
   List<Medecine>medicines= [];
   double bill=0.0;
@@ -24,9 +90,12 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
     this.medecinesList = new model.MedecinesList();
     super.initState();
   }
+   final GlobalKey<ScaffoldState> _scaffoldstate =
+      new GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldstate,
        appBar: AppBar(
         elevation: 0,
         leading: IconButton(
@@ -245,7 +314,20 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                   RaisedButton(
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onPressed: (){
+                    onPressed: () async{
+                   await _createOrder();
+                   await _createPaymentOrder();
+                   final snackBar = SnackBar(content: Text('Order Sent, you will receive a notification from the pharmacy'));
+                    _scaffoldstate.currentState.showSnackBar(snackBar);
+                    SharedPreferences preferences= await SharedPreferences.getInstance();
+                       String id= preferences.getString('id');
+                     /*  if(result!=null){
+                       print('*********************************appointment created');
+                      }*/
+                      Navigator.of(context).pushNamed("/account",arguments:int.parse(id));
+                      /*if(result!=null){
+                       print('*********************************order created');
+                      }*/
                      // Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.userID]);
                     },
                     shape: RoundedRectangleBorder(

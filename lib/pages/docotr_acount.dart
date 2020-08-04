@@ -26,7 +26,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
           },
         ),
         title: Text(
-          'Doctors',
+          'Doctor',
           style: TextStyle(
             fontSize:22.0,
             fontFamily: 'Poppins',
@@ -173,7 +173,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
                         ],
                       ),
                     ),
-                    Center(child:ball(currentDoctor.avatar, Theme.of(context).primaryColor,)),
+                    Center(child:ball(widget.doctor.avatar, Theme.of(context).primaryColor,)),
                   ],
                 ),
               ],
@@ -439,7 +439,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
         color: color,
         borderRadius: BorderRadius.circular(100.0),
         border: Border.all(width: 1,color: Colors.grey.withOpacity(0.2)),
-        image: DecorationImage(image: AssetImage(image), fit: BoxFit.cover,)
+        image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover,)
       ),
       
     );

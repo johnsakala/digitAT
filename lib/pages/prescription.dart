@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class Prescription extends StatefulWidget {
@@ -13,8 +17,105 @@ class Prescription extends StatefulWidget {
 
 class _PrescriptionState extends State<Prescription > {
   User currentUser=User.init().getCurrentUser();
-  String prescription;
+  String prescription, aid, number;
+
+   Future< List< dynamic >> _fetchAids() async {
+
+    final http.Response response = await http
+        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/department.get?PARENT=72',
+    )  .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+     List<dynamic> medicalAids=[]; 
+    if (response.statusCode == 200) {
+    
+
+      try {
+        if (responseBody["result"] != null) {
+          
+            medicalAids = responseBody["result"];
+        
+          print('********************'+medicalAids.toString());     
+            
+        } else {
+          
+          print('-----------------'+response.body);
+        }
+      } catch (error) {
+        print('-----------------'+error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    return medicalAids;
+  }
+   Future _createOrder() async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  String id= preferences.getString('id');
+ //int result=0;
+     final http.Response response = await http.post(
+        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":"medicine order",
+   "DESCRIPTION":prescription+" payment"+ aid +" "+number,
+   "CREATED_BY":id,
+   "RESPONSIBLE_ID":widget.rId
+  }
+
+}),).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita');
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
+  }
+
+  Future _createPaymentOrder() async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  String id= preferences.getString('id');
+ //int result=0;
+     final http.Response response = await http.post(
+        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":"payment",
+   "DESCRIPTION":"pay for medicines ${widget.rId}",
+   "CREATED_BY":id,
+   "RESPONSIBLE_ID":widget.rId
+  }
+
+}),).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita');
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
+  }
   final _formKey = GlobalKey<FormState>();
+   final GlobalKey<ScaffoldState> _scaffoldstate =
+      new GlobalKey<ScaffoldState>();
   void initState() {
     //this.medecinesList = new model.MedecinesList();
     super.initState();
@@ -26,17 +127,14 @@ class _PrescriptionState extends State<Prescription > {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldstate,
       appBar: AppBar(
         elevation: 0,
         
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor )
-              
-             
-         ,
+          icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor ),
           onPressed: (){
             Navigator.of(context).pop();
-           // Navigator.of(context).pushNamed('/home', arguments:[currentUser.name,currentUser.phoneNumber]);
           },
         ),
         backgroundColor: Theme.of(context).accentColor,
@@ -51,7 +149,11 @@ class _PrescriptionState extends State<Prescription > {
         ),
 
       ),
-      body:
+      body:FutureBuilder(
+        future: _fetchAids(),
+        builder:(BuildContext context, AsyncSnapshot<List<dynamic>> snapshot){
+          if(snapshot.hasData){
+          return
           SingleChildScrollView(
         child: Column(
           children: <Widget>[
@@ -114,12 +216,81 @@ class _PrescriptionState extends State<Prescription > {
                          }
                              return null;
                                   },
-                            )), 
+                            ),
+                            ), 
+                             Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                           
+                            ),
+                            child:DropDownFormField(
+                  titleText: 'Medical Aid',
+                  value: aid,
+                  onSaved: (value) {
+                    setState(() {
+                      aid = value;
+                    });
+                  },
+                  onChanged: (value) {
+                    setState(() {
+                     aid = value;
+                    });
+                  },
+                  dataSource: [
+                         {
+                          "display": "${snapshot.data[0]['NAME']}",
+                      "value": "${snapshot.data[0]['NAME']}",
+                         },
+                           {
+                          "display": "${snapshot.data[1]['NAME']}",
+                      "value": "${snapshot.data[1]['NAME']}",
+                         }
+                  ],
+                  textField: 'display',
+                  valueField: 'value',
+                ),
+                          ),
+                           Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                          
+                            ),
+                            child:
+                            
+                            TextFormField(
+                                  decoration: InputDecoration(
+                               labelText: 'Medical aid Number'
+                                            ),
+                                            
+                             onChanged: (value){
+                               setState(() {
+                                 number=value;
+                               });  
+                               },     
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Number can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )),
                         ]),
                ),) 
                ],
         ),
-      ),
+      );}
+      else{
+        Center(child: CircularProgressIndicator(),);
+      }
+      }),
       bottomNavigationBar: BottomAppBar(
         elevation: 0,
         color: Colors.transparent,
@@ -160,7 +331,22 @@ class _PrescriptionState extends State<Prescription > {
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: ()async {
                    if (_formKey.currentState.validate()) {
-                     
+                      
+                   await _createOrder();
+                   await _createPaymentOrder();
+                   final snackBar = SnackBar(content: Text('Order Sent, you will receive a notification from the pharmacy'));
+                    _scaffoldstate.currentState.showSnackBar(snackBar);
+                    SharedPreferences preferences= await SharedPreferences.getInstance();
+                       String id= preferences.getString('id');
+                     /*  if(result!=null){
+                       print('*********************************appointment created');
+                      }*/
+                      Navigator.of(context).pushNamed("/account",arguments:int.parse(id));
+                      /*if(result!=null){
+                       print('*********************************order created');
+                      }*/
+                     // Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.userID]);
+                    
                    }
                     },
                     shape: RoundedRectangleBorder(
@@ -170,7 +356,7 @@ class _PrescriptionState extends State<Prescription > {
                     child:Container(
                       margin: EdgeInsets.only(left: 45.0,right: 45.0,top: 12,bottom: 12),
                       child:Text(
-                        'Continue',
+                        'Checkout',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
