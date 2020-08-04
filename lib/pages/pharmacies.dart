@@ -1,30 +1,23 @@
 import 'dart:convert';
-
-import 'package:digitAT/models/medecine.dart';
-import 'package:digitAT/models/pharmacist.dart';
 import 'package:flutter/material.dart';
-import 'package:digitAT/models/medecine.dart' as model;
 import 'package:digitAT/models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:digitAT/widgets/searchWidget.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-class Medecines extends StatefulWidget {
-  final String pId;
-  const Medecines({Key key,this.pId}):super(key:key);
+class Pharmacies extends StatefulWidget {
   @override
-  _MedecinesState createState() => _MedecinesState();
+  _PharmaciesState createState() => _PharmaciesState();
 }
 
-class _MedecinesState extends State<Medecines> {
+class _PharmaciesState extends State<Pharmacies> {
   User currentUser=User.init().getCurrentUser();
   //model.MedecinesList medecinesList;
-  List<Medecine>medicines= [];
-  double bill=0.0;
-  Future< List< dynamic >> _fetchMedicines() async {
+  
+  Future< List< dynamic >> _fetchPharmacies() async {
 //  showAlertDialog(context);
     final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/crm.product.list',
+        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/department.get?PARENT=32',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
@@ -32,41 +25,11 @@ class _MedecinesState extends State<Medecines> {
     if (response.statusCode == 200) {
       try {
         if (responseBody["result"] != null) {
-               result = responseBody["result"];
-            
-        } else {
-          
-          print('-----------------'+response.body);
-        }
-      } catch (error) {
-        print('-----------------'+error);
-      }
-    } else {
-      print("Please check your internet connection ");
-      Fluttertoast.showToast(
-          msg: "Please check your internet connection ",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 4,
-          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
-    }
-    return result;
-  }
-      
-Future<Pharmacist> _fetchPharmacist() async {
-//  showAlertDialog(context);
-Pharmacist pharmacist;
-    final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.get?UF_DEPARTMENT=${widget.pId}',
-    )  .catchError((error) => print(error));
-    Map<String, dynamic> responseBody = jsonDecode(response.body);
-    
-    List< dynamic> result=[];
-    if (response.statusCode == 200) {
-      try {
-        if (responseBody["result"] != null) {
-               result = responseBody["result"];
-                  pharmacist= Pharmacist(result[0]["ID"], result[0]["NAME"], result[0]["LAST_NAME"]);            
+         
+            print('result //////////////////////////////'+ responseBody["result"].toString());
+      result = responseBody["result"];
+         
+                      print('list //////////////////////////////'+ result.toString());
    
         } else {
           
@@ -85,34 +48,20 @@ Pharmacist pharmacist;
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
     print('response //////////////////////////////'+result.toString());
-    return pharmacist;
+    return result;
   }
-  Pharmacist _pharmacist;
-  void getPharmacist() async{
+      
 
-     _pharmacist= await _fetchPharmacist();
-       
-
- 
-  }
   void initState() {
     //this.medecinesList = new model.MedecinesList();
     super.initState();
-    setState(() {
-      getPharmacist();
-    });
-  
+   
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        actions: <Widget>[
-      IconButton(icon: Icon(Icons.edit), onPressed: (){
-        Navigator.of(context).pushNamed('/prescription', arguments: _pharmacist.id);
-      })
-        ],
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor )
               
@@ -162,7 +111,7 @@ Pharmacist pharmacist;
               padding:EdgeInsets.only(top:12.0,right: 12.0,left: 12.0,bottom: 12.0),
               alignment: Alignment.topLeft,
               child: Text(
-                'Medicines :',
+                'Pharmacies :',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 16.0,
@@ -206,26 +155,16 @@ Pharmacist pharmacist;
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    '${snapshot.data[index]['PRICE']}',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12.0,
-                      color: Colors.grey
-                    ),
-                  ),
+               
                 ],
               ),
               IconButton(
                 onPressed: (){
-                  print(_pharmacist.id);
-                 setState(() {
-                   bill= bill+ double.parse(snapshot.data[index]['PRICE']);
-                 medicines.add(model.Medecine(snapshot.data[index]['NAME'], snapshot.data[index]['PRICE']));
-             });
+                  print('add');
+           Navigator.of(context).pushNamed('/medecines',arguments: snapshot.data[index]["ID"]);
                 
                  },
-                icon: Icon(Icons.add_circle_outline),
+                icon: Icon(Icons.arrow_forward),
                 color: Theme.of(context).accentColor.withOpacity(0.8),
                 iconSize: 30,
 
@@ -249,70 +188,9 @@ Pharmacist pharmacist;
             );
           }
         } ,
-        future: _fetchMedicines(),
+        future: _fetchPharmacies(),
       ),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 0,
-        color: Colors.transparent,
-        child: Container(
-              padding:EdgeInsets.only(right: 0.0,left: 30.0,bottom: 0.0,top: 0),
-              margin:EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.0),
-                border: Border.all(width: 1,color: Colors.grey.withOpacity(0.6)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        '${medicines.length} medecine Added',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12.0,
-                          color: Colors.grey
-                        ),
-                      ),
-                      Text(
-                        '\$ $bill',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold
-                        ),
-                      ),
-                    ],
-                  ),
-                  RaisedButton(
-                    elevation: 0,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onPressed: (){
-                      Navigator.of(context).pushNamed("/medecinesSeconde", arguments:[medicines,bill,_pharmacist.id]);
-                    },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)
-                    ),
-                    color: Theme.of(context).accentColor,
-                    child:Container(
-                      margin: EdgeInsets.only(left: 45.0,right: 45.0,top: 12,bottom: 12),
-                      child:Text(
-                        'Continue',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12.0,
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              )
-            ),
-      ),
+     
     );
   }
 }

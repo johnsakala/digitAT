@@ -1,10 +1,14 @@
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 
 class AcountWidget extends StatefulWidget {
 
-  final List<String> acountInfos;
+  final int acountInfos;
 
   const AcountWidget({Key key, this.acountInfos}) : super(key: key);
   @override
@@ -12,11 +16,30 @@ class AcountWidget extends StatefulWidget {
 }
 
 class _AcountWidgetState extends State<AcountWidget> {
+  
+    List<dynamic> _user= [];
+  String fullname; 
+  void _getResults() async{
+      _user= await _fetchUser(this.widget.acountInfos);
+   
+    print('**********************'+_user[0]['NAME']);
+  }
+  @override
+  void initState(){
+    super.initState();
+     _getResults();
+  
+    
+   }
+   
   User currentUser = new User.init().getCurrentUser();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:SingleChildScrollView(
+      body:FutureBuilder(builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot){
+      if(snapshot.hasData)
+      {
+     return SingleChildScrollView(
         child: Column(
           children: <Widget>[
             Container(  
@@ -32,20 +55,25 @@ class _AcountWidgetState extends State<AcountWidget> {
                 children: <Widget>[
                   Container(
                     alignment: Alignment.topRight,
-                    padding: const EdgeInsets.all(12.0),
-                    child:Icon(Icons.perm_identity,size: 25,
+                    padding: const EdgeInsets.all(6.0),
+                    child:FlatButton(
+                      child:Icon(Icons.home,size: 25,
                         color: Theme.of(context).primaryColor
                     ),
+                    onPressed: (){
+                      Navigator.of(context).pushNamed('/home',arguments:[snapshot.data[0]['NAME']+' '+snapshot.data[0]['LAST_NAME'],snapshot.data[0]['ID'],snapshot.data[0]['PERSONAL_CITY']]);
+                    },),
                   ),    
                   Expanded(
                     child:  Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        ball("images/imageuser.png", Colors.transparent),
+                        ball("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU", Colors.transparent),
                         Column(
                           children: <Widget>[
-                            Text("${currentUser.name}",style:TextStyle(color:Theme.of(context).primaryColor,fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
-                            Text("+ ${currentUser.phoneNumber}",style:TextStyle(color:Theme.of(context).primaryColor,fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
+
+                       Text("${snapshot.data[0]['NAME']+' '+snapshot.data[0]['LAST_NAME']}",style:TextStyle(color:Theme.of(context).primaryColor,fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
+                            Text("${snapshot.data[0]['PERSONAL_PHONE']}",style:TextStyle(color:Theme.of(context).primaryColor,fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
                           ],
                         ),
                         Text("25%",style:TextStyle(color:Theme.of(context).primaryColor,fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
@@ -90,10 +118,10 @@ class _AcountWidgetState extends State<AcountWidget> {
                                 child:FlatButton(
       textColor: Colors.white,
       onPressed: () {
-               Navigator.of(context).pushNamed('/createAcount');
+              // Navigator.of(context).pushNamed('/createAcount');
      },
       child: Text(
-                                  'Complete your profile', 
+                  'Edit ', 
                                   style:  TextStyle(
                                     fontSize: 10.0, 
                                     color: Theme.of(context).primaryColor,
@@ -113,7 +141,13 @@ class _AcountWidgetState extends State<AcountWidget> {
                   Container(
                     alignment: Alignment.topLeft,
                     padding: const EdgeInsets.all(12.0),
-                    child:Icon(Icons.settings,size: 25.0,color: Theme.of(context).primaryColor,)
+                    child:FlatButton(
+                      child:Icon(Icons.settings,size: 25,
+                        color: Theme.of(context).primaryColor
+                    ),
+                    onPressed: (){
+                      //Navigator.of(context).pushNamed('/home',arguments:[snapshot.data[0]['NAME']+' '+snapshot.data[0]['LAST_NAME'],snapshot.data[0]['ID']]);
+                    },),
                   )
                 ],
               ),
@@ -140,9 +174,17 @@ class _AcountWidgetState extends State<AcountWidget> {
             ),
           ],
         ),
-      )
-    );
-  }
+      );
+    
+      }
+      else{
+        return Center(child: CircularProgressIndicator());
+      }
+    },
+                  future: _fetchUser(widget.acountInfos)),
+    
+  
+   ); 
 }
 Widget _dropDownListe(Icon icon ,String title,double borderWidth,String route,BuildContext context){
   return Container(
@@ -188,14 +230,54 @@ Widget _dropDownListe(Icon icon ,String title,double borderWidth,String route,Bu
     ),
   );
 }
+Future< List< dynamic >> _fetchUser(accountInfos) async {
+//  showAlertDialog(context);
+    final http.Response response = await http
+        .get(
+      'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.get?ID=$accountInfos',
+    )
+        .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    
+    List< dynamic> result=[];
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+         
+      result = 
+      responseBody["result"];
+         // result= serverResponse.result;
+   
+        
+          
+        } else {
+          
+          print('-----------------'+response.body);
+        }
+      } catch (error) {
+        print('-----------------'+error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    return result;
+  }
+
 Widget ball(String image,Color color){
     return Container(
-      height: 70,width: 70.0,
+      height: 60,width: 60.0,
       decoration: BoxDecoration(
         color:color,
         borderRadius: BorderRadius.circular(100.0),
-        image: DecorationImage(image:AssetImage(image), fit: BoxFit.cover,
+        image: DecorationImage(image:Image.network(image).image, fit: BoxFit.cover,
         ),
       ),
     );
   }
+}

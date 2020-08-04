@@ -1,40 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:digitAT/api/server_response.dart';
-
-
-class DepartmentUsers {
-  List<Result> result;
-
-  DepartmentUsers({this.result});
-
-  DepartmentUsers.fromJson(Map<String, dynamic> json) {
-    if (json["result"] != null) {
-      result = new List<Result>();
-      json['result'].forEach((v) {
-        print("Processing someone\n");
-        result.add(new Result.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.result != null) {
-      data['result'] = this.result.map((v) => v.toJson()).toList();
-    }
-    return data;
-  }
-}
-
-class Result {
-  String iD;
+class Customer{
+      String iD;
   bool aCTIVE;
   String eMAIL;
   String nAME;
@@ -70,8 +35,8 @@ class Result {
   Null uFDISTRICT;
   String uFPHONEINNER;
   String uSERTYPE;
-   Result.init();
-  Result(
+  Customer.init();
+  Customer(
       {this.iD,
         this.aCTIVE,
         this.eMAIL,
@@ -109,7 +74,7 @@ class Result {
         this.uFPHONEINNER,
         this.uSERTYPE});
 
-  Result.fromJson(Map<String, dynamic> json) {
+  Customer.fromJson(Map<String, dynamic> json) {
     iD = json['ID'];
     aCTIVE = json['ACTIVE'];
     eMAIL = json['EMAIL'];
@@ -193,19 +158,6 @@ class Result {
     return data;
   }
 }
+ 
 
-showAlertDialog(BuildContext context){
-  AlertDialog alert=AlertDialog(
-    content: new Row(
-      children: [
-        CircularProgressIndicator(),
-        Container(margin: EdgeInsets.only(left: 10),child:Text("Please Wait\nSigning-in" )),
-      ],),
-  );
-  showDialog(barrierDismissible: true,
-    context:context,
-    builder:(BuildContext context){
-      return alert;
-    },
-  );
-}
+           

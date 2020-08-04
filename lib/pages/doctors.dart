@@ -47,10 +47,7 @@ class _DoctorsListState extends State<DoctorsList> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
           onPressed: () {
-            Navigator.of(context).pushNamed('/home', arguments: [
-              widget.currentUser.name,
-              widget.currentUser.phoneNumber
-            ]);
+            Navigator.of(context).pop();
           },
         ),
         backgroundColor: Theme.of(context).accentColor,
@@ -207,6 +204,7 @@ ListView _jobsListView(data) {
       separatorBuilder: (context, index) {
         return SizedBox(height: 4.0);
       },
+      
       itemBuilder: (context, index) {
 //        return searchString == null || searchString == ""
 //            ? DoctorsCardWidget(doctors: data.elementAt(index),) : items[index].contains(searchString)

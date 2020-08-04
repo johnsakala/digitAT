@@ -42,7 +42,9 @@ class _MedecinesWidgetState extends State<MedecinesWidget> {
                 ],
               ),
               IconButton(
-                onPressed: (){},
+                onPressed: (){
+                  
+                },
                 icon: Icon(Icons.add_circle_outline),
                 color: Theme.of(context).accentColor.withOpacity(0.8),
                 iconSize: 30,

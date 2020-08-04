@@ -17,7 +17,7 @@ class _DoctorsCardWidgetState extends State<DoctorsCardWidget> {
         child:FlatButton(        
           highlightColor: Theme.of(context).primaryColor,
           onPressed: (){
-            Navigator.of(context).pushNamed('/doctorProfil');
+            Navigator.of(context).pushNamed('/doctorProfil', arguments: widget.doctors);
           },
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),

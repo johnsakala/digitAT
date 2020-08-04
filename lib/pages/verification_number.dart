@@ -20,7 +20,7 @@ class VerificationNumber extends StatefulWidget {
 
 class _VerificationNumberState extends State<VerificationNumber> {
   User currentUser=new User.init().getCurrentUser();
-
+   var _code='';
 
   final GlobalKey<FormState> _formKey =  GlobalKey<FormState>();
   @override
@@ -97,7 +97,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
                     length: 6,
                    onCompleted: (String value) {
                     setState(() {
-                      //......set varification code
+                      _code=value;
                     });
             
             },
@@ -225,7 +225,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
   verifyOTP() {
     _auth.currentUser().then((user) {
       if (user != null) {
-        verifiedSuccess();
+        verifiedSuccess(user.phoneNumber);
       } else {
         signIn();
       }
@@ -235,21 +235,21 @@ class _VerificationNumberState extends State<VerificationNumber> {
   signIn() async {
     try {
       final AuthCredential credential = PhoneAuthProvider.getCredential(
-        verificationId: this.verificationId,
-        smsCode: optController.text,
+        verificationId: widget.verificationId,
+        smsCode: _code,
       );
       final FirebaseUser user =
           (await _auth.signInWithCredential(credential)).user;
       final FirebaseUser currentUser = await _auth.currentUser();
       assert(user.uid == currentUser.uid);
-      verifiedSuccess();
+      verifiedSuccess(user.phoneNumber);
     } catch (e) {
       handleError(e);
     }
   }
 
   handleError(PlatformException error) {
-    print("Something went wrong" +verificationId + widget.userPhoneNumber);
+    print("Something went wrong" + verificationId + widget.userPhoneNumber);
     print(error);
     switch (error.code) {
       case 'ERROR_INVALID_VERIFICATION_CODE':
@@ -278,8 +278,8 @@ class _VerificationNumberState extends State<VerificationNumber> {
     int maskLength = userPhoneNumber.length - 3;
     return userPhoneNumber.replaceRange(4, maskLength, '*' * maskLength);
   }
-  void verifiedSuccess() {
-    Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.phoneNumber]);
+  void verifiedSuccess(String phone) {
+    Navigator.of(context).pushNamed('/createAcount',arguments: [0,phone]);
          print("Successfully Verified user number");
   }
 

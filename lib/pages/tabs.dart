@@ -6,7 +6,7 @@ import 'home.dart';
 
 class TabsWidget extends StatefulWidget {
 
-  final List<String> acountInfos;
+  final List<dynamic> acountInfos;
   
   const TabsWidget({Key key, this.acountInfos}) : super(key: key);
 
@@ -25,16 +25,16 @@ class _BubblesState extends State<TabsWidget> with SingleTickerProviderStateMixi
     switch (page){
       case 0 :
         currentTitle = 'Home';
-        return Home(value: "${widget.acountInfos[0]}");
+        return Home(value: ["${widget.acountInfos[0]}","${widget.acountInfos[2]}"]);
       case 1 :
         currentTitle = 'chat';  
         return prefix0.Conversation();
       case 2 :
         currentTitle = 'profile';
-        return AcountWidget(acountInfos: ["${widget.acountInfos[0]}","${widget.acountInfos[1]}"],);
+        return AcountWidget(acountInfos:int.parse(widget.acountInfos[1]));
       default:
         currentTitle = 'Home';
-        return Home(value: "${widget.acountInfos[0]}");
+        return Home(value: ["${widget.acountInfos[0]}","${widget.acountInfos[2]}"]);
 
     }
     

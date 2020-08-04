@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 showAlertDialog(BuildContext context,String message){
+
   AlertDialog alert=AlertDialog(
     content: new Row(
       children: [
@@ -11,6 +12,9 @@ showAlertDialog(BuildContext context,String message){
   showDialog(barrierDismissible: true,
     context:context,
     builder:(BuildContext context){
+     /* Future.delayed(Duration(seconds: 15)).then((value){
+        Navigator.of(context).pop();
+      });*/
       return alert;
     },
   );

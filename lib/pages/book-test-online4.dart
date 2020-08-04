@@ -24,7 +24,8 @@ class _BookTestsOnlineFourthStepState extends State<BookTestsOnlineFourthStep> {
              
          ,
           onPressed: (){
-            Navigator.of(context).pushNamed('/thirdBookTest');
+            Navigator.of(context).pop();
+            //Navigator.of(context).pushNamed('/thirdBookTest');
           },
         ),
         backgroundColor: Theme.of(context).accentColor,

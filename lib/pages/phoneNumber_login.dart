@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:digitAT/pages/verification_number.dart';
+import 'package:flutter_verification_code_input/flutter_verification_code_input.dart';
 class PhoneLogin extends StatefulWidget {
   @override
   _PhoneLoginState createState() => _PhoneLoginState();
@@ -16,6 +17,8 @@ class _PhoneLoginState extends State<PhoneLogin> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String countryCode = "";
   String phoneNumber = "";
+  String smsOTP;
+  bool _loading=false;
   @override
   Widget build(BuildContext context) {
       return Scaffold(
@@ -67,8 +70,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                       children: <Widget>[
                         Expanded(child: Container(
                             height: 40.0,
-                            width:MediaQuery.of(context).size.width*0.30,
-                            margin: EdgeInsets.only(top: 20.0 ,left: 12.0,right: 12.0),
+                            margin: EdgeInsets.only(top: 20.0 ,left: 10.0,right: 10.0),
                             decoration: BoxDecoration(
                               border: Border.all(width: 1.0,color: Color(0xdddddddd)),
                               borderRadius: BorderRadius.circular(12.0),                          
@@ -78,6 +80,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                                   dense: false,
                                   showFlag:
                                   true, //displays flag, true by default
+                                 
                                   showDialingCode:
                                   true, //displays dialing code, false by default
                                   showName: false, //eg. 'GBP'
@@ -114,7 +117,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                                 ],
                                 keyboardType: TextInputType.number,                            
                                 decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.only(top: 6,left:12,right: 12),
+                                  contentPadding: EdgeInsets.only(top: 6,left:12),
                                   border: InputBorder.none, 
                                   suffixIcon:Icon(Icons.verified_user),
                                   prefixText: "",
@@ -132,7 +135,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                   Container(
                     margin: EdgeInsets.only(top:50.0,bottom: 20.0,right:30.0,left: 30.0 ),
                     height: 40,
-                    child: RaisedButton(
+                    child:_loading? CircularProgressIndicator() :RaisedButton(
                       color: Theme.of(context).accentColor,
                       onPressed: (){
                         sendOTP(context);
@@ -169,6 +172,9 @@ class _PhoneLoginState extends State<PhoneLogin> {
   FirebaseAuth _auth = FirebaseAuth.instance;
   TextEditingController phoneNumberController = new TextEditingController();
   void sendOTP(BuildContext context) {
+    setState(() {
+   _loading=true;
+    });
     this.phoneNo="+"+this._selected.dialingCode+" "+this.phoneNumberController.text;
     print("passing argument"+this.phoneNo);
     verifyPhone(this.phoneNo);
@@ -188,10 +194,12 @@ class _PhoneLoginState extends State<PhoneLogin> {
   }
 
   Future<void> verifyPhone(String userPhoneNumber) async {
-    showAlertDialog(context,"Sending OTP");
+
+    //showAlertDialog(context,"Sending OTP");
     final PhoneCodeSent smsOTPSent = (String verId, [int forceCodeResend]) {
       this.verificationId = verId;
-      verifyUser();
+    verifyUser();
+        
     };
     try {
 
@@ -203,17 +211,99 @@ class _PhoneLoginState extends State<PhoneLogin> {
           codeSent:
           smsOTPSent, // WHEN CODE SENT THEN WE OPEN DIALOG TO ENTER OTP.
           timeout: const Duration(seconds: 45),
-          verificationCompleted: (AuthCredential phoneAuthCredential) {
-            print(phoneAuthCredential);
-            Navigator.of(context).pop();
+          verificationCompleted: (AuthCredential credential) async{
+           
+           
+            AuthResult result = await _auth.signInWithCredential(credential);
+
+          FirebaseUser user = result.user;
+
+          if(user != null){
+               Navigator.of(context).pop(context);
+                 Navigator.of(context).pushNamed('/createAcount',arguments: [0,user.phoneNumber]).then((value){
+                   Navigator.of(context).pop(context);
+                    });
+          }else{
+            print("Error");
+          }
 
           },
           verificationFailed: (AuthException exception) {
             Navigator.of(context).pop();
             print('${exception.message}');
           });
+             
     } catch (e) {
       Navigator.of(context).pop();
+      handleError(e);
+    }
+  
+  }
+
+   Future<bool> smsOTPDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Enter Code'),
+            content: Container(
+              height: 85,
+              child: Column(children: [
+                VerificationCodeInput(
+                   keyboardType: TextInputType.number,
+                    length: 6,
+                   onCompleted: (String value) {
+                    setState(() {
+                    this.smsOTP = value;
+                    });
+                  },
+                ),
+                (errorMessage != ''
+                    ? Text(
+                        errorMessage,
+                        style: TextStyle(color: Colors.red),
+                      )
+                    : Container())
+              ]),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('Submit'),
+                onPressed: () {
+                    Navigator.of(context).pop();
+
+                 
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  signIn() async {
+    try {
+      setState(() {
+        _loading=false;
+
+      });
+      final AuthCredential credential = PhoneAuthProvider.getCredential(
+        verificationId: verificationId,
+        smsCode: smsOTP,
+      );
+      final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+      final FirebaseUser currentUser = await _auth.currentUser();
+      assert(user.uid == currentUser.uid);
+      Navigator.of(context).pop();
+      Navigator.of(context).pushNamed('/home',arguments: [currentUser.phoneNumber]).then((value){
+                   Navigator.of(context).pop();
+                    });
+    } catch (e) {
       handleError(e);
     }
   }

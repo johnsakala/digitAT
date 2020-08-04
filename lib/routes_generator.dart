@@ -1,5 +1,7 @@
 import 'package:digitAT/pages/acount.dart';
 import 'package:digitAT/pages/home_options.dart';
+import 'package:digitAT/pages/pharmacies.dart';
+import 'package:digitAT/pages/prescription.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/pages/appointment.dart';
 import 'package:digitAT/pages/book-test-online1.dart';
@@ -38,7 +40,7 @@ class RouteGenerator {
       case '/verification':
         return MaterialPageRoute(builder: (_) => VerificationNumber("",""));
       case '/createAcount':
-        return MaterialPageRoute(builder: (_) => CreateAcount()); 
+        return MaterialPageRoute(builder: (_) => CreateAcount(accountInfo:args)); 
         case '/account':
         return MaterialPageRoute(builder: (_) => AcountWidget(acountInfos: args)); 
       case '/home':
@@ -48,9 +50,9 @@ class RouteGenerator {
       case '/doctors':
         return MaterialPageRoute(builder: (_) => DoctorsList());  
       case '/doctorProfil':
-        return MaterialPageRoute(builder: (_) => DoctorAcount());
+        return MaterialPageRoute(builder: (_) => DoctorAcount(doctor: args,));
       case '/firstDoctorBook':
-        return MaterialPageRoute(builder: (_) => DoctorBookFirstStep());
+        return MaterialPageRoute(builder: (_) => DoctorBookFirstStep(doctor: args,));
       case '/secondeDoctorBook':
         return MaterialPageRoute(builder: (_) => DoctorBookSecondeStep());
       case '/offers':
@@ -64,15 +66,19 @@ class RouteGenerator {
       case "/fourthBookTest":
         return MaterialPageRoute(builder: (_) => BookTestsOnlineFourthStep());
       case '/medecines':
-        return MaterialPageRoute(builder: (_) => Medecines());
+        return MaterialPageRoute(builder: (_) => Medecines(pId: args));
       case '/medecinesSeconde':
-        return MaterialPageRoute(builder: (_) => MedecinesSlected());
+        return MaterialPageRoute(builder: (_) => MedecinesSlected(value: args,));
       case '/mydoctors':
         return MaterialPageRoute(builder: (_) => MyDoctorsList());
       case '/appointment':
         return MaterialPageRoute(builder: (_) => AppointmentsList());
       case '/health':
         return MaterialPageRoute(builder: (_) => HealthTips());
+        case '/pharmacies':
+        return MaterialPageRoute(builder: (_) => Pharmacies());
+        case '/prescription':
+        return MaterialPageRoute(builder: (_) => Prescription());
 
 
 

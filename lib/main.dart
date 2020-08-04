@@ -12,6 +12,14 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+ @override
+  void initState()  {
+    // TODO: implement initState
+    super.initState();
+  
+  }
+
   @override
   Widget build(BuildContext context) {
     return  MaterialApp(
@@ -44,15 +52,18 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
+
+
 }
 
 class AfterSplash extends StatelessWidget {
+ 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'digitAT',
-      initialRoute: '/',
+      initialRoute:'/',
       onGenerateRoute: RouteGenerator.generateRoute,
       debugShowCheckedModeBanner: false,
       darkTheme: ThemeData(

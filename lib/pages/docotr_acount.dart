@@ -3,8 +3,8 @@ import 'package:flutter/rendering.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
 class DoctorAcount extends StatefulWidget {
-  
-  const DoctorAcount({Key key,}) : super(key: key);
+  final Doctor doctor;
+  const DoctorAcount({Key key,this.doctor}) : super(key: key);
   @override
   _DoctorAcountState createState() => _DoctorAcountState();
 }
@@ -22,7 +22,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
               color:Theme.of(context).primaryColor
           ),
           onPressed: (){
-            Navigator.of(context).pushNamed('/home', arguments:[currentUser.name,currentUser.phoneNumber]);
+            Navigator.of(context).pop();
           },
         ),
         title: Text(
@@ -87,7 +87,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                                Text(
-                                "${currentDoctor.name}",
+                                "${widget.doctor.name}",
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 16.0,
@@ -97,7 +97,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
                               ),
                               Center(
                                 child:Text(
-                                  "${currentDoctor.description}",
+                                  "${widget.doctor.description}",
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14.0,
@@ -145,10 +145,9 @@ class _DoctorAcountState extends State<DoctorAcount> {
                                 child: Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(10.0),
-                                    image:DecorationImage(
-                                      image:AssetImage('images/index.jpeg'),
-                                      fit: BoxFit.cover,
-                                    ),
+                                    image: DecorationImage(image: NetworkImage(widget.doctor.avatar),
+                                     fit: BoxFit.cover,
+      ),
                                   ),
                                   child: Container(
                                   decoration: BoxDecoration(
@@ -213,7 +212,9 @@ class _DoctorAcountState extends State<DoctorAcount> {
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20.0)
                           ),
-                          onPressed: (){},
+                          onPressed: (){
+
+                          },
                           child: Text(
                             'Book',
                             style: TextStyle(
@@ -405,7 +406,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: (){
-                      Navigator.of(context).pushNamed("/firstDoctorBook");
+                      Navigator.of(context).pushNamed("/firstDoctorBook", arguments: widget.doctor);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)

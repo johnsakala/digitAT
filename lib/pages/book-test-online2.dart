@@ -25,7 +25,8 @@ class _BookTestsOnlineSecondeStepState extends State<BookTestsOnlineSecondeStep>
              
          ,
           onPressed: (){
-            Navigator.of(context).pushNamed('/bookTest');
+            Navigator.of(context).pop();
+           // Navigator.of(context).pushNamed('/bookTest');
           },
         ),
         backgroundColor: Theme.of(context).accentColor,

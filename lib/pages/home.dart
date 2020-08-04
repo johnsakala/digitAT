@@ -2,17 +2,14 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:http/http.dart' as http;
-import 'package:digitAT/models/doctor.dart';
-
 import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:digitAT/api/doctors.dart';
 class Home extends StatefulWidget {
-  final String value;
+  final List<dynamic> value;
   const Home( {Key key, this.value}) : super(key: key);
  
   @override
@@ -33,10 +30,10 @@ class _HomeState extends State<Home> {
          child:FlatButton(
       textColor: Colors.white,
       onPressed: () {
-               Navigator.of(context).pushNamed('/account',arguments: [currentUser.name,currentUser.phoneNumber]);
+               Navigator.of(context).pushNamed('/createAcount',arguments: [currentUser.id,currentUser.phoneNumber]);
      },
-      child: Text(
-                              "${widget.value}",
+      child: /*currentUser.name==null?Text('Update Profile'):*/Text(
+                              "${widget.value[0]}",
                               style: TextStyle(
                           
                                 fontFamily: 'Poppins',
@@ -170,7 +167,7 @@ class _HomeState extends State<Home> {
                       
                         borderRadius: BorderRadius.circular(150)),
                       onPressed: (){
-                        Navigator.of(context).pushNamed('/medecines');
+                        Navigator.of(context).pushNamed('/pharmacies');
                       },
                       child:ball("images/pill.png",Theme.of(context).scaffoldBackgroundColor),
                     ),
@@ -452,7 +449,7 @@ class _HomeState extends State<Home> {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      'https://internationaltechnology.bitrix24.com/rest/1/nq1s3dbqiyy4m4lz/user.get.json?UF_DEPARTMENT=1',
+      'https://internationaltechnology.bitrix24.com/rest/1/nq1s3dbqiyy4m4lz/user.get.json?UF_DEPARTMENT=1&PERSONAL_CITY=${widget.value[1]}',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);

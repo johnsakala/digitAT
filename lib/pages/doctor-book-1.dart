@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
 class DoctorBookFirstStep extends StatefulWidget {
+    final Doctor doctor;
+  const DoctorBookFirstStep({Key key,this.doctor}) : super(key: key);
   @override
   _DoctorBookFirstStepState createState() => _DoctorBookFirstStepState();
 }
@@ -24,7 +26,7 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
              
          ,
           onPressed: (){
-            Navigator.of(context).pushNamed('/doctorProfil');
+            Navigator.of(context).pop();
           },
         ),
         backgroundColor: Theme.of(context).accentColor,
@@ -66,12 +68,12 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
-                          ball(currentDoctor.avatar, Colors.transparent),
+                          ball(widget.doctor.avatar, Colors.transparent),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                currentDoctor.name,
+                                widget.doctor.name,
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 14.0,

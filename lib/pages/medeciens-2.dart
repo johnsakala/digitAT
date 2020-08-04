@@ -1,16 +1,26 @@
+import 'package:digitAT/models/medecine.dart';
+import 'package:digitAT/pages/medecines.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/medecine.dart' as model;
 import 'package:digitAT/models/user.dart';
-import 'package:digitAT/widgets/medecinesSlected.dart';
+
 class MedecinesSlected extends StatefulWidget {
+   final List<dynamic> value;
+  const MedecinesSlected( {Key key, this.value}) : super(key: key);
   @override
   _MedecinesSlectedState createState() => _MedecinesSlectedState();
 }
 
 class _MedecinesSlectedState extends State<MedecinesSlected> {
   User currentUser=User.init().getCurrentUser();
+  List<Medecine>medicines= [];
+  double bill=0.0;
   model.MedecinesList medecinesList;
   void initState() {
+    setState(() {
+      medicines.addAll(widget.value[0]);
+      bill=widget.value[1];
+    });
     this.medecinesList = new model.MedecinesList();
     super.initState();
   }
@@ -67,14 +77,61 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                             padding: EdgeInsets.symmetric(vertical: 15),
                             shrinkWrap: true,
                             primary: false,
-                            itemCount:4,
+                            itemCount: medicines.length ,
                             separatorBuilder: (context,index){
                               return SizedBox(height: 7,);
                             },
                             itemBuilder: (context,index){
-                              return MedecinesSlectedList(
-                                medecines: medecinesList.medecine.elementAt(index),
-                              );
+                              return  Column(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.only(left: 12.0,right: 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    '${medicines[index].name}',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14.0,
+                      color: Theme.of(context).focusColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '${medicines[index].price}',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12.0,
+                      color: Colors.grey
+                    ),
+                  ),
+                ],
+              ),
+              IconButton(
+                onPressed: (){
+                  setState(() {
+                    
+                    medicines.remove(medicines[index]);
+                    bill=bill-double.parse(medicines[index].price);
+                    
+                  });
+                 print(bill);
+                },
+                icon: Icon(Icons.remove_circle_outline),
+                color: Colors.red.withOpacity(0.8),
+                iconSize: 30,
+
+              )
+            ],
+          ),
+        ),
+        SizedBox(height: 15.0,child: Center(child: Container(height: 1.0,color: Colors.grey.withOpacity(0.1),),),),
+      ],
+    );
                             },
                           ),
                           Container(
@@ -92,7 +149,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                                     ),
                                   ),
                                   Text(
-                                    '45\$',
+                                    '$bill\$',
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 16.0,
@@ -167,7 +224,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '3 medecines Added',
+                        '${medicines.length} medecines Added',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
@@ -175,7 +232,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                         ),
                       ),
                       Text(
-                        '\$ 45',
+                        '\$ $bill',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
@@ -189,7 +246,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: (){
-                      Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.phoneNumber]);
+                     // Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.userID]);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)

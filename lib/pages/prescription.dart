@@ -1,25 +1,34 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:digitAT/models/test.dart' as model;
 import 'package:digitAT/models/user.dart';
-import 'package:digitAT/widgets/searchWidget.dart';
-import 'package:digitAT/widgets/testsWidget.dart';
-class BookTestsOnline extends StatefulWidget {
+import 'package:http/http.dart' as http;
+
+
+class Prescription extends StatefulWidget {
+  final String rId;
+  const Prescription ({Key key,this.rId}):super(key:key);
   @override
-  _BookTestsOnlineState createState() => _BookTestsOnlineState();
+  _PrescriptionState createState() => _PrescriptionState();
 }
 
-class _BookTestsOnlineState extends State<BookTestsOnline> {
+class _PrescriptionState extends State<Prescription > {
   User currentUser=User.init().getCurrentUser();
-  model.TestsList testsList;
+  String prescription;
+  final _formKey = GlobalKey<FormState>();
   void initState() {
-    this.testsList = new model.TestsList();
+    //this.medecinesList = new model.MedecinesList();
     super.initState();
+    setState(() {
+     
+    });
+  
   }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
+        
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor )
               
@@ -32,9 +41,9 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
         ),
         backgroundColor: Theme.of(context).accentColor,
         title: Text(
-          'ScaniT',
+          'PharmaHub',
           style: TextStyle(
-            fontSize:18.0,
+            fontSize:22.0,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.bold,
             color: Theme.of(context).primaryColor,
@@ -42,7 +51,8 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
         ),
 
       ),
-      body: SingleChildScrollView(
+      body:
+          SingleChildScrollView(
         child: Column(
           children: <Widget>[
             Stack(
@@ -54,18 +64,16 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
                       borderRadius: BorderRadius.only(bottomLeft:Radius.circular(25.0),bottomRight: Radius.circular(25.0)),
                       color: Theme.of(context).accentColor,
                     ),
+                    
                   ),
-                Padding(
-                    padding: const EdgeInsets.only(top: 0,left: 12.0,right: 12.0),
-                    child:new SearchBarWidget(),
-                ),
+                 
               ],
             ),
             Container(
               padding:EdgeInsets.only(top:12.0,right: 12.0,left: 12.0,bottom: 12.0),
               alignment: Alignment.topLeft,
               child: Text(
-                'Select Medical Test:',
+                'Paste prescription below :',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 16.0,
@@ -75,34 +83,48 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
               ),
             ),
             Container(
-              padding:EdgeInsets.only(right: 12.0,left: 12.0,bottom: 12.0),
-              decoration: BoxDecoration(            
-               color: Theme.of(context).primaryColor,
-               borderRadius: BorderRadius.circular(20.0),
-              ),
-              child: ListView.separated(
-                padding: EdgeInsets.symmetric(vertical: 15),
-                shrinkWrap: true,
-                primary: false,
-                itemCount: testsList.tests.length,
-                separatorBuilder: (context,index){
-                  return SizedBox(height: 7,);
-                },
-                itemBuilder: (context,index){
-                  return Tests(
-                    tests: testsList.tests.elementAt(index),
-                  );
-                },
-              ),                
-            ),
-          ],
+              
+              child:  Form(
+                      key: _formKey,
+                     
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 300.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                          
+                            ),
+                            child:
+                            
+                            TextFormField(
+                                 maxLines: 8, 
+                                            
+                             onChanged: (value){
+                               setState(() {
+                                 prescription=value;
+                               });  
+                               },     
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )), 
+                        ]),
+               ),) 
+               ],
         ),
       ),
       bottomNavigationBar: BottomAppBar(
         elevation: 0,
         color: Colors.transparent,
         child: Container(
-              padding:EdgeInsets.only(right: 0.0,left: 50.0,bottom: 0.0,top: 0),
+              padding:EdgeInsets.only(right: 0.0,left: 30.0,bottom: 0.0,top: 0),
               margin:EdgeInsets.all(12.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20.0),
@@ -116,7 +138,7 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '1 test Added',
+                        '',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
@@ -124,11 +146,10 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
                         ),
                       ),
                       Text(
-                        '\$ 300',
+                        '',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
-                          color: Theme.of(context).focusColor,
                           fontWeight: FontWeight.bold
                         ),
                       ),
@@ -137,8 +158,10 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
                   RaisedButton(
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onPressed: (){
-                      Navigator.of(context).pushNamed("/secondeBookTest");
+                    onPressed: ()async {
+                   if (_formKey.currentState.validate()) {
+                     
+                   }
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -152,7 +175,7 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
                           color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),

@@ -1,4 +1,4 @@
-package com.example.digitAT
+package com.international.digitAT
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
