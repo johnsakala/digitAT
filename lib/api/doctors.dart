@@ -41,7 +41,7 @@ class Result {
   String lASTNAME;
   String sECONDNAME;
   String pERSONALGENDER;
-  Null pERSONALPROFESSION;
+  String pERSONALPROFESSION;
   String pERSONALWWW;
   String pERSONALBIRTHDAY;
   String pERSONALPHOTO="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:digitAT/models/doc_booking.dart';
+import 'package:digitAT/models/payment.dart';
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -10,7 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 class DoctorBookSecondeStep extends StatefulWidget {
-  final List<dynamic> value;
+  final DoctorBooking value;
   const DoctorBookSecondeStep({Key key,this.value}) : super(key: key);
   @override
   _DoctorBookSecondeStepState createState() => _DoctorBookSecondeStepState();
@@ -19,70 +21,9 @@ class DoctorBookSecondeStep extends StatefulWidget {
 class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
 
   String aid, number;
-  Future< List< dynamic >> _fetchAids() async {
+  bool _loading = false;
 
-    final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/department.get?PARENT=72',
-    )  .catchError((error) => print(error));
-    Map<String, dynamic> responseBody = jsonDecode(response.body);
-     List<dynamic> medicalAids=[]; 
-    if (response.statusCode == 200) {
-    
-
-      try {
-        if (responseBody["result"] != null) {
-          
-            medicalAids = responseBody["result"];
-        
-          print('********************'+medicalAids.toString());     
-            
-        } else {
-          
-          print('-----------------'+response.body);
-        }
-      } catch (error) {
-        print('-----------------'+error);
-      }
-    } else {
-      print("Please check your internet connection ");
-      Fluttertoast.showToast(
-          msg: "Please check your internet connection ",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 4,
-          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
-    }
-    return medicalAids;
-  }
-   Future _createAppointment() async {
-//  showAlertDialog(context);
-  SharedPreferences preferences= await SharedPreferences.getInstance();
-  String id= preferences.getString('id');
  
-     final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
-       headers: {"Content-Type": "application/json"},
-       body: jsonEncode({
-  "fields":{ 
-   "TITLE":"appointment booking",
-   "DESCRIPTION":widget.value[1]+ " "+ nameController.text+" "+ emailController.text+" "+ phoneNumberController.text+" "+"payment $aid $number",
-   "CREATED_BY":id,
-   "RESPONSIBLE_ID":widget.value[0].userId
-  }
-
-}),).catchError((error) => print(error));
-       if(response.statusCode==200)
-       {
-         Map<String, dynamic> responseBody = jsonDecode(response.body);     
-           print('***********************zvaita');
-        
- 
-       }
-       else{
-         print(response.statusCode);
-       }
-      
-  }
 
   User currentUser=new User.init().getCurrentUser();
   Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
@@ -115,11 +56,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
         ),
 
       ),
-      body: FutureBuilder(
-        future: _fetchAids(),
-        builder:(BuildContext context, AsyncSnapshot<List<dynamic>> snapshot){
-          if(snapshot.hasData){
-          return SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
             Stack(
@@ -146,12 +83,12 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            ball(widget.value[0].avatar, Colors.transparent),
+                            ball(widget.value.doctor.avatar, Colors.transparent),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 Text(
-                                  widget.value[0].name,
+                                  widget.value.doctor.name,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14.0,
@@ -162,7 +99,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                 Container(
                                   width: 200,
                                   child:Text(
-                                    widget.value[0].description,
+                                    widget.value.doctor.description,
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 12.0,
@@ -192,7 +129,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                   ),
                                   SizedBox(height: 15.0,),
                                   Text(
-                                    "Tomorrow ${widget.value[1]}",
+                                    "Tomorrow ${widget.value.timeSlot}",
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14.0,
@@ -313,70 +250,8 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                           ],
                         ),
                       ),
-                        Container(
-                            height: 100.0,
-                            margin:  const EdgeInsets.only(top: 12.0),
-                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(width: 1.5,color: Colors.grey),
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.grey.withOpacity(0.4)                           
-                            ),
-                            child:DropDownFormField(
-                  titleText: 'Medical Aid',
-                  value: aid,
-                  onSaved: (value) {
-                    setState(() {
-                      aid = value;
-                    });
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                     aid = value;
-                    });
-                  },
-                  dataSource: [
-                         {
-                          "display": "${snapshot.data[0]['NAME']}",
-                      "value": "${snapshot.data[0]['NAME']}",
-                         },
-                           {
-                          "display": "${snapshot.data[1]['NAME']}",
-                      "value": "${snapshot.data[1]['NAME']}",
-                         }
-                  ],
-                  textField: 'display',
-                  valueField: 'value',
-                ),
-                          ),
-      Container(
-                            height: 100.0,
-                            margin:  const EdgeInsets.only(top: 12.0),
-                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(width: 1.5,color: Colors.grey),
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.grey.withOpacity(0.4)                          
-                            ),
-                            child:
-                            
-                            TextFormField(
-                                  decoration: InputDecoration(
-                               labelText: 'Medical aid Number'
-                                            ),
-                                            
-                             onChanged: (value){
-                               setState(() {
-                                 number=value;
-                               });  
-                               },     
-                        validator: (value) {
-                      if (value.isEmpty) {
-                       return 'Number can not be empty!';
-                         }
-                             return null;
-                                  },
-                            )),
+                     
+     
                         SizedBox(height: 25.0,),
                         Container(
                           child: Text(
@@ -397,13 +272,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
             ),
           ],
         ),
-      );
-      }
-      else{
-        return CircularProgressIndicator();
-      }
-      
-        }),
+      ),
         bottomNavigationBar: BottomAppBar(
         elevation: 0,
         color: Colors.transparent,
@@ -431,17 +300,16 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                       ),
                     ],
                   ),
-                  RaisedButton(
+                  _loading? CircularProgressIndicator(): RaisedButton(
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: () async{
-                       await _createAppointment();
-                        SharedPreferences preferences= await SharedPreferences.getInstance();
-                       String id= preferences.getString('id');
+                      
                      /*  if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                      Navigator.of(context).pushNamed("/account",arguments:int.parse(id));
+                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+ nameController.text+" "+ emailController.text+" "+ phoneNumberController.text+" "+"payment $aid $number", widget.value.doctor.userId);
+                      Navigator.of(context).pushNamed("/payments",arguments:payments);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)

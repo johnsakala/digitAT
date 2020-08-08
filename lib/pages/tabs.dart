@@ -25,16 +25,16 @@ class _BubblesState extends State<TabsWidget> with SingleTickerProviderStateMixi
     switch (page){
       case 0 :
         currentTitle = 'Home';
-        return Home(value: ["${widget.acountInfos[0]}","${widget.acountInfos[2]}"]);
+        return Home(value: ["${widget.acountInfos[0]}","${widget.acountInfos[2]}",widget.acountInfos[1]]);
       case 1 :
         currentTitle = 'chat';  
         return prefix0.Conversation();
       case 2 :
         currentTitle = 'profile';
-        return AcountWidget(acountInfos:int.parse(widget.acountInfos[1]));
+        return AcountWidget(acountInfos:widget.acountInfos[1]);
       default:
         currentTitle = 'Home';
-        return Home(value: ["${widget.acountInfos[0]}","${widget.acountInfos[2]}"]);
+        return Home(value: ["${widget.acountInfos[0]}","${widget.acountInfos[2]}",widget.acountInfos[1]]);
 
     }
     
@@ -51,6 +51,7 @@ class _BubblesState extends State<TabsWidget> with SingleTickerProviderStateMixi
     return Scaffold(
       body: _currentPage(_page),
       bottomNavigationBar: CurvedNavigationBar(
+        
         initialIndex: 0,
         items: <Widget>[
           Icon(Icons.home, size: 25,color: Theme.of(context).primaryColor,),

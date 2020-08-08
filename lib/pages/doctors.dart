@@ -134,7 +134,7 @@ class _DoctorsListState extends State<DoctorsList> {
                       } else if (snapshot.hasError) {
                         return Text("${snapshot.error}");
                       }
-                      return CircularProgressIndicator();
+                      return Center(child:CircularProgressIndicator());
                     })),
           ],
         ),
@@ -146,7 +146,7 @@ class _DoctorsListState extends State<DoctorsList> {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      'https://internationaltechnology.bitrix24.com/rest/1/nq1s3dbqiyy4m4lz/user.get.json?UF_DEPARTMENT=1',
+      'https://internationaltechnology.bitrix24.com/rest/1/nq1s3dbqiyy4m4lz/user.get.json?UF_DEPARTMENT=30',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
@@ -168,7 +168,7 @@ class _DoctorsListState extends State<DoctorsList> {
             _doctorsList.add(
               new Doctor(
                   user.nAME + " " + user.lASTNAME,
-                  "${user.pERSONALPHONE} B.Sc DDVL Demilitologist 26 years of experience ",
+                  " ${user.pERSONALPROFESSION} 26 years of experience ",
                   user.pERSONALPHOTO,
                   "Closed To day",
                   Colors.green,

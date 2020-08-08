@@ -1,82 +1,56 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart';
-import 'package:dio/dio.dart';
+import 'package:digitAT/models/profile.dart';
 import 'package:http/http.dart' as http;
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:permission_handler/permission_handler.dart';
-class CreateAcount extends StatefulWidget {
-  final List<dynamic> accountInfo;
-  const CreateAcount({Key key, this.accountInfo}):super(key:key);
+class EditAcount extends StatefulWidget {
+  final Profile profile;
+  const EditAcount({Key key, this.profile}):super(key:key);
   @override
-  _CreateAcountState createState() => _CreateAcountState();
+  _EditAcountState createState() => _EditAcountState();
 
   
 }
 
-class _CreateAcountState extends State<CreateAcount> {
+class _EditAcountState extends State<EditAcount> {
   User currentUser = new User.init().getCurrentUser();
   File _image;
-  
-  Future _getPhoto() async{
-    print('picking image');
-     var status = await Permission.storage.status;
-           if (status.isUndetermined) {
-                // You can request multiple permissions at once.
-                Map<Permission, PermissionStatus> statuses = await [
-                  Permission.storage,
-                  Permission.camera,
-                ].request();
-                print(statuses[Permission.storage]); // it should print PermissionStatus.granted
-              }
-    final image= await ImagePicker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _image=image;
-    });
-    print('image path ////////////////'+basename(_image.path));
-  }
-
-
- uploadPhoto(File _image) async {
-final Directory dir= await getApplicationDocumentsDirectory();
-final String path = dir.path;
-final String fileName = basename(_image.path);
-final File localImage = await _image.copy('$path/$fileName');
-SharedPreferences pref= await SharedPreferences.getInstance();
-pref.setString('profilePic', localImage.path);
-  print(dir.listSync());  
-
-}
- setDetails(String id, String fullname,String phonenumber, String city)async{
-    SharedPreferences preferences= await SharedPreferences.getInstance();
-    preferences.setString("id", id);
-    preferences.setString("name", fullname);
-    preferences.setString("phone", phoneNumber);
-    preferences.setString("city", city);
-    
-
-  }
-    final _formKey = GlobalKey<FormState>();
-    
-    String city, gender,email, fname,lname, phoneNumber;
-    int  _result;
+     final _formKey = GlobalKey<FormState>();
+    int id;
+    String city, gender, name,lname, phoneNumber;
+    bool  _result;
     var newFormat = DateFormat("dd-MMM-yyyy");
    bool _load= false;
    
     DateTime birthDate;
+    final GlobalKey<ScaffoldState> _scaffoldstate =
+      new GlobalKey<ScaffoldState>();
+  
+  Future _getPhoto() async{
+    print('picking image');
+    final image= await ImagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      _image=image;
+    });
+    print('image path ////////////////'+_image.toString());
+  }
+
+
+ 
     @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    phoneNumber= widget.accountInfo[1];
+    phoneNumber= widget.profile.phone;
+    city= widget.profile.city;
+    name=widget.profile.name;
+    lname=widget.profile.lname;
+    id=int.parse(widget.profile.id);
   }
 
   @override
@@ -84,12 +58,13 @@ pref.setString('profilePic', localImage.path);
 
     return Scaffold(
       appBar: AppBar(
+        key: _scaffoldstate,
         elevation: 0,
         backgroundColor: Theme.of(context).accentColor,
         leading: IconButton(
           onPressed: (){
             //TODO Paramters should be changed once user starts coming from the Core system
-            Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.phoneNumber]);
+            Navigator.of(context).pop();
           },
           icon: Icon(Icons.arrow_back,color: Theme.of(context).primaryColor),
         ),
@@ -131,13 +106,14 @@ pref.setString('profilePic', localImage.path);
                             child:
                             
                             TextFormField(
+                              initialValue: name,
                                   decoration: InputDecoration(
                                labelText: 'First Name'
                                             ),
                                             
                              onChanged: (value){
                                setState(() {
-                                 fname=value;
+                                 name=value;
                                });  
                                },     
                         validator: (value) {
@@ -159,6 +135,7 @@ pref.setString('profilePic', localImage.path);
                             child:
                             
                             TextFormField(
+                              initialValue: lname,
                                   decoration: InputDecoration(
                                labelText: 'Last Name'
                                             ),
@@ -188,6 +165,7 @@ pref.setString('profilePic', localImage.path);
                   titleText: 'City',
                   hintText: 'Select city',
                   value: city,
+                  autovalidate: true,
                   onSaved: (value) {
                     setState(() {
                       city = value;
@@ -325,7 +303,7 @@ pref.setString('profilePic', localImage.path);
                               color: Colors.grey.withOpacity(0.4)                           
                             ),
                             child:  TextFormField(
-                             initialValue: widget.accountInfo[1]==null?"":'${widget.accountInfo[1]}',
+                             initialValue: widget.profile.phone==null?"":'${widget.profile.phone}',
                               keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
                                   
@@ -338,34 +316,6 @@ pref.setString('profilePic', localImage.path);
                         validator: (value) {
                       if (value.isEmpty) {
                        return 'Phone Number can not be empty!';
-                         }
-                             return null;
-                                  },
-                            )
-                          ),
-                          Container(
-                            height: 100.0,
-                            margin:  const EdgeInsets.only(top: 12.0),
-                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(width: 1.5,color: Colors.grey),
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.grey.withOpacity(0.4)                           
-                            ),
-                            child:  TextFormField(
-                             
-                              
-                                  decoration: InputDecoration(
-                                  
-                               labelText: 'Email Address'
-                                            ),
-                               onChanged: (value){
-                                email=value; 
-                               },             
-                              
-                        validator: (value) {
-                      if (value.isEmpty) {
-                       return 'Email Number can not be empty!';
                          }
                              return null;
                                   },
@@ -416,6 +366,7 @@ pref.setString('profilePic', localImage.path);
                             child:DropDownFormField(
                   titleText: 'Gender',
                   hintText: 'Select gender',
+                  autovalidate: true,
                   value: gender,
                   onSaved: (value) {
                     setState(() {
@@ -531,7 +482,7 @@ pref.setString('profilePic', localImage.path);
             children: <Widget>[
               MaterialButton(
                 child:_load?CircularProgressIndicator() : Text(
-                  "Submit",
+                  "Done",
                   style: TextStyle(
                     color:Theme.of(context).accentColor,
                     fontWeight: FontWeight.bold,
@@ -544,25 +495,25 @@ pref.setString('profilePic', localImage.path);
                   setState(() {
                     _load=true;
                   });
-                     /*showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Center(child: CircularProgressIndicator(),);
-                  });*/
+                    
                   
-                 _result=await _createAccount(gender,fname,lname,city,phoneNumber,email,birthDate);
+                 _result=await _editAccount(gender,name,lname,city,phoneNumber,birthDate);
 
-                  User.init().setCurrentUser(fname+' '+lname, phoneNumber, _result.toString());
+                  User.init().setCurrentUser(name+' '+lname, phoneNumber, _result.toString());
                   
                     /* Navigator.of(context).pushNamed('/home', arguments:[lname]).then((value){
                    Navigator.of(context).pop();
-                    });
-                    await uploadPhoto( _image);
-                    SharedPreferences pref= await SharedPreferences.getInstance();
-                     String imagePath=  pref.getString('profilePic');*/ 
-                     await setDetails(_result.toString(), fname+" "+lname,phoneNumber,city);
-                       
-                    Navigator.of(context).pushNamed('/home',arguments:[fname+' '+lname,_result,city]);
+                    });*/
+                    //await uploadPhoto( _image,_image.uri.toFilePath(), _result);
+                    if(_result){
+                    Navigator.of(context).pushNamed('/home',arguments:[name+' '+lname,id,city]);
+
+                   }
+                   else{
+                    /*final snackBar = SnackBar(content: Text('Failed to update profile, please check your internet connection'));
+                    _scaffoldstate.currentState.showSnackBar(snackBar);*/
+                    print("***************************failed to update");
+                   }
                   }
                 },
               ),
@@ -587,27 +538,11 @@ pref.setString('profilePic', localImage.path);
     );
   }
 
-   Future <int>_createAccount(String g, String name, String lname, String city, String phoneNumber,String email, DateTime dob) async {
+   Future <bool>_editAccount(String g, String name, String lname, String city, String phoneNumber, DateTime dob) async {
 //  showAlertDialog(context);
-  int result=0;
+  bool result=false;
     final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.add',
-       headers: {"Content-Type": "application/json"},
-       body: jsonEncode({
-          "EXTRANET":"N",
-          "USER_TYPE":"employee",
-          "SONET_GROUP_ID":[1],
-          "UF_DEPARTMENT":[70],
-         "LAST_NAME":lname,
-         "EMAIL":email,
-         "PERSONAL_BIRTHDAY":dob.toString(),
-         "NAME":name,
-         "PERSONAL_CITY":city,
-         "PERSONAL_GENDER":g,
-         "PERSONAL_PHONE":phoneNumber
-         
-
-       }),).catchError((error) => print(error));
+        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.update?ID=${widget.profile.id}&NAME=$name&LAST_NAME=$lname&PERSONAL_PHONE=$phoneNumber&PERSONAL_CITY=$city&PERSONAL_BIRTHDAY=${dob.toString()}' ).catchError((error) => print('///////////////////////error'+error));
        if(response.statusCode==200)
        {  
          setState(() {

@@ -1,7 +1,11 @@
 import 'package:digitAT/config/app_config.dart' as config;
+import 'package:digitAT/pages/Welcome.dart';
+import 'package:digitAT/pages/tabs.dart';
+import 'package:digitAT/pages/verification_number.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:digitAT/routes_generator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:splashscreen/splashscreen.dart';
 
 void main() => runApp(MyApp());
@@ -12,14 +16,52 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  String id,name,city,phone,vId;
+getId()async{
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  preferences.getString("id");
+}
+fetchId()async{
+  id= await getId();
+  print('############'+id.toString());
+}
 
  @override
   void initState()  {
     // TODO: implement initState
     super.initState();
-  
-  }
+ 
+   SharedPreferences.getInstance().then((SharedPreferences sp) {
+      String _testValue,_name,_city,_phone,_vId;
+      _testValue = sp.getString('id');
+      _name = sp.getString('name');
+      _city = sp.getString('city');
+      _phone = sp.getString('phone');
+      _vId = sp.getString('vId');
 
+      // will be null if never previously saved
+      if (_testValue == null ) {
+        _testValue = null;
+       
+         // set an initial value
+      }
+      if (_vId == null ) {
+        _vId = null;
+       
+         // set an initial value
+      }
+      setState(() {
+        id=_testValue;
+        name=_name;
+        city=_city;
+        phone=_phone;
+        vId=_vId;
+
+      });
+    
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return  MaterialApp(
@@ -29,7 +71,7 @@ class _MyAppState extends State<MyApp> {
 
               imageBackground: AssetImage('images/splash.jpg'),
             seconds: 3,
-          navigateAfterSeconds: new AfterSplash(),
+          navigateAfterSeconds: new AfterSplash([id,name,city,phone,vId]),
           title:Text(
                     'Welcome To \n digitAT',
                     textAlign: TextAlign.center,
@@ -41,12 +83,11 @@ class _MyAppState extends State<MyApp> {
                     ),
                   ),
       
-          /*image: Image(image: AssetImage('images/digitAT-white.png'),
-                      ),*/
-          backgroundColor:Hexcolor('#8582c4').withOpacity(0.8),
-         // styleTextUnderTheLoader: new TextStyle(),
+        
+          backgroundColor:Hexcolor('#1DA1F2').withOpacity(0.8),
+       
           photoSize: 100.0,
-         // onClick: ()=>print("Flutter Egypt"),
+      
           loaderColor:Hexcolor('#8582c4'),
         ),
       ),
@@ -57,13 +98,15 @@ class _MyAppState extends State<MyApp> {
 }
 
 class AfterSplash extends StatelessWidget {
+ const AfterSplash(this.id);
+ final List<dynamic> id;
  
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    int iD= int.parse(id[0]);
     return MaterialApp(
       title: 'digitAT',
-      initialRoute:'/',
+      home:id[0]==null?(id[4]==null?Welcome():VerificationNumber(id[3], id[4])):TabsWidget(acountInfos: [id[1],iD,id[2]]),
       onGenerateRoute: RouteGenerator.generateRoute,
       debugShowCheckedModeBanner: false,
       darkTheme: ThemeData(

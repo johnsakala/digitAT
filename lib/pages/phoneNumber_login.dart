@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:digitAT/pages/verification_number.dart';
 import 'package:flutter_verification_code_input/flutter_verification_code_input.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class PhoneLogin extends StatefulWidget {
   @override
   _PhoneLoginState createState() => _PhoneLoginState();
@@ -137,8 +138,11 @@ class _PhoneLoginState extends State<PhoneLogin> {
                     height: 40,
                     child:_loading? CircularProgressIndicator() :RaisedButton(
                       color: Theme.of(context).accentColor,
-                      onPressed: (){
+                      onPressed: ()async{
                         sendOTP(context);
+                        SharedPreferences preferences= await SharedPreferences.getInstance();
+                        preferences.setString("phone", this.phoneNo);
+                        preferences.setString("vId", this.verificationId);
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30.0),
@@ -171,7 +175,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
   String errorMessage = '';
   FirebaseAuth _auth = FirebaseAuth.instance;
   TextEditingController phoneNumberController = new TextEditingController();
-  void sendOTP(BuildContext context) {
+  void sendOTP(BuildContext context)  {
     setState(() {
    _loading=true;
     });
@@ -181,6 +185,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
   }
 
   void verifyUser() {
+
 
     print("passing argument"+this.phoneNo);
     Navigator.of(context).pop();
@@ -196,7 +201,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
   Future<void> verifyPhone(String userPhoneNumber) async {
 
     //showAlertDialog(context,"Sending OTP");
-    final PhoneCodeSent smsOTPSent = (String verId, [int forceCodeResend]) {
+    final PhoneCodeSent smsOTPSent = (String verId, [int forceCodeResend])  {
       this.verificationId = verId;
     verifyUser();
         
@@ -240,52 +245,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
   
   }
 
-   Future<bool> smsOTPDialog(BuildContext context) {
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return new AlertDialog(
-            title: Text('Enter Code'),
-            content: Container(
-              height: 85,
-              child: Column(children: [
-                VerificationCodeInput(
-                   keyboardType: TextInputType.number,
-                    length: 6,
-                   onCompleted: (String value) {
-                    setState(() {
-                    this.smsOTP = value;
-                    });
-                  },
-                ),
-                (errorMessage != ''
-                    ? Text(
-                        errorMessage,
-                        style: TextStyle(color: Colors.red),
-                      )
-                    : Container())
-              ]),
-            ),
-            contentPadding: EdgeInsets.all(10),
-            actions: <Widget>[
-              FlatButton(
-                 shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                color: Theme.of(context).accentColor,
-                child: Text('Submit'),
-                onPressed: () {
-                    Navigator.of(context).pop();
-
-                 
-                },
-              )
-            ],
-          );
-        });
-  }
-
+   
   signIn() async {
     try {
       setState(() {

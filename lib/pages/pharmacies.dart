@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:digitAT/models/medecine.dart';
+import 'package:digitAT/models/medicine_list.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:http/http.dart' as http;
@@ -161,7 +163,9 @@ class _PharmaciesState extends State<Pharmacies> {
               IconButton(
                 onPressed: (){
                   print('add');
-           Navigator.of(context).pushNamed('/medecines',arguments: snapshot.data[index]["ID"]);
+                  List<Medecine> meds=[];
+                  MedList list =MedList(snapshot.data[index]["ID"], meds, 0.0, snapshot.data[index]["NAME"]);
+           Navigator.of(context).pushNamed('/medecines',arguments:list );
                 
                  },
                 icon: Icon(Icons.arrow_forward),

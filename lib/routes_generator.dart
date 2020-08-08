@@ -1,5 +1,7 @@
 import 'package:digitAT/pages/acount.dart';
+import 'package:digitAT/pages/editAccount.dart';
 import 'package:digitAT/pages/home_options.dart';
+import 'package:digitAT/pages/payment.dart';
 import 'package:digitAT/pages/pharmacies.dart';
 import 'package:digitAT/pages/prescription.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +43,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => VerificationNumber("",""));
       case '/createAcount':
         return MaterialPageRoute(builder: (_) => CreateAcount(accountInfo:args)); 
+        case '/editAcount':
+        return MaterialPageRoute(builder: (_) => EditAcount(profile:args)); 
         case '/account':
         return MaterialPageRoute(builder: (_) => AcountWidget(acountInfos: args)); 
       case '/home':
@@ -66,7 +70,7 @@ class RouteGenerator {
       case "/fourthBookTest":
         return MaterialPageRoute(builder: (_) => BookTestsOnlineFourthStep());
       case '/medecines':
-        return MaterialPageRoute(builder: (_) => Medecines(pId: args));
+        return MaterialPageRoute(builder: (_) => Medecines(value: args));
       case '/medecinesSeconde':
         return MaterialPageRoute(builder: (_) => MedecinesSlected(value: args,));
       case '/mydoctors':
@@ -79,6 +83,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => Pharmacies());
         case '/prescription':
         return MaterialPageRoute(builder: (_) => Prescription());
+        case '/payments':
+        return MaterialPageRoute(builder: (_) => Payment(payment: args,));
 
 
 

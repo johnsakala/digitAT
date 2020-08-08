@@ -1,5 +1,7 @@
 
 import 'dart:convert';
+import 'dart:io';
+import 'package:digitAT/models/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,13 +26,25 @@ class _AcountWidgetState extends State<AcountWidget> {
   void _getResults() async{
       _user= await _fetchUser(this.widget.acountInfos);
    await setId(_user[0]['ID']);
+   await setCity(_user[0]['PERSONAL_CITY']);
+   await setName(_user[0]['NAME']+" "+_user[0]['LAST_NAME']);
     print('**********************'+_user[0]['NAME']);
   }
 
 
+  setCity(String city)async{
+    SharedPreferences preferences= await SharedPreferences.getInstance();
+    preferences.setString("city", city);
+
+  }
   setId(String id)async{
     SharedPreferences preferences= await SharedPreferences.getInstance();
     preferences.setString("id", id);
+
+  }
+    setName(String name)async{
+    SharedPreferences preferences= await SharedPreferences.getInstance();
+    preferences.setString("name", name);
 
   }
   @override
@@ -52,114 +66,89 @@ class _AcountWidgetState extends State<AcountWidget> {
         child: Column(
           children: <Widget>[
             Container(  
-              height: 280.0,
-              padding:EdgeInsets.all(12.0),
-              margin:EdgeInsets.only(top: 40.0,left: 12.0,right: 12.0),
+              height: 220.0,
+              padding:EdgeInsets.all(7.0),
+              margin:EdgeInsets.only(top: 40.0,left: 3.0,right: 3.0),
               decoration: BoxDecoration(
                borderRadius: BorderRadius.circular(16.0),
                color: Theme.of(context).accentColor,
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Container(
                     alignment: Alignment.topRight,
-                    padding: const EdgeInsets.all(6.0),
+                    padding: const EdgeInsets.only(top:6.0),
                     child:FlatButton(
-                      child:Icon(Icons.home,size: 25,
-                        color: Theme.of(context).primaryColor
+                     child:Icon(Icons.edit,size: 25,
+                        color: Theme.of(context).accentColor
                     ),
-                    onPressed: (){
-                      Navigator.of(context).pushNamed('/home',arguments:[snapshot.data[0]['NAME']+' '+snapshot.data[0]['LAST_NAME'],snapshot.data[0]['ID'],snapshot.data[0]['PERSONAL_CITY']]);
-                    },),
+                     onPressed: (){
+                       
+                     },
+                    
+                    ),
                   ),    
-                  Expanded(
-                    child:  Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        ball("https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU", Colors.transparent),
-                        Column(
-                          children: <Widget>[
+                  Container(
+                      
+                      child: Column(
+                        
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          ball('https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU', Colors.transparent),
+                         Expanded(
+                          
+                           child: Row(
+                       mainAxisAlignment:  MainAxisAlignment.center,
+                              children: <Widget>[
 
-                       Text("${snapshot.data[0]['NAME']+' '+snapshot.data[0]['LAST_NAME']}",style:TextStyle(color:Theme.of(context).primaryColor,fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
-                            Text("${snapshot.data[0]['PERSONAL_PHONE']}",style:TextStyle(color:Theme.of(context).primaryColor,fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
-                          ],
-                        ),
-                        Text("25%",style:TextStyle(color:Theme.of(context).primaryColor,fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
-                        Row(
-                          children: <Widget>[
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12.0),
-                                 color: Theme.of(context).primaryColor,
-                              ),
-                              width: 70,
-                              height: 4,
-                             
+                           Text("${snapshot.data[0]['NAME']+' '+snapshot.data[0]['LAST_NAME']}",
+                           style:TextStyle(color:Theme.of(context).primaryColor,
+                           fontSize: 19.0,
+                           fontFamily: 'Poppins',
+                           fontWeight: FontWeight.bold),
+                           ),
+                        
+                            
+                              ],
                             ),
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                  color: Colors.indigo,
-                                ),
-                                height: 4,
-                              ),
+                         ),
+                         
+                             Row(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: <Widget>[
+                           Icon(Icons.phone,
+                                color:Theme.of(context).primaryColor),
+                          Text("${snapshot.data[0]['PERSONAL_PHONE']}",
+                              style:TextStyle(color:Theme.of(context).primaryColor,
+                              fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
+                         ],),  
+                         SizedBox(
+                             height: 30.0, 
                             ),
-                          ],        
-                        ),
-                        Container(
-                          height: 30,
-                          decoration: BoxDecoration(
-                            border: Border.all(width: 2,color: Theme.of(context).primaryColor),
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          child: RaisedButton(
-                            color: Theme.of(context).accentColor,
-                            onPressed: (){
-                              
-                            },
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                            ),
-                            child: Container(
-                              child:  Center(
-                                child:FlatButton(
-      textColor: Colors.white,
-      onPressed: () {
-              // Navigator.of(context).pushNamed('/createAcount');
-     },
-      child: Text(
-                  'Edit ', 
-                                  style:  TextStyle(
-                                    fontSize: 10.0, 
-                                    color: Theme.of(context).primaryColor,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-      shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
-    ),   
-                              ),
-                            ),   
-                          ),
-                        ),    
-                      ],
+                           
+                        ],
+                      ),
                     ),
-                  ),
+                  
                   Container(
                     alignment: Alignment.topLeft,
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const EdgeInsets.only(top:12.0),
                     child:FlatButton(
-                      child:Icon(Icons.settings,size: 25,
+                      child:Icon(Icons.edit,size: 25,
                         color: Theme.of(context).primaryColor
                     ),
                     onPressed: (){
-                      //Navigator.of(context).pushNamed('/home',arguments:[snapshot.data[0]['NAME']+' '+snapshot.data[0]['LAST_NAME'],snapshot.data[0]['ID']]);
+                      Profile profile= Profile(snapshot.data[0]['ID'], snapshot.data[0]['NAME'], snapshot.data[0]['LAST_NAME'], snapshot.data[0]['PERSONAL_PHONE'], snapshot.data[0]['PERSONAL_CITY']);
+                       Navigator.of(context).pushNamed('/editAcount',arguments: profile);
                     },),
-                  )
+                  ),
+                    
+                        
+                 
                 ],
               ),
+              
             ),
             Container(
               padding:EdgeInsets.all(12.0),
@@ -280,7 +269,7 @@ Future< List< dynamic >> _fetchUser(accountInfos) async {
 
 Widget ball(String image,Color color){
     return Container(
-      height: 60,width: 60.0,
+      height: 90,width: 90.0,
       decoration: BoxDecoration(
         color:color,
         borderRadius: BorderRadius.circular(100.0),

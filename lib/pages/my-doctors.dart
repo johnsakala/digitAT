@@ -29,7 +29,7 @@ class _MyDoctorsListState extends State<MyDoctorsList> {
             color: Theme.of(context).primaryColor,
           ),
           onPressed: (){
-            Navigator.of(context).pushNamed('/home', arguments:[widget.currentUser.name,widget.currentUser.phoneNumber]);
+            Navigator.of(context).pop();
           },
         ),
         backgroundColor: Theme.of(context).accentColor,

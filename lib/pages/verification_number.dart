@@ -20,14 +20,17 @@ class VerificationNumber extends StatefulWidget {
 
 class _VerificationNumberState extends State<VerificationNumber> {
   User currentUser=new User.init().getCurrentUser();
-   var _code='';
+   var _code;
 
   final GlobalKey<FormState> _formKey =  GlobalKey<FormState>();
+    final GlobalKey<ScaffoldState> _scaffoldstate =
+      new GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     verificationId=widget.verificationId;
 
     return Scaffold(
+      key: _scaffoldstate,
         backgroundColor: Color(0xeeffffff),
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -99,8 +102,10 @@ class _VerificationNumberState extends State<VerificationNumber> {
                     setState(() {
                       _code=value;
                     });
+
             
             },
+            
         )
                   ),
                   Container(
@@ -109,8 +114,13 @@ class _VerificationNumberState extends State<VerificationNumber> {
                     child: RaisedButton(
                       color: Theme.of(context).accentColor,
                       onPressed: (){
+                      
                         if(_formKey.currentState.validate()){
-                  verifyOTP();
+                       verifyOTP();
+                        }
+                        else{
+                           final snackBar = SnackBar(content: Text('Enter verification code first'));
+                    _scaffoldstate.currentState.showSnackBar(snackBar);
                         }
                       },
                       shape: RoundedRectangleBorder(

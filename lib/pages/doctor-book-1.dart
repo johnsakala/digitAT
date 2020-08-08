@@ -1,3 +1,4 @@
+import 'package:digitAT/models/doc_booking.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
@@ -293,7 +294,8 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: (){
-                      Navigator.of(context).pushNamed("/secondeDoctorBook" ,arguments: [widget.doctor, selectedChoice]);
+                      DoctorBooking doctorBooking= DoctorBooking(widget.doctor, selectedChoice);
+                      Navigator.of(context).pushNamed("/secondeDoctorBook" ,arguments: doctorBooking);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)

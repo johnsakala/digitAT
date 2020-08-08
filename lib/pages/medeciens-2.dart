@@ -1,82 +1,27 @@
 import 'dart:convert';
 
 import 'package:digitAT/models/medecine.dart';
+import 'package:digitAT/models/medicine_list.dart';
+import 'package:digitAT/models/payment.dart';
 import 'package:digitAT/pages/medecines.dart';
+import 'package:digitAT/pages/payment.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/medecine.dart' as model;
 import 'package:digitAT/models/user.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 class MedecinesSlected extends StatefulWidget {
-   final List<dynamic> value;
+   final MedList value;
   const MedecinesSlected( {Key key, this.value}) : super(key: key);
   @override
   _MedecinesSlectedState createState() => _MedecinesSlectedState();
 }
 
 class _MedecinesSlectedState extends State<MedecinesSlected> {
-  Future _createOrder() async {
-//  showAlertDialog(context);
-  SharedPreferences preferences= await SharedPreferences.getInstance();
-  String id= preferences.getString('id');
- //int result=0;
-     final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
-       headers: {"Content-Type": "application/json"},
-       body: jsonEncode({
-  "fields":{ 
-   "TITLE":"medicine order",
-   "DESCRIPTION":medicines.toString()+" "+widget.value[3],
-   "CREATED_BY":id,
-   "RESPONSIBLE_ID":widget.value[2]
-  }
+  bool _loading=false;
+  
 
-}),).catchError((error) => print(error));
-       if(response.statusCode==200)
-       {
-         Map<String, dynamic> responseBody = jsonDecode(response.body);     
-           
-        print('//////////////////////////////zvaita');
- 
-       }
-       else{
-         print(response.statusCode);
-       }
-       //return responseBody['result'];
-  }
-
-  Future _createPaymentOrder() async {
-//  showAlertDialog(context);
-  SharedPreferences preferences= await SharedPreferences.getInstance();
-  String id= preferences.getString('id');
- //int result=0;
-     final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
-       headers: {"Content-Type": "application/json"},
-       body: jsonEncode({
-  "fields":{ 
-   "TITLE":"payment",
-   "DESCRIPTION":"pay for medicines",
-   "CREATED_BY":id,
-   "RESPONSIBLE_ID":widget.value[3]
-  }
-
-}),).catchError((error) => print(error));
-       if(response.statusCode==200)
-       {
-         Map<String, dynamic> responseBody = jsonDecode(response.body);     
-           
-        print('//////////////////////////////zvaita');
- 
-       }
-       else{
-         print(response.statusCode);
-       }
-       //return responseBody['result'];
-  }
+  
 
   User currentUser=User.init().getCurrentUser();
   List<Medecine>medicines= [];
@@ -84,10 +29,11 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
   model.MedecinesList medecinesList;
   void initState() {
     setState(() {
-      medicines.addAll(widget.value[0]);
-      bill=widget.value[1];
+      medicines.addAll(widget.value.list);
+      bill=widget.value.bill;
     });
     this.medecinesList = new model.MedecinesList();
+   // print("//////////////////////////////////////////////// pharmacistID"+widget.value[2].toString());
     super.initState();
   }
    final GlobalKey<ScaffoldState> _scaffoldstate =
@@ -104,12 +50,12 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
              
          ,
           onPressed: (){
-            Navigator.of(context).pushNamed('/medecines',);
+            Navigator.of(context).pop();
           },
         ),
         backgroundColor: Theme.of(context).accentColor,
         title: Text(
-          'PharmaHub',
+          'Checkout',
           style: TextStyle(
             fontSize:22.0,
             fontFamily: 'Poppins',
@@ -183,9 +129,13 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
               IconButton(
                 onPressed: (){
                   setState(() {
+                    print(double.parse(medicines[index].price));
                     
-                    medicines.remove(medicines[index]);
+                      
                     bill=bill-double.parse(medicines[index].price);
+                    medicines.removeAt(index);
+                    
+                    
                     
                   });
                  print(bill);
@@ -249,7 +199,8 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                 children: <Widget>[
                   FlatButton(
                     onPressed: (){
-                      Navigator.of(context).pushNamed('/medecines');
+                      MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy);
+                      Navigator.of(context).pushNamed('/medecines',arguments: list);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -311,20 +262,19 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                       ),
                     ],
                   ),
-                  RaisedButton(
+                  _loading? CircularProgressIndicator(): RaisedButton(
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: () async{
-                   await _createOrder();
-                   await _createPaymentOrder();
+                   
                    final snackBar = SnackBar(content: Text('Order Sent, you will receive a notification from the pharmacy'));
                     _scaffoldstate.currentState.showSnackBar(snackBar);
-                    SharedPreferences preferences= await SharedPreferences.getInstance();
-                       String id= preferences.getString('id');
+                  
                      /*  if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                      Navigator.of(context).pushNamed("/account",arguments:int.parse(id));
+                      Payments payments= Payments('Medicines Order',medicines.toString()+" bill"+bill.toString(), widget.value.pharmacistID);
+                      Navigator.of(context).pushNamed("/payments",arguments:payments);
                       /*if(result!=null){
                        print('*********************************order created');
                       }*/

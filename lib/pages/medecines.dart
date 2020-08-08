@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:digitAT/models/medecine.dart';
+import 'package:digitAT/models/medicine_list.dart';
 import 'package:digitAT/models/pharmacist.dart';
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +12,8 @@ import 'package:digitAT/widgets/searchWidget.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 class Medecines extends StatefulWidget {
-  final String pId;
-  const Medecines({Key key,this.pId}):super(key:key);
+  final MedList value;
+  const Medecines({Key key,this.value}):super(key:key);
   @override
   _MedecinesState createState() => _MedecinesState();
 }
@@ -25,7 +26,7 @@ class _MedecinesState extends State<Medecines> {
   double bill=0.0;
    List<dynamic> medicalAids=[];
 
-  Future< List< dynamic >> _fetchMedicines() async {
+  Future <List<dynamic>> _fetchMedicines() async {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/crm.product.list',
@@ -93,7 +94,7 @@ Future<Pharmacist> _fetchPharmacist() async {
 //  showAlertDialog(context);
 Pharmacist pharmacist;
     final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.get?UF_DEPARTMENT=${widget.pId}',
+        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.get?UF_DEPARTMENT=${widget.value.pid}',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
@@ -103,7 +104,8 @@ Pharmacist pharmacist;
         if (responseBody["result"] != null) {
                result = responseBody["result"];
                   pharmacist= Pharmacist(result[0]["ID"], result[0]["NAME"], result[0]["LAST_NAME"]);            
-   
+       print("-----------------------------pid"+pharmacist.id);
+    
         } else {
           
           print('-----------------'+response.body);
@@ -123,56 +125,22 @@ Pharmacist pharmacist;
     print('response //////////////////////////////'+result.toString());
     return pharmacist;
   }
-  Future<Pharmacist> _fetchAidOfficer(String id) async {
-//  showAlertDialog(context);
-Pharmacist officer;
- 
-    final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.get?UF_DEPARTMENT=$id',
-    )  .catchError((error) => print(error));
-    Map<String, dynamic> responseBody = jsonDecode(response.body);
-    
-    List< dynamic> result=[];
-    if (response.statusCode == 200) {
-      try {
-        if (responseBody["result"] != null) {
-               result = responseBody["result"];
-                  officer= Pharmacist(result[0]["ID"], result[0]["NAME"], result[0]["LAST_NAME"]);            
-   
-        } else {
-          
-          print('-----------------'+response.body);
-        }
-      } catch (error) {
-        print('-----------------'+error);
-      }
-    } else {
-      print("Please check your internet connection ");
-      Fluttertoast.showToast(
-          msg: "Please check your internet connection ",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 4,
-          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
-    }
-    print('response //////////////////////////////'+result.toString());
-    return officer;
-  }
+
   Pharmacist _pharmacist, officer;
   void getPharmacist() async{
-
      _pharmacist= await _fetchPharmacist();
-     
-     
-
- 
   }
   void initState() {
     //this.medecinesList = new model.MedecinesList();
     super.initState();
+
     setState(() {
-      getPharmacist();
+      bill= widget.value.bill;
+      medicines= widget.value.list;
+     getPharmacist();
     });
+ 
+   
   
   }
   @override
@@ -181,15 +149,15 @@ Pharmacist officer;
       appBar: AppBar(
         elevation: 0,
         actions: <Widget>[
-      IconButton(icon: Icon(Icons.edit), onPressed: (){
+      IconButton(icon: Icon(Icons.content_paste),
+      tooltip: 'Paste presciption',
+      color: Theme.of(context).primaryColor,
+       onPressed: (){
         Navigator.of(context).pushNamed('/prescription', arguments: _pharmacist.id);
       })
         ],
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor )
-              
-             
-         ,
+          icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor ),
           onPressed: (){
             Navigator.of(context).pop();
            // Navigator.of(context).pushNamed('/home', arguments:[currentUser.name,currentUser.phoneNumber]);
@@ -197,7 +165,7 @@ Pharmacist officer;
         ),
         backgroundColor: Theme.of(context).accentColor,
         title: Text(
-          'PharmaHub',
+          '${widget.value.pharmacy}',
           style: TextStyle(
             fontSize:22.0,
             fontFamily: 'Poppins',
@@ -234,7 +202,7 @@ Pharmacist officer;
               padding:EdgeInsets.only(top:12.0,right: 12.0,left: 12.0,bottom: 12.0),
               alignment: Alignment.topLeft,
               child: Text(
-                'Medicines :',
+                'Add Prescription :',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 16.0,
@@ -316,74 +284,7 @@ Pharmacist officer;
               ), 
                              
             ),
-             Container(
-                            height: 100.0,
-                            margin:  const EdgeInsets.only(top: 12.0),
-                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(width: 1.5,color: Colors.grey),
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.grey.withOpacity(0.4)                           
-                            ),
-                            child:DropDownFormField(
-                  titleText: 'Medical Aid',
-                  value: aid,
-                  onSaved: (value)async {
-                     officer= await _fetchAidOfficer(value);
-                    setState(() {
-                      aid = value;
-                    });
-                    print("//////////// ${officer.id}");
-                  },
-                  onChanged: (value) async {
-                     officer= await _fetchAidOfficer(value);
-                    setState(() {
-                     aid = value;
-                    });
-                    print("//////////// ${officer.id}");
-                  },
-                  dataSource: [
-                         {
-                          "display": "${medicalAids[0]['NAME']}",
-                      "value": "${medicalAids[0]['ID']}",
-                         },
-                           {
-                          "display": "${medicalAids[1]['NAME']}",
-                      "value": "${medicalAids[1]['ID']}",
-                         }
-                  ],
-                  textField: 'display',
-                  valueField: 'value',
-                ),
-                          ),
-      Container(
-                            height: 100.0,
-                            margin:  const EdgeInsets.only(top: 12.0),
-                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(width: 1.5,color: Colors.grey),
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.grey.withOpacity(0.4)                          
-                            ),
-                            child:
-                            
-                            TextFormField(
-                                  decoration: InputDecoration(
-                               labelText: 'Medical aid Number'
-                                            ),
-                                            
-                             onChanged: (value){
-                               setState(() {
-                                 number=value;
-                               });  
-                               },     
-                        validator: (value) {
-                      if (value.isEmpty) {
-                       return 'Number can not be empty!';
-                         }
-                             return null;
-                                  },
-                            )),
+             
           ],
         ),
       );
@@ -435,7 +336,9 @@ Pharmacist officer;
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: (){
-                      Navigator.of(context).pushNamed("/medecinesSeconde", arguments:[medicines,bill,_pharmacist.id,aid+" "+number,officer.id]);
+                      print(_pharmacist.id);
+                      MedList list = MedList.second(widget.value.pharmacistID, medicines, bill, widget.value.pharmacy, _pharmacist.id);
+                      Navigator.of(context).pushNamed("/medecinesSeconde", arguments:list);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)

@@ -30,7 +30,7 @@ class _HomeState extends State<Home> {
          child:FlatButton(
       textColor: Colors.white,
       onPressed: () {
-               Navigator.of(context).pushNamed('/createAcount',arguments: [currentUser.id,currentUser.phoneNumber]);
+               Navigator.of(context).pushNamed('/account',arguments: widget.value[2]);
      },
       child: /*currentUser.name==null?Text('Update Profile'):*/Text(
                               "${widget.value[0]}",
@@ -54,7 +54,7 @@ class _HomeState extends State<Home> {
                             fontSize:22.0,
                             fontFamily: 'Bauhaus',
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor.withOpacity(0.8),
+                            color: Theme.of(context).primaryColor,
                           ),
                         ),),
       drawer: Drawer(
@@ -82,14 +82,14 @@ class _HomeState extends State<Home> {
             leading: Image(image: AssetImage('images/nurse.png'),),
             title:Text('Doctors'),
            onTap:(){
-               Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.phoneNumber]);
+              Navigator.of(context).pushNamed('/doctors');
            }
           ),
            ListTile(
             leading: Image(image: AssetImage('images/pill.png'),),
             title:Text('PharmaHub'),
                 onTap:(){
-               Navigator.of(context).pushNamed('/medecines');
+                Navigator.of(context).pushNamed('/pharmacies');
            }
           ),
            ListTile(
@@ -449,7 +449,7 @@ class _HomeState extends State<Home> {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      'https://internationaltechnology.bitrix24.com/rest/1/nq1s3dbqiyy4m4lz/user.get.json?UF_DEPARTMENT=1&PERSONAL_CITY=${widget.value[1]}',
+      'https://internationaltechnology.bitrix24.com/rest/1/nq1s3dbqiyy4m4lz/user.get.json?UF_DEPARTMENT=30&PERSONAL_CITY=${widget.value[1]}',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
@@ -472,7 +472,7 @@ class _HomeState extends State<Home> {
                card(
                    user.pERSONALPHOTO,
                   user.nAME + " " + user.lASTNAME,
-                  "B.Sc DDVL Demilitologist  ",
+                  user.pERSONALPROFESSION,
                   "4.2",
             ));
           });
