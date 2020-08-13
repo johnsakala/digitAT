@@ -1,18 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart';
+import 'package:digitAT/api/url.dart';
+import 'package:digitAT/models/profile.dart';
+import 'package:digitAT/data/app_database.dart';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:digitAT/models/user.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:permission_handler/permission_handler.dart';
+
+
 class CreateAcount extends StatefulWidget {
   final List<dynamic> accountInfo;
   const CreateAcount({Key key, this.accountInfo}):super(key:key);
@@ -23,41 +24,54 @@ class CreateAcount extends StatefulWidget {
 }
 
 class _CreateAcountState extends State<CreateAcount> {
-  User currentUser = new User.init().getCurrentUser();
+
   File _image;
-  
+  String baseImage;
+  var imageJson;
+  final database= AppDatabase();
+  Future saveProfile(Profile profile){
+  final user = User(
+    userId : profile.id,
+    phoneNumber: profile.phone,
+    fullName: profile.name,
+    city:profile.city
+  );
+  database.insertUser(user);
+  }
   Future _getPhoto() async{
     print('picking image');
-     var status = await Permission.storage.status;
-           if (status.isUndetermined) {
-                // You can request multiple permissions at once.
-                Map<Permission, PermissionStatus> statuses = await [
-                  Permission.storage,
-                  Permission.camera,
-                ].request();
-                print(statuses[Permission.storage]); // it should print PermissionStatus.granted
-              }
+     
     final image= await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
-      _image=image;
+     _image=image;
+    final bytes = _image.readAsBytesSync();
+    String img64 = base64Encode(bytes);
+    baseImage=img64;
+    imageJson=baseImage;
+    
+     
     });
-    print('image path ////////////////'+basename(_image.path));
+   
+    print('image path //////////////'+imageJson);
   }
 
 
- uploadPhoto(File _image) async {
-final Directory dir= await getApplicationDocumentsDirectory();
+ uploadPhoto(String _image) async {
+ setState(() {
+   imageJson= jsonEncode({"image":_image});
+ });
+/*final Directory dir= await getApplicationDocumentsDirectory();
 final String path = dir.path;
 final String fileName = basename(_image.path);
 final File localImage = await _image.copy('$path/$fileName');
 SharedPreferences pref= await SharedPreferences.getInstance();
 pref.setString('profilePic', localImage.path);
-  print(dir.listSync());  
+  print(dir.listSync()); */ 
 
 }
- setDetails(String id, String fullname,String phonenumber, String city)async{
+ setDetails(int id, String fullname,String phonenumber, String city)async{
     SharedPreferences preferences= await SharedPreferences.getInstance();
-    preferences.setString("id", id);
+    preferences.setInt("id", id);
     preferences.setString("name", fullname);
     preferences.setString("phone", phoneNumber);
     preferences.setString("city", city);
@@ -89,7 +103,7 @@ pref.setString('profilePic', localImage.path);
         leading: IconButton(
           onPressed: (){
             //TODO Paramters should be changed once user starts coming from the Core system
-            Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.phoneNumber]);
+            Navigator.of(context).pop();
           },
           icon: Icon(Icons.arrow_back,color: Theme.of(context).primaryColor),
         ),
@@ -544,24 +558,15 @@ pref.setString('profilePic', localImage.path);
                   setState(() {
                     _load=true;
                   });
-                     /*showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Center(child: CircularProgressIndicator(),);
-                  });*/
-                  
-                 _result=await _createAccount(gender,fname,lname,city,phoneNumber,email,birthDate);
-
-                  User.init().setCurrentUser(fname+' '+lname, phoneNumber, _result.toString());
-                  
-                    /* Navigator.of(context).pushNamed('/home', arguments:[lname]).then((value){
-                   Navigator.of(context).pop();
-                    });
-                    await uploadPhoto( _image);
-                    SharedPreferences pref= await SharedPreferences.getInstance();
-                     String imagePath=  pref.getString('profilePic');*/ 
-                     await setDetails(_result.toString(), fname+" "+lname,phoneNumber,city);
-                       
+                
+                   // await uploadPhoto(baseImage);
+                 _result = await _createAccount(gender,fname,lname,city,phoneNumber,email,birthDate);
+                    Profile profile= Profile.first(_result, fname+" "+lname, phoneNumber, city);
+                     await saveProfile(profile);
+                     
+                     await setDetails(_result, fname+" "+lname,phoneNumber,city);
+                     await confirmDialog(context); 
+                      
                     Navigator.of(context).pushNamed('/home',arguments:[fname+' '+lname,_result,city]);
                   }
                 },
@@ -591,9 +596,10 @@ pref.setString('profilePic', localImage.path);
 //  showAlertDialog(context);
   int result=0;
     final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.add',
+        '${webhook}user.add',
        headers: {"Content-Type": "application/json"},
        body: jsonEncode({
+         "PERSONAL_ZIP":imageJson,
           "EXTRANET":"N",
           "USER_TYPE":"employee",
           "SONET_GROUP_ID":[1],
@@ -639,5 +645,36 @@ pref.setString('profilePic', localImage.path);
                               ),
                             ),
                           );
+  }
+
+  Future<bool> confirmDialog(BuildContext context) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Confirmation'),
+            content: Container(
+              height: 85,
+              child:Text('Account updated successfully'),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
   }
 }

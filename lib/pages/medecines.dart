@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/medecine.dart';
 import 'package:digitAT/models/medicine_list.dart';
 import 'package:digitAT/models/pharmacist.dart';
@@ -29,7 +30,7 @@ class _MedecinesState extends State<Medecines> {
   Future <List<dynamic>> _fetchMedicines() async {
 //  showAlertDialog(context);
     final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/crm.product.list',
+        .get('${webhook}crm.product.list',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
@@ -58,7 +59,7 @@ class _MedecinesState extends State<Medecines> {
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
     final http.Response aids = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/department.get?PARENT=72',
+        .get('${webhook}department.get?PARENT=72',
     )  .catchError((error) => print(error));
     Map<String, dynamic> aidsBody = jsonDecode(aids.body); 
     if (aids.statusCode == 200) {
@@ -94,7 +95,7 @@ Future<Pharmacist> _fetchPharmacist() async {
 //  showAlertDialog(context);
 Pharmacist pharmacist;
     final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.get?UF_DEPARTMENT=${widget.value.pid}',
+        .get('${webhook}user.get?UF_DEPARTMENT=${widget.value.pid}',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
@@ -337,7 +338,7 @@ Pharmacist pharmacist;
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: (){
                       print(_pharmacist.id);
-                      MedList list = MedList.second(widget.value.pharmacistID, medicines, bill, widget.value.pharmacy, _pharmacist.id);
+                      MedList list = MedList.second(widget.value.pid, medicines, bill, widget.value.pharmacy, _pharmacist.id);
                       Navigator.of(context).pushNamed("/medecinesSeconde", arguments:list);
                     },
                     shape: RoundedRectangleBorder(

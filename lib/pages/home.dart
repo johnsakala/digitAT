@@ -1,4 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:digitAT/api/url.dart';
+import 'package:digitAT/models/doctor.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:http/http.dart' as http;
@@ -30,7 +32,7 @@ class _HomeState extends State<Home> {
          child:FlatButton(
       textColor: Colors.white,
       onPressed: () {
-               Navigator.of(context).pushNamed('/account',arguments: widget.value[2]);
+               //Navigator.of(context).pushNamed('/account',arguments: widget.value[2]);
      },
       child: /*currentUser.name==null?Text('Update Profile'):*/Text(
                               "${widget.value[0]}",
@@ -103,18 +105,18 @@ class _HomeState extends State<Home> {
           ),
 
            ListTile(
-            leading: Icon(Icons.local_hospital),
+            leading: Image(image: AssetImage('images/Hospitals.png'),),
             title:Text('Hospitals'),
 
           ),
            ListTile(
-            leading: Icon(Icons.local_hospital),
+            leading: Image(image: AssetImage('images/TheLab.png'),),
             title:Text('TheLab'),
 
           ),
-         
+
            ListTile(
-            leading: Icon(Icons.payment),
+            leading:Image(image: AssetImage('images/MoneyTel.png'),),
             title:Text('MoneyTel'),
 
           ),
@@ -384,7 +386,7 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-  Widget card(String image,String title,String subTitle,String rank){
+  Widget card(Doctor doctor){
     return 
      Stack(
      children: <Widget>[
@@ -396,49 +398,55 @@ class _HomeState extends State<Home> {
         ),
         width: 140.0,
         height: 140.0,
-        child: Card(
-          elevation: 0.2,
-          child: Wrap(
-            children: <Widget>[
-              Container(
-                margin:EdgeInsets.symmetric(horizontal: 0.0,vertical:40.0),
-                child:ListTile(
-                  title: Text(
-                    title,
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 10.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    ),
-                  subtitle: Column(
-                    children: <Widget>[
-                      Text(
-                        subTitle,
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 10.0
-                        ),
+        child: GestureDetector(
+          onTap: (){
+                        Navigator.of(context).pushNamed('/doctorProfil', arguments: doctor);
+
+          },
+                  child: Card(
+            elevation: 0.2,
+            child: Wrap(
+              children: <Widget>[
+                Container(
+                  margin:EdgeInsets.symmetric(horizontal: 0.0,vertical:40.0),
+                  child:ListTile(
+                    title: Text(
+                      doctor.name,
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 10.0,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Row(
-                        children: <Widget>[
-                          Icon(Icons.star,color: Colors.yellow,),
-                          Text(rank,style: TextStyle(fontFamily: 'Poppins',),),
-                        ],
-                      )
-                    ],
+                      ),
+                    subtitle: Column(
+                      children: <Widget>[
+                        Text(
+                          doctor.profession,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 10.0
+                          ),
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Icon(Icons.star,color: Colors.yellow,),
+                            Text(doctor.state,style: TextStyle(fontFamily: 'Poppins',),),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
         Container(
           margin:EdgeInsets.symmetric(horizontal: 30.0,vertical:0.0),
-          child:ballcard(image,Colors.transparent),
+          child:ballcard(doctor.avatar,Colors.transparent),
         ),
      ],
     );
@@ -449,7 +457,7 @@ class _HomeState extends State<Home> {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      'https://internationaltechnology.bitrix24.com/rest/1/nq1s3dbqiyy4m4lz/user.get.json?UF_DEPARTMENT=30&PERSONAL_CITY=${widget.value[1]}',
+      '${webhook}user.get.json?UF_DEPARTMENT=30&PERSONAL_CITY=${widget.value[1]}',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
@@ -468,13 +476,10 @@ class _HomeState extends State<Home> {
             if(user.pERSONALPHOTO==null){
               user.pERSONALPHOTO="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
             }
+            Doctor doc = Doctor.min(user.nAME+' '+user.lASTNAME, user.pERSONALPROFESSION, user.pERSONALPHOTO, "4.2", Colors.transparent, user.iD, user.pERSONALPROFESSION);
             _doctorsList.add(
-               card(
-                   user.pERSONALPHOTO,
-                  user.nAME + " " + user.lASTNAME,
-                  user.pERSONALPROFESSION,
-                  "4.2",
-            ));
+               card(doc)
+            );
           });
 
           serverResponse = _doctorsList;
@@ -500,7 +505,8 @@ class _HomeState extends State<Home> {
   ListView _doctorsListView(data) {
     return ListView(
         scrollDirection: Axis.horizontal,
-        children: _doctorsList);
+        children: _doctorsList,
+        );
   }
 }
 

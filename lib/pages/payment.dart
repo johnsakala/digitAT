@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/payment.dart';
 import 'package:digitAT/models/pharmacist.dart';
 import 'package:digitAT/models/profile.dart';
@@ -26,10 +27,10 @@ class _PaymentState extends State<Payment> {
   Future _createPaymentOrder() async {
 //  showAlertDialog(context);
   SharedPreferences preferences= await SharedPreferences.getInstance();
-  String id= preferences.getString('id');
+  int id= preferences.getInt('id');
  //int result=0;
      final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+        '${webhook}tasks.task.add',
        headers: {"Content-Type": "application/json"},
        body: jsonEncode({
   "fields":{ 
@@ -55,7 +56,7 @@ class _PaymentState extends State<Payment> {
   Future< List< dynamic >> _fetchAids() async {
 
     final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/department.get?PARENT=72',
+        .get('${webhook}department.get?PARENT=72',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
      List<dynamic> medicalAids=[]; 
@@ -92,7 +93,7 @@ class _PaymentState extends State<Payment> {
 Pharmacist officer;
  
     final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.get?UF_DEPARTMENT=$id',
+        .get('${webhook}user.get?UF_DEPARTMENT=$id',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
@@ -127,10 +128,10 @@ setState(() {
   _loading=true;
 });
   SharedPreferences preferences= await SharedPreferences.getInstance();
-  String id= preferences.getString('id');
+  int id= preferences.getInt('id');
  
      final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+        '${webhook}tasks.task.add',
        headers: {"Content-Type": "application/json"},
        body: jsonEncode({
   "fields":{ 
@@ -322,12 +323,14 @@ setState(() {
                        await _createTask();
                        await _createPaymentOrder();
                         SharedPreferences preferences= await SharedPreferences.getInstance();
-                       String id= preferences.getString('id');
+                       int id= preferences.getInt('id');
                        String name= preferences.getString('name');
                        String city= preferences.getString('city');
                        
                        Profile profile=Profile.min(id, name, city);
-                       confirmDialog(context, profile);
+                           
+                       await confirmDialog(context);
+                        Navigator.of(context).pushNamed("/home",arguments:[profile.name,profile.id,profile.city]);
                      /*  if(result!=null){
                        print('*********************************appointment created');
                       }*/
@@ -355,14 +358,14 @@ setState(() {
             ),
       ));
   }
-  Future<bool> confirmDialog(BuildContext context, Profile profile) {
-    int iD= int.parse(profile.id);
+  Future<bool> confirmDialog(BuildContext context) {
+
     return showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return new AlertDialog(
-            title: Text(''),
+            title: Text('Confirmation'),
             content: Container(
               height: 85,
               child:Text('${widget.payment.title} completed successfully'),
@@ -376,9 +379,9 @@ setState(() {
                 color: Theme.of(context).accentColor,
                 child: Text('OK'),
                 onPressed: () {
-                    Navigator.of(context).pop();
-                 Navigator.of(context).pushNamed("/home",arguments:[profile.name,iD,profile.city]);
-                 
+                
+                                     Navigator.of(context).pop();
+
                 },
               )
             ],
@@ -386,5 +389,37 @@ setState(() {
         });
   }
 
+  Future <int>_createDeal(String g, String name, String lname, String city, String phoneNumber, DateTime dob) async {
+
+  int result=0;
+    final http.Response response = await http.post(
+        '${webhook}crm.contact.add',
+         headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+         
+         "fields":{  "TITLE": "digitAT", 
+                    "NAME": name, 
+                    "SECOND_NAME": " ", 
+                    "LAST_NAME": lname, 
+                     
+                    "OPENED": "Y", 
+                    "ASSIGNED_BY_ID": 1, 
+                    "PHONE": [ { "VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
+       }
+       })
+        
+         ).catchError((error) => print('///////////////////////error'+error));
+       if(response.statusCode==200)
+       {  
+        
+        
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           result=responseBody['result'];
+       }
+       else{
+         print(response.statusCode);
+       }
+       return result;
+  }
 
 }

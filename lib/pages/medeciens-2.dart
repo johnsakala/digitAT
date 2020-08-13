@@ -50,7 +50,8 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
              
          ,
           onPressed: (){
-            Navigator.of(context).pop();
+            MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy);
+                      Navigator.of(context).pushNamed('/medecines',arguments: list);
           },
         ),
         backgroundColor: Theme.of(context).accentColor,
@@ -199,6 +200,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                 children: <Widget>[
                   FlatButton(
                     onPressed: (){
+                      print('-----------------------'+widget.value.pid.toString());
                       MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
                     },
@@ -267,10 +269,10 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: () async{
                    
-                   final snackBar = SnackBar(content: Text('Order Sent, you will receive a notification from the pharmacy'));
+                /* final snackBar = SnackBar(content: Text('Order Sent, you will receive a notification from the pharmacy'));
                     _scaffoldstate.currentState.showSnackBar(snackBar);
                   
-                     /*  if(result!=null){
+                       if(result!=null){
                        print('*********************************appointment created');
                       }*/
                       Payments payments= Payments('Medicines Order',medicines.toString()+" bill"+bill.toString(), widget.value.pharmacistID);

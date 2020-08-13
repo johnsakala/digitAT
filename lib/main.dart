@@ -16,14 +16,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String id,name,city,phone,vId;
+  String name,city,phone,vId;
+  int id;
 getId()async{
   SharedPreferences preferences = await SharedPreferences.getInstance();
-  preferences.getString("id");
+  preferences.getInt("id");
 }
 fetchId()async{
   id= await getId();
-  print('############'+id.toString());
+  
 }
 
  @override
@@ -32,8 +33,9 @@ fetchId()async{
     super.initState();
  
    SharedPreferences.getInstance().then((SharedPreferences sp) {
-      String _testValue,_name,_city,_phone,_vId;
-      _testValue = sp.getString('id');
+      String _name,_city,_phone,_vId;
+      int _testValue;
+      _testValue = sp.getInt('id');
       _name = sp.getString('name');
       _city = sp.getString('city');
       _phone = sp.getString('phone');
@@ -72,23 +74,14 @@ fetchId()async{
               imageBackground: AssetImage('images/splash.jpg'),
             seconds: 3,
           navigateAfterSeconds: new AfterSplash([id,name,city,phone,vId]),
-          title:Text(
-                    'Welcome To \n digitAT',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color:Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 30.0,
-                      fontFamily: "Bauhaus"
-                    ),
-                  ),
+    
       
         
           backgroundColor:Hexcolor('#1DA1F2').withOpacity(0.8),
        
           photoSize: 100.0,
       
-          loaderColor:Hexcolor('#8582c4'),
+          loaderColor:Hexcolor('#1DA1F2'),
         ),
       ),
     );
@@ -103,10 +96,10 @@ class AfterSplash extends StatelessWidget {
  
   @override
   Widget build(BuildContext context) {
-    int iD= int.parse(id[0]);
+    
     return MaterialApp(
       title: 'digitAT',
-      home:id[0]==null?(id[4]==null?Welcome():VerificationNumber(id[3], id[4])):TabsWidget(acountInfos: [id[1],iD,id[2]]),
+      home:id[0]==null?Welcome():TabsWidget(acountInfos: [id[1],id[0],id[2]]),
       onGenerateRoute: RouteGenerator.generateRoute,
       debugShowCheckedModeBanner: false,
       darkTheme: ThemeData(

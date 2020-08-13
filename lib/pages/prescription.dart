@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:digitAT/api/url.dart';
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
@@ -22,7 +23,7 @@ class _PrescriptionState extends State<Prescription > {
    Future< List< dynamic >> _fetchAids() async {
 
     final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/department.get?PARENT=72',
+        .get('${webhook}department.get?PARENT=72',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
      List<dynamic> medicalAids=[]; 
@@ -57,10 +58,10 @@ class _PrescriptionState extends State<Prescription > {
    Future _createOrder() async {
 //  showAlertDialog(context);
   SharedPreferences preferences= await SharedPreferences.getInstance();
-  String id= preferences.getString('id');
+  int id= preferences.getInt('id');
  //int result=0;
      final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+        '${webhook}tasks.task.add',
        headers: {"Content-Type": "application/json"},
        body: jsonEncode({
   "fields":{ 
@@ -87,10 +88,10 @@ class _PrescriptionState extends State<Prescription > {
   Future _createPaymentOrder() async {
 //  showAlertDialog(context);
   SharedPreferences preferences= await SharedPreferences.getInstance();
-  String id= preferences.getString('id');
+  int id= preferences.getInt('id');
  //int result=0;
      final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/tasks.task.add',
+        '${webhook}tasks.task.add',
        headers: {"Content-Type": "application/json"},
        body: jsonEncode({
   "fields":{ 
@@ -337,7 +338,7 @@ class _PrescriptionState extends State<Prescription > {
                    final snackBar = SnackBar(content: Text('Order Sent, you will receive a notification from the pharmacy'));
                     _scaffoldstate.currentState.showSnackBar(snackBar);
                    SharedPreferences preferences= await SharedPreferences.getInstance();
-                       String id= preferences.getString('id');
+                       int id= preferences.getInt('id');
                        String name= preferences.getString('name');
                        String city= preferences.getString('city');
                      /*  if(result!=null){

@@ -11,12 +11,14 @@ class User extends DataClass implements Insertable<User> {
   final int id;
   final int userId;
   final String phoneNumber;
-  final String email;
+  final String fullName;
+  final String city;
   User(
       {@required this.id,
       @required this.userId,
       @required this.phoneNumber,
-      @required this.email});
+      @required this.fullName,
+      @required this.city});
   factory User.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -28,8 +30,9 @@ class User extends DataClass implements Insertable<User> {
           intType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
       phoneNumber: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}phone_number']),
-      email:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}email']),
+      fullName: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}full_name']),
+      city: stringType.mapFromDatabaseResponse(data['${effectivePrefix}city']),
     );
   }
   @override
@@ -44,8 +47,11 @@ class User extends DataClass implements Insertable<User> {
     if (!nullToAbsent || phoneNumber != null) {
       map['phone_number'] = Variable<String>(phoneNumber);
     }
-    if (!nullToAbsent || email != null) {
-      map['email'] = Variable<String>(email);
+    if (!nullToAbsent || fullName != null) {
+      map['full_name'] = Variable<String>(fullName);
+    }
+    if (!nullToAbsent || city != null) {
+      map['city'] = Variable<String>(city);
     }
     return map;
   }
@@ -58,8 +64,10 @@ class User extends DataClass implements Insertable<User> {
       phoneNumber: phoneNumber == null && nullToAbsent
           ? const Value.absent()
           : Value(phoneNumber),
-      email:
-          email == null && nullToAbsent ? const Value.absent() : Value(email),
+      fullName: fullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullName),
+      city: city == null && nullToAbsent ? const Value.absent() : Value(city),
     );
   }
 
@@ -70,7 +78,8 @@ class User extends DataClass implements Insertable<User> {
       id: serializer.fromJson<int>(json['id']),
       userId: serializer.fromJson<int>(json['userId']),
       phoneNumber: serializer.fromJson<String>(json['phoneNumber']),
-      email: serializer.fromJson<String>(json['email']),
+      fullName: serializer.fromJson<String>(json['fullName']),
+      city: serializer.fromJson<String>(json['city']),
     );
   }
   @override
@@ -80,15 +89,23 @@ class User extends DataClass implements Insertable<User> {
       'id': serializer.toJson<int>(id),
       'userId': serializer.toJson<int>(userId),
       'phoneNumber': serializer.toJson<String>(phoneNumber),
-      'email': serializer.toJson<String>(email),
+      'fullName': serializer.toJson<String>(fullName),
+      'city': serializer.toJson<String>(city),
     };
   }
 
-  User copyWith({int id, int userId, String phoneNumber, String email}) => User(
+  User copyWith(
+          {int id,
+          int userId,
+          String phoneNumber,
+          String fullName,
+          String city}) =>
+      User(
         id: id ?? this.id,
         userId: userId ?? this.userId,
         phoneNumber: phoneNumber ?? this.phoneNumber,
-        email: email ?? this.email,
+        fullName: fullName ?? this.fullName,
+        city: city ?? this.city,
       );
   @override
   String toString() {
@@ -96,14 +113,19 @@ class User extends DataClass implements Insertable<User> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('phoneNumber: $phoneNumber, ')
-          ..write('email: $email')
+          ..write('fullName: $fullName, ')
+          ..write('city: $city')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(id.hashCode,
-      $mrjc(userId.hashCode, $mrjc(phoneNumber.hashCode, email.hashCode))));
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(
+          userId.hashCode,
+          $mrjc(
+              phoneNumber.hashCode, $mrjc(fullName.hashCode, city.hashCode)))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -111,39 +133,46 @@ class User extends DataClass implements Insertable<User> {
           other.id == this.id &&
           other.userId == this.userId &&
           other.phoneNumber == this.phoneNumber &&
-          other.email == this.email);
+          other.fullName == this.fullName &&
+          other.city == this.city);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<int> id;
   final Value<int> userId;
   final Value<String> phoneNumber;
-  final Value<String> email;
+  final Value<String> fullName;
+  final Value<String> city;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.phoneNumber = const Value.absent(),
-    this.email = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.city = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
     @required int userId,
     @required String phoneNumber,
-    @required String email,
+    @required String fullName,
+    @required String city,
   })  : userId = Value(userId),
         phoneNumber = Value(phoneNumber),
-        email = Value(email);
+        fullName = Value(fullName),
+        city = Value(city);
   static Insertable<User> custom({
     Expression<int> id,
     Expression<int> userId,
     Expression<String> phoneNumber,
-    Expression<String> email,
+    Expression<String> fullName,
+    Expression<String> city,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (userId != null) 'user_id': userId,
       if (phoneNumber != null) 'phone_number': phoneNumber,
-      if (email != null) 'email': email,
+      if (fullName != null) 'full_name': fullName,
+      if (city != null) 'city': city,
     });
   }
 
@@ -151,12 +180,14 @@ class UsersCompanion extends UpdateCompanion<User> {
       {Value<int> id,
       Value<int> userId,
       Value<String> phoneNumber,
-      Value<String> email}) {
+      Value<String> fullName,
+      Value<String> city}) {
     return UsersCompanion(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      email: email ?? this.email,
+      fullName: fullName ?? this.fullName,
+      city: city ?? this.city,
     );
   }
 
@@ -172,8 +203,11 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (phoneNumber.present) {
       map['phone_number'] = Variable<String>(phoneNumber.value);
     }
-    if (email.present) {
-      map['email'] = Variable<String>(email.value);
+    if (fullName.present) {
+      map['full_name'] = Variable<String>(fullName.value);
+    }
+    if (city.present) {
+      map['city'] = Variable<String>(city.value);
     }
     return map;
   }
@@ -184,7 +218,8 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('id: $id, ')
           ..write('userId: $userId, ')
           ..write('phoneNumber: $phoneNumber, ')
-          ..write('email: $email')
+          ..write('fullName: $fullName, ')
+          ..write('city: $city')
           ..write(')'))
         .toString();
   }
@@ -226,17 +261,27 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
         minTextLength: 1, maxTextLength: 50);
   }
 
-  final VerificationMeta _emailMeta = const VerificationMeta('email');
-  GeneratedTextColumn _email;
+  final VerificationMeta _fullNameMeta = const VerificationMeta('fullName');
+  GeneratedTextColumn _fullName;
   @override
-  GeneratedTextColumn get email => _email ??= _constructEmail();
-  GeneratedTextColumn _constructEmail() {
-    return GeneratedTextColumn('email', $tableName, false,
+  GeneratedTextColumn get fullName => _fullName ??= _constructFullName();
+  GeneratedTextColumn _constructFullName() {
+    return GeneratedTextColumn('full_name', $tableName, false,
+        minTextLength: 1, maxTextLength: 50);
+  }
+
+  final VerificationMeta _cityMeta = const VerificationMeta('city');
+  GeneratedTextColumn _city;
+  @override
+  GeneratedTextColumn get city => _city ??= _constructCity();
+  GeneratedTextColumn _constructCity() {
+    return GeneratedTextColumn('city', $tableName, false,
         minTextLength: 1, maxTextLength: 50);
   }
 
   @override
-  List<GeneratedColumn> get $columns => [id, userId, phoneNumber, email];
+  List<GeneratedColumn> get $columns =>
+      [id, userId, phoneNumber, fullName, city];
   @override
   $UsersTable get asDslTable => this;
   @override
@@ -265,11 +310,17 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     } else if (isInserting) {
       context.missing(_phoneNumberMeta);
     }
-    if (data.containsKey('email')) {
-      context.handle(
-          _emailMeta, email.isAcceptableOrUnknown(data['email'], _emailMeta));
+    if (data.containsKey('full_name')) {
+      context.handle(_fullNameMeta,
+          fullName.isAcceptableOrUnknown(data['full_name'], _fullNameMeta));
     } else if (isInserting) {
-      context.missing(_emailMeta);
+      context.missing(_fullNameMeta);
+    }
+    if (data.containsKey('city')) {
+      context.handle(
+          _cityMeta, city.isAcceptableOrUnknown(data['city'], _cityMeta));
+    } else if (isInserting) {
+      context.missing(_cityMeta);
     }
     return context;
   }

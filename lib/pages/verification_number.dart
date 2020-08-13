@@ -1,14 +1,17 @@
 //import 'package:flutter/gestures.dart';
+import 'dart:convert';
+
+import 'package:digitAT/api/url.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:digitAT/models/user.dart';
 import'package:flutter_verification_code_input/flutter_verification_code_input.dart';
-
-import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 //import 'package:flutter/services.dart';
 
 class VerificationNumber extends StatefulWidget {
@@ -21,6 +24,7 @@ class VerificationNumber extends StatefulWidget {
 class _VerificationNumberState extends State<VerificationNumber> {
   User currentUser=new User.init().getCurrentUser();
    var _code;
+   bool load=false;
 
   final GlobalKey<FormState> _formKey =  GlobalKey<FormState>();
     final GlobalKey<ScaffoldState> _scaffoldstate =
@@ -38,7 +42,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
           leading: IconButton(
             icon: Icon(Icons.close,color: Colors.black),
             onPressed: (){    
-              Navigator.of(context).pushNamed('/phone');
+              //Navigator.of(context).pushNamed('/phone');
             },
           ),
         ),
@@ -111,11 +115,14 @@ class _VerificationNumberState extends State<VerificationNumber> {
                   Container(
                     margin: EdgeInsets.only(top:40.0,bottom: 20.0,right:30.0,left: 30.0 ),
                     height: 40,
-                    child: RaisedButton(
+                    child:load?CircularProgressIndicator(): RaisedButton(
                       color: Theme.of(context).accentColor,
                       onPressed: (){
                       
                         if(_formKey.currentState.validate()){
+                          setState(() {
+                            load=true;
+                          });
                        verifyOTP();
                         }
                         else{
@@ -252,7 +259,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
           (await _auth.signInWithCredential(credential)).user;
       final FirebaseUser currentUser = await _auth.currentUser();
       assert(user.uid == currentUser.uid);
-      verifiedSuccess(user.phoneNumber);
+     await verifiedSuccess(user.phoneNumber);
     } catch (e) {
       handleError(e);
     }
@@ -288,9 +295,50 @@ class _VerificationNumberState extends State<VerificationNumber> {
     int maskLength = userPhoneNumber.length - 3;
     return userPhoneNumber.replaceRange(4, maskLength, '*' * maskLength);
   }
-  void verifiedSuccess(String phone) {
-    Navigator.of(context).pushNamed('/createAcount',arguments: [0,phone]);
+  Future verifiedSuccess(String phone) async {
+    int _id;
+    SharedPreferences preferences= await SharedPreferences.getInstance();
+     _id= await _createLead( phone);
+     preferences.setInt('id', _id);
+     preferences.setString('name',phone);
+    Navigator.of(context).pushNamed('/home',arguments: [phone,_id,'Harare']);
          print("Successfully Verified user number");
+  }
+   Future <int>_createLead( String phoneNumber) async {
+//  showAlertDialog(context);
+  int result=0;
+    final http.Response response = await http.post(
+        '${webhook}crm.lead.add',
+         headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+         
+        "fields":{  "TITLE": "digitAT", 
+                    "NAME": " ", 
+                    "SECOND_NAME": " ", 
+                    "LAST_NAME": " ", 
+                    "STATUS_ID": "NEW", 
+                    "OPENED": "Y", 
+                    "ASSIGNED_BY_ID": 1, 
+                    "ADDRESS_CITY":"Harare",
+                    "PHONE": [ { "VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
+       }
+       })
+        
+         ).catchError((error) => print('///////////////////////error'+error));
+       if(response.statusCode==200)
+       {  
+         setState(() {
+           load=false;
+         }); 
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           result=responseBody['result'];
+        print('******************************'+result.toString());
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       return result;
   }
 
 }

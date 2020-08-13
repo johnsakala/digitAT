@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/medecine.dart';
 import 'package:digitAT/models/medicine_list.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class _PharmaciesState extends State<Pharmacies> {
   Future< List< dynamic >> _fetchPharmacies() async {
 //  showAlertDialog(context);
     final http.Response response = await http
-        .get('https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/department.get?PARENT=32',
+        .get('${webhook}department.get?PARENT=32',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     

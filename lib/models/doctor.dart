@@ -9,8 +9,10 @@ class Doctor{
   String userId;
   Color color;
   String avatar;
+  String profession;
 
   Doctor.init();
+  Doctor.min(this.name,this.profession,this.avatar,this.state,this.color,this.userId, this.description);
   Doctor(this.name,this.description,this.avatar,this.state,this.color,this.userId);
   Doctor getCurrentDoctor() {
     return Doctor("Dr.Alina james", "B.Sc DDVL Demilitologist",

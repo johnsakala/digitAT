@@ -20,6 +20,8 @@ class App {
     return _height * v;
   }
 
+
+
   double appWidth(double v) {
     return _width * v;
   }

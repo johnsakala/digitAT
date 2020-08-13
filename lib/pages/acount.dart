@@ -1,6 +1,8 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
@@ -24,11 +26,12 @@ class _AcountWidgetState extends State<AcountWidget> {
     List<dynamic> _user= [];
   String fullname; 
   void _getResults() async{
-      _user= await _fetchUser(this.widget.acountInfos);
-   await setId(_user[0]['ID']);
+ print('**********************'+this.widget.acountInfos.toString());
+  /*    _user= await _fetchUser(this.widget.acountInfos);
+   await setId(int.parse(_user[0]['ID']));
    await setCity(_user[0]['PERSONAL_CITY']);
-   await setName(_user[0]['NAME']+" "+_user[0]['LAST_NAME']);
-    print('**********************'+_user[0]['NAME']);
+   await setName(_user[0]['NAME']+" "+_user[0]['LAST_NAME']);*/
+   
   }
 
 
@@ -37,9 +40,9 @@ class _AcountWidgetState extends State<AcountWidget> {
     preferences.setString("city", city);
 
   }
-  setId(String id)async{
+  setId(int id)async{
     SharedPreferences preferences= await SharedPreferences.getInstance();
-    preferences.setString("id", id);
+    preferences.setInt("id", id);
 
   }
     setName(String name)async{
@@ -59,7 +62,7 @@ class _AcountWidgetState extends State<AcountWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:FutureBuilder(builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot){
+      body:FutureBuilder(builder: (BuildContext context, AsyncSnapshot snapshot){
       if(snapshot.hasData)
       {
      return SingleChildScrollView(
@@ -74,7 +77,7 @@ class _AcountWidgetState extends State<AcountWidget> {
                color: Theme.of(context).accentColor,
               ),
               child: Row(
-                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Container(
                     alignment: Alignment.topRight,
@@ -102,7 +105,7 @@ class _AcountWidgetState extends State<AcountWidget> {
                        mainAxisAlignment:  MainAxisAlignment.center,
                               children: <Widget>[
 
-                           Text("${snapshot.data[0]['NAME']+' '+snapshot.data[0]['LAST_NAME']}",
+                           Text("${snapshot.data['NAME']+' '+snapshot.data['LAST_NAME']}",
                            style:TextStyle(color:Theme.of(context).primaryColor,
                            fontSize: 19.0,
                            fontFamily: 'Poppins',
@@ -119,7 +122,7 @@ class _AcountWidgetState extends State<AcountWidget> {
                              children: <Widget>[
                            Icon(Icons.phone,
                                 color:Theme.of(context).primaryColor),
-                          Text("${snapshot.data[0]['PERSONAL_PHONE']}",
+                          Text("${snapshot.data['PHONE'][0]['VALUE']}",
                               style:TextStyle(color:Theme.of(context).primaryColor,
                               fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
                          ],),  
@@ -139,7 +142,7 @@ class _AcountWidgetState extends State<AcountWidget> {
                         color: Theme.of(context).primaryColor
                     ),
                     onPressed: (){
-                      Profile profile= Profile(snapshot.data[0]['ID'], snapshot.data[0]['NAME'], snapshot.data[0]['LAST_NAME'], snapshot.data[0]['PERSONAL_PHONE'], snapshot.data[0]['PERSONAL_CITY']);
+                      Profile profile= Profile(int.parse(snapshot.data['ID']), snapshot.data['NAME'], snapshot.data['LAST_NAME'], snapshot.data['PHONE'][0]['VALUE'], snapshot.data['ADDRESS_CITY']);
                        Navigator.of(context).pushNamed('/editAcount',arguments: profile);
                     },),
                   ),
@@ -228,16 +231,16 @@ Widget _dropDownListe(Icon icon ,String title,double borderWidth,String route,Bu
     ),
   );
 }
-Future< List< dynamic >> _fetchUser(accountInfos) async {
+Future _fetchUser(accountInfos) async {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.get?ID=$accountInfos',
+      '${webhook}crm.lead.get?ID=$accountInfos',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
-    List< dynamic> result=[];
+    var result;
     if (response.statusCode == 200) {
       try {
         if (responseBody["result"] != null) {
@@ -245,7 +248,7 @@ Future< List< dynamic >> _fetchUser(accountInfos) async {
       result = 
       responseBody["result"];
          // result= serverResponse.result;
-   
+    print('-----------------'+result.toString());
         
           
         } else {
@@ -273,7 +276,7 @@ Widget ball(String image,Color color){
       decoration: BoxDecoration(
         color:color,
         borderRadius: BorderRadius.circular(100.0),
-        image: DecorationImage(image:Image.network(image).image, fit: BoxFit.cover,
+        image: DecorationImage(image:NetworkImage(image), fit: BoxFit.cover,
         ),
       ),
     );

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:digitAT/api/url.dart';
+import 'package:path/path.dart';
 import 'package:digitAT/models/profile.dart';
 import 'package:http/http.dart' as http;
 import 'package:dropdown_formfield/dropdown_formfield.dart';
@@ -8,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class EditAcount extends StatefulWidget {
   final Profile profile;
   const EditAcount({Key key, this.profile}):super(key:key);
@@ -22,7 +26,7 @@ class _EditAcountState extends State<EditAcount> {
   File _image;
      final _formKey = GlobalKey<FormState>();
     int id;
-    String city, gender, name,lname, phoneNumber;
+    String city,baseImage, gender, name,lname, phoneNumber;
     bool  _result;
     var newFormat = DateFormat("dd-MMM-yyyy");
    bool _load= false;
@@ -31,17 +35,34 @@ class _EditAcountState extends State<EditAcount> {
     final GlobalKey<ScaffoldState> _scaffoldstate =
       new GlobalKey<ScaffoldState>();
   
+  var imageJson;
+  
   Future _getPhoto() async{
     print('picking image');
+     
     final image= await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
       _image=image;
+           final bytes = _image.readAsBytesSync();
+    String img64 = base64Encode(bytes);
+    baseImage=img64;
+    imageJson=baseImage;
+    
     });
-    print('image path ////////////////'+_image.toString());
+   
+    print('image path //////////////'+imageJson);
   }
 
 
- 
+ uploadPhoto(File _image) async{
+ final Directory dir= await getApplicationDocumentsDirectory();
+final String path = dir.path;
+final String fileName = basename(_image.path);
+final File localImage = await _image.copy('$path/$fileName');
+SharedPreferences pref= await SharedPreferences.getInstance();
+pref.setString('profilePic', localImage.path);
+  print(dir.listSync());
+}
     @override
   void initState() {
     // TODO: implement initState
@@ -50,7 +71,7 @@ class _EditAcountState extends State<EditAcount> {
     city= widget.profile.city;
     name=widget.profile.name;
     lname=widget.profile.lname;
-    id=int.parse(widget.profile.id);
+    id=widget.profile.id;
   }
 
   @override
@@ -496,15 +517,15 @@ class _EditAcountState extends State<EditAcount> {
                     _load=true;
                   });
                     
-                  
+                  // await uploadPhoto(_image);
                  _result=await _editAccount(gender,name,lname,city,phoneNumber,birthDate);
-
+                        //  await _createContact(gender, name, lname, city, phoneNumber, birthDate);
                   User.init().setCurrentUser(name+' '+lname, phoneNumber, _result.toString());
                   
                     /* Navigator.of(context).pushNamed('/home', arguments:[lname]).then((value){
                    Navigator.of(context).pop();
                     });*/
-                    //await uploadPhoto( _image,_image.uri.toFilePath(), _result);
+                    
                     if(_result){
                     Navigator.of(context).pushNamed('/home',arguments:[name+' '+lname,id,city]);
 
@@ -539,10 +560,65 @@ class _EditAcountState extends State<EditAcount> {
   }
 
    Future <bool>_editAccount(String g, String name, String lname, String city, String phoneNumber, DateTime dob) async {
-//  showAlertDialog(context);
+
   bool result=false;
     final http.Response response = await http.post(
-        'https://internationaltechnology.bitrix24.com/rest/1/0w1pl1vx3qvxg57c/user.update?ID=${widget.profile.id}&NAME=$name&LAST_NAME=$lname&PERSONAL_PHONE=$phoneNumber&PERSONAL_CITY=$city&PERSONAL_BIRTHDAY=${dob.toString()}' ).catchError((error) => print('///////////////////////error'+error));
+        '${webhook}crm.lead.update',
+         headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+         
+         
+                    "ID":widget.profile.id,
+                    "TITLE": "digitAT", 
+                    "NAME": name, 
+                    "SECOND_NAME": " ", 
+                    "LAST_NAME": lname, 
+                    "STATUS_ID": "NEW", 
+                    "OPENED": "Y", 
+                    "ASSIGNED_BY_ID": 1, 
+                    "PHONE": [ { "VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
+       
+       })
+        
+         ).catchError((error) => print('///////////////////////error'+error));
+       if(response.statusCode==200)
+       {  
+         setState(() {
+           _load=false;
+         }); 
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           result=responseBody['result'];
+        print(result);
+ 
+       }
+       else{
+         print("***********************lead"+response.statusCode.toString());
+       }
+       return result;
+  }
+
+/*Future <int>_createContact(String g, String name, String lname, String city, String phoneNumber, DateTime dob) async {
+
+  int result=0;
+    final http.Response response = await http.post(
+        '${webhook}crm.contact.add',
+         headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+         
+         "fields":{ 
+                    "NAME": name, 
+                    "LAST_NAME": lname, 
+                    "OPENED": "Y", 
+                    "ASSIGNED_BY_ID": 1, 
+                    "TYPE_ID": "CLIENT",
+                    "BIRTHDATE":dob.toString(),
+                    "ADDRESS_CITY":city,
+                
+                            "PHONE": [ { "VALUE":phoneNumber, "VALUE_TYPE": "WORK" } ] 
+       }
+       })
+        
+         ).catchError((error) => print('///////////////////////error'+error));
        if(response.statusCode==200)
        {  
          setState(() {
@@ -557,7 +633,7 @@ class _EditAcountState extends State<EditAcount> {
          print(response.statusCode);
        }
        return result;
-  }
+  }*/
 
 
 

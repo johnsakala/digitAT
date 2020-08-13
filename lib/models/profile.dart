@@ -1,6 +1,6 @@
 class Profile{
 
-    String id;
+    int id;
   String name;
   String lname;
   String phone;
@@ -9,5 +9,6 @@ class Profile{
 
   Profile.init();
   Profile.min(this.id,this.name,this.city);
+  Profile.first(this.id,this.name,this.phone,this.city);
   Profile(this.id,this.name,this.lname,this.phone,this.city);
 }
