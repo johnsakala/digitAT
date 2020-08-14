@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -20,34 +21,63 @@ class _SignUpState extends State<SignUp> {
 final GoogleSignIn googleSignIn = GoogleSignIn();
 var _user;
  
-  Map userProfile;
-  
+  bool isLoggedIn = false;
+  bool isLoading = false;
+  var profileData;
 
-Future login() async {
-  final facebookLogin = FacebookLogin();
-  final facebookLoginResult = await facebookLogin.logIn(['email']);
+  var facebookLogin = FacebookLogin();
 
-  print(facebookLoginResult.accessToken);
-  print(facebookLoginResult.accessToken.token);
-  print(facebookLoginResult.accessToken.expires);
-  print(facebookLoginResult.accessToken.permissions);
-  print(facebookLoginResult.accessToken.userId);
-  print(facebookLoginResult.accessToken.isValid());
 
-  print(facebookLoginResult.errorMessage);
-  print(facebookLoginResult.status);
+  void onLoginStatusChanged(bool isLoggedIn, {profileData}) {
+    setState(() {
+      isLoading = false;
+      this.isLoggedIn = isLoggedIn;
+      this.profileData = profileData;
+    });
+  }
 
-  final token = facebookLoginResult.accessToken.token;
+   Future initiateFacebookLogin() async {
+    setState(() {
+      isLoading = true;
+    });
+    var facebookLoginResult =
+        await facebookLogin.logIn(['email', 'public_profile']);
 
-  /// for profile details also use the below code
-  final graphResponse = await http.get(
-      'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=$token');
-  final profile = json.decode(graphResponse.body);
-  setState(() {
-    userProfile=profile;
-  });
-  print(profile);
-}
+    switch (facebookLoginResult.status) {
+      case FacebookLoginStatus.error:
+        onLoginStatusChanged(false);
+        break;
+      case FacebookLoginStatus.cancelledByUser:
+        onLoginStatusChanged(false);
+        break;
+      case FacebookLoginStatus.loggedIn:
+       final token = facebookLoginResult.accessToken.token;
+
+       print('*******************'+token.toString());
+        var graphResponse = await http.get(
+            'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email,picture.height(200)&access_token=${facebookLoginResult.accessToken.token}');
+
+        var profile = json.decode(graphResponse.body);
+        print(profile.toString());
+       
+        onLoginStatusChanged(true, profileData: profile);
+        AuthCredential credential= FacebookAuthProvider.getCredential(accessToken: token);
+
+    // this line do auth in firebase with your facebook credential.
+   final AuthResult authResult = await _auth.signInWithCredential(credential);
+  final FirebaseUser user = authResult.user;
+  assert(!user.isAnonymous);
+  assert(await user.getIdToken() != null);
+
+  final FirebaseUser currentUser = await _auth.currentUser();
+  assert(user.uid == currentUser.uid);
+    setState(() {
+      
+      profileData=user;
+    });
+        break;
+    }
+  }
 
 Future<String> signInWithGoogle() async {
   final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
@@ -151,9 +181,15 @@ Future<String> signInWithGoogle() async {
                 elevation: 0.2,
                 color: Theme.of(context).primaryColor,
                 onPressed: () async{
-                  await login();
-                  int response = await _createLead('',userProfile['name']);
-                   Navigator.of(context).pushNamed("/home",arguments: [userProfile['name'],response,'Harare']);
+                  initiateFacebookLogin().whenComplete(() async{
+                        SharedPreferences preferences= await SharedPreferences.getInstance();
+                    print(profileData);
+
+                  int response = await _createLead(profileData.email,profileData.displayName,'facebook');
+                  preferences.setInt('id', response);
+                    preferences.setString('name',_user.displayName);
+                   Navigator.of(context).pushNamed("/home",arguments: [profileData.displayName,response,'Harare']);
+                });
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30.0),
@@ -195,7 +231,11 @@ Future<String> signInWithGoogle() async {
                 color: Theme.of(context).primaryColor,
                 onPressed: (){
                   signInWithGoogle().whenComplete(() async{
-                    int response= await _createLead(_user.email,'');
+                        SharedPreferences preferences= await SharedPreferences.getInstance();
+
+                    int response= await _createLead(_user.email,_user.displayName,"gmail");
+                    preferences.setInt('id', response);
+                    preferences.setString('name',_user.displayName);
                          Navigator.of(context).pushNamed("/home",arguments: [_user.displayName,response,'Harare']);
 
                           });
@@ -269,7 +309,7 @@ Future<String> signInWithGoogle() async {
     );
   }
 
-  Future <int>_createLead( String email, String name) async {
+  Future <int>_createLead( String email, String name,String type) async {
 //  showAlertDialog(context);
   int result=0;
     final http.Response response = await http.post(
@@ -277,16 +317,18 @@ Future<String> signInWithGoogle() async {
          headers: {"Content-Type": "application/json"},
        body: jsonEncode({
          
-        "fields":{  "TITLE": "digitAT", 
+        "fields":{  "TITLE": "digitAT $type", 
                     "NAME": name, 
                     "SECOND_NAME": " ", 
                     "LAST_NAME": " ", 
                     "STATUS_ID": "NEW", 
                     "OPENED": "Y", 
+                    "HAS_PHONE": "Y",
+                    "HAS_EMAIL": "Y",
                     "ASSIGNED_BY_ID": 1, 
                     "ADDRESS_CITY":"Harare",
-                    "EMAIL":email,
-                    "PHONE": [ { "VALUE": "040235", "VALUE_TYPE": "WORK" } ] 
+                    "EMAIL":  [ { "VALUE": email, "VALUE_TYPE": "WORK" } ],
+                    "PHONE": [ { "VALUE": "0404", "VALUE_TYPE": "WORK" } ] 
        }
        })
         

@@ -26,7 +26,7 @@ class _EditAcountState extends State<EditAcount> {
   File _image;
      final _formKey = GlobalKey<FormState>();
     int id;
-    String city,baseImage, gender, name,lname, phoneNumber;
+    String city,baseImage, gender, name,sname,lname,email, phoneNumber;
     bool  _result;
     var newFormat = DateFormat("dd-MMM-yyyy");
    bool _load= false;
@@ -70,8 +70,10 @@ pref.setString('profilePic', localImage.path);
     phoneNumber= widget.profile.phone;
     city= widget.profile.city;
     name=widget.profile.name;
+    sname=widget.profile.sname;
     lname=widget.profile.lname;
     id=widget.profile.id;
+    email= widget.profile.email;
   }
 
   @override
@@ -143,6 +145,30 @@ pref.setString('profilePic', localImage.path);
                          }
                              return null;
                                   },
+                            )),
+                            Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                          
+                            ),
+                            child:
+                            
+                            TextFormField(
+                              initialValue: sname,
+                                  decoration: InputDecoration(
+                               labelText: 'Second Name'
+                                            ),
+                                            
+                             onChanged: (value){
+                               setState(() {
+                                 sname=value;
+                               });  
+                               },     
+                        
                             )),
                             Container(
                             height: 100.0,
@@ -314,7 +340,7 @@ pref.setString('profilePic', localImage.path);
                   valueField: 'value',
                 ),
                           ),
-                          Container(
+                          widget.profile.phone=="0404"?Container(
                             height: 100.0,
                             margin:  const EdgeInsets.only(top: 12.0),
                             padding: const EdgeInsets.only(left: 12.0,right: 12.0),
@@ -324,7 +350,89 @@ pref.setString('profilePic', localImage.path);
                               color: Colors.grey.withOpacity(0.4)                           
                             ),
                             child:  TextFormField(
-                             initialValue: widget.profile.phone==null?"":'${widget.profile.phone}',
+                             initialValue: '${widget.profile.email}',
+                              keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                  
+                               labelText: 'Email'
+                                            ),
+                               onChanged: (value){
+                                phoneNumber=value; 
+                               },             
+                              
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Email can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )
+                          ):Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                           
+                            ),
+                            child:  TextFormField(
+                             initialValue: phoneNumber,
+                              keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                  
+                               labelText: 'Phone Number'
+                                            ),
+                               onChanged: (value){
+                                phoneNumber=value; 
+                               },             
+                              
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Phone Number can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )
+                          ),
+                          widget.profile.phone!="0404"?Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                           
+                            ),
+                            child:  TextFormField(
+                             
+                              keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                  
+                               labelText: 'Email'
+                                            ),
+                               onChanged: (value){
+                                phoneNumber=value; 
+                               },             
+                              
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Email can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )
+                          ):Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                           
+                            ),
+                            child:  TextFormField(
+                             
                               keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
                                   

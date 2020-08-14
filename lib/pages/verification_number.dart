@@ -297,6 +297,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
   }
   Future verifiedSuccess(String phone) async {
     int _id;
+     print('*********************** $phone');
     SharedPreferences preferences= await SharedPreferences.getInstance();
      _id= await _createLead( phone);
      preferences.setInt('id', _id);
@@ -312,7 +313,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
          headers: {"Content-Type": "application/json"},
        body: jsonEncode({
          
-        "fields":{  "TITLE": "digitAT", 
+        "fields":{  "TITLE": "digitAT phone", 
                     "NAME": " ", 
                     "SECOND_NAME": " ", 
                     "LAST_NAME": " ", 
@@ -320,6 +321,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
                     "OPENED": "Y", 
                     "ASSIGNED_BY_ID": 1, 
                     "ADDRESS_CITY":"Harare",
+                    "EMAIL":  [ { "VALUE": "me@digitat.info", "VALUE_TYPE": "WORK" } ],
                     "PHONE": [ { "VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
        }
        })

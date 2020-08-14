@@ -24,7 +24,7 @@ class AcountWidget extends StatefulWidget {
 class _AcountWidgetState extends State<AcountWidget> {
   
     List<dynamic> _user= [];
-  String fullname; 
+  String fullname, fname=' ', sname=' ', lname=' '; 
   void _getResults() async{
  print('**********************'+this.widget.acountInfos.toString());
   /*    _user= await _fetchUser(this.widget.acountInfos);
@@ -76,11 +76,13 @@ class _AcountWidgetState extends State<AcountWidget> {
                borderRadius: BorderRadius.circular(16.0),
                color: Theme.of(context).accentColor,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              child:Stack(
+                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Container(
                     alignment: Alignment.topRight,
+                    height:60,
+                    width:60,
                     padding: const EdgeInsets.only(top:6.0),
                     child:FlatButton(
                      child:Icon(Icons.edit,size: 25,
@@ -104,7 +106,7 @@ class _AcountWidgetState extends State<AcountWidget> {
                            child: Row(
                        mainAxisAlignment:  MainAxisAlignment.center,
                               children: <Widget>[
-
+                    
                            Text("${snapshot.data['NAME']+' '+snapshot.data['LAST_NAME']}",
                            style:TextStyle(color:Theme.of(context).primaryColor,
                            fontSize: 19.0,
@@ -120,9 +122,12 @@ class _AcountWidgetState extends State<AcountWidget> {
                              Row(
                              mainAxisAlignment: MainAxisAlignment.center,
                              children: <Widget>[
-                           Icon(Icons.phone,
+                           snapshot.data['PHONE'][0]['VALUE']=="0404"?Icon(Icons.email,
+                                color:Theme.of(context).primaryColor):Icon(Icons.phone,
                                 color:Theme.of(context).primaryColor),
-                          Text("${snapshot.data['PHONE'][0]['VALUE']}",
+                          snapshot.data['PHONE'][0]['VALUE']=="0404"?Text("${snapshot.data['EMAIL'][0]['VALUE']}",
+                              style:TextStyle(color:Theme.of(context).primaryColor,
+                              fontFamily: 'Poppins',fontWeight: FontWeight.bold),):Text("${snapshot.data['PHONE'][0]['VALUE']}",
                               style:TextStyle(color:Theme.of(context).primaryColor,
                               fontFamily: 'Poppins',fontWeight: FontWeight.bold),),
                          ],),  
@@ -137,12 +142,15 @@ class _AcountWidgetState extends State<AcountWidget> {
                   Container(
                     alignment: Alignment.topLeft,
                     padding: const EdgeInsets.only(top:12.0),
+                    height:60,
+                    width:60,
                     child:FlatButton(
                       child:Icon(Icons.edit,size: 25,
                         color: Theme.of(context).primaryColor
                     ),
                     onPressed: (){
-                      Profile profile= Profile(int.parse(snapshot.data['ID']), snapshot.data['NAME'], snapshot.data['LAST_NAME'], snapshot.data['PHONE'][0]['VALUE'], snapshot.data['ADDRESS_CITY']);
+                     splitNames(snapshot.data['NAME']);
+                      Profile profile= Profile(int.parse(snapshot.data['ID']), fname,sname,lname, snapshot.data['PHONE'][0]['VALUE'],snapshot.data['ADDRESS_CITY'], snapshot.data['EMAIL'][0]['VALUE']);
                        Navigator.of(context).pushNamed('/editAcount',arguments: profile);
                     },),
                   ),
@@ -269,7 +277,38 @@ Future _fetchUser(accountInfos) async {
     }
     return result;
   }
-
+void splitNames(String name){
+  List<String> names= name.split(" ");
+  switch(names.length){
+    case 1:{
+      setState(() {
+        fname=names[0];
+      });
+    }
+    break;
+    case 2: {
+       setState(() {
+        fname=names[0];
+        lname=names[1];
+        sname='';
+      });
+    }
+    break;
+    case 3: {
+      setState(() {
+        fname=names[0];
+        sname=names[1];
+        lname=names[2];
+      });
+    }
+    break;
+    default:{
+      setState(() {
+        
+      });
+    }
+  }
+}
 Widget ball(String image,Color color){
     return Container(
       height: 90,width: 90.0,
