@@ -1,4 +1,5 @@
 import 'package:digitAT/api/url.dart';
+import 'package:digitAT/config/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/doctor.dart' as model;
 import 'package:digitAT/models/user.dart';
@@ -147,7 +148,7 @@ class _DoctorsListState extends State<DoctorsList> {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      '${webhook}user.get.json?UF_DEPARTMENT=30',
+      '${webhook}user.get.json?UF_DEPARTMENT=$doctorsId',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);

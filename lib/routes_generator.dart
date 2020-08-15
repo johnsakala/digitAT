@@ -84,7 +84,7 @@ class RouteGenerator {
         case '/prescription':
         return MaterialPageRoute(builder: (_) => Prescription());
         case '/payments':
-        return MaterialPageRoute(builder: (_) => Payment(payment: args,));
+        return MaterialPageRoute(builder: (_) => Paymnt(payment: args,));
 
 
 

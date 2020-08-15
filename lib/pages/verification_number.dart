@@ -302,6 +302,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
      _id= await _createLead( phone);
      preferences.setInt('id', _id);
      preferences.setString('name',phone);
+     preferences.setString('city','Harare');
     Navigator.of(context).pushNamed('/home',arguments: [phone,_id,'Harare']);
          print("Successfully Verified user number");
   }
@@ -313,7 +314,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
          headers: {"Content-Type": "application/json"},
        body: jsonEncode({
          
-        "fields":{  "TITLE": "digitAT phone", 
+        "fields":{  "TITLE": "digitAT Phone", 
                     "NAME": " ", 
                     "SECOND_NAME": " ", 
                     "LAST_NAME": " ", 

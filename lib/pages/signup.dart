@@ -23,11 +23,61 @@ var _user;
  
   bool isLoggedIn = false;
   bool isLoading = false;
+  bool isloading=false;
   var profileData;
-
+ String fname,sname,lname;
   var facebookLogin = FacebookLogin();
 
 
+          var bodyProgress = new Container(
+            child: new Stack(
+              children: <Widget>[
+                
+                new Container(
+                  alignment: AlignmentDirectional.center,
+                  decoration: new BoxDecoration(
+                    color: Colors.blue,
+                  ),
+                  child: new Container(
+                    decoration: new BoxDecoration(
+                      color: Colors.blue[200],
+                      borderRadius: new BorderRadius.circular(10.0)
+                    ),
+                    width: 300.0,
+                    height: 200.0,
+                    alignment: AlignmentDirectional.center,
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Center(
+                          child: new SizedBox(
+                            height: 50.0,
+                            width: 50.0,
+                            child: new CircularProgressIndicator(
+                              value: null,
+                              strokeWidth: 7.0,
+                            ),
+                          ),
+                        ),
+                        new Container(
+                          margin: const EdgeInsets.only(top: 25.0),
+                          child: new Center(
+                            child: new Text(
+                              "Please wait, loading..",
+                              style: new TextStyle(
+                                color: Colors.white
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
   void onLoginStatusChanged(bool isLoggedIn, {profileData}) {
     setState(() {
       isLoading = false;
@@ -55,7 +105,7 @@ var _user;
 
        print('*******************'+token.toString());
         var graphResponse = await http.get(
-            'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email,picture.height(200)&access_token=${facebookLoginResult.accessToken.token}');
+            'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email,picture.height(200).width(200)&access_token=${facebookLoginResult.accessToken.token}');
 
         var profile = json.decode(graphResponse.body);
         print(profile.toString());
@@ -108,7 +158,7 @@ Future<String> signInWithGoogle() async {
     
       return Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
-        body: ListView(
+        body: isloading?bodyProgress:ListView(
           
           children: [
             Container(
@@ -182,13 +232,20 @@ Future<String> signInWithGoogle() async {
                 color: Theme.of(context).primaryColor,
                 onPressed: () async{
                   initiateFacebookLogin().whenComplete(() async{
+                     setState((){
+                    isloading=true;
+                    });
                         SharedPreferences preferences= await SharedPreferences.getInstance();
                     print(profileData);
-
-                  int response = await _createLead(profileData.email,profileData.displayName,'facebook');
+                    List url=profileData.photoUrl.split('/');
+                    
+                    splitNames(profileData.displayName);
+                  int response = await _createLead(profileData.email,'https://graph.facebook.com/${url[3]}/picture?width=200',fname,sname,lname,'Facebook');
                   preferences.setInt('id', response);
-                    preferences.setString('name',_user.displayName);
-                   Navigator.of(context).pushNamed("/home",arguments: [profileData.displayName,response,'Harare']);
+                    preferences.setString('name',fname);
+                    
+                    preferences.setString('city','Harare');
+                   Navigator.of(context).pushNamed("/home",arguments: [fname,response,'Harare']);
                 });
                 },
                 shape: RoundedRectangleBorder(
@@ -231,12 +288,16 @@ Future<String> signInWithGoogle() async {
                 color: Theme.of(context).primaryColor,
                 onPressed: (){
                   signInWithGoogle().whenComplete(() async{
+                    setState((){
+                    isloading=true;
+                    });
                         SharedPreferences preferences= await SharedPreferences.getInstance();
-
-                    int response= await _createLead(_user.email,_user.displayName,"gmail");
+                    splitNames(_user.displayName);
+                    int response= await _createLead(_user.email,_user.photoUrl,fname, sname,lname,"Gmail");
                     preferences.setInt('id', response);
-                    preferences.setString('name',_user.displayName);
-                         Navigator.of(context).pushNamed("/home",arguments: [_user.displayName,response,'Harare']);
+                    preferences.setString('name',fname);
+                    preferences.setString('city','Harare');
+                         Navigator.of(context).pushNamed("/home",arguments: [fname,response,'Harare']);
 
                           });
                 },
@@ -308,23 +369,57 @@ Future<String> signInWithGoogle() async {
         ),
     );
   }
+  void splitNames(String name){
+  List<String> names= name.split(" ");
+  switch(names.length){
+    case 1:{
+      setState(() {
+        fname=names[0];
+      });
+    }
+    break;
+    case 2: {
+       setState(() {
+        fname=names[0];
+        lname=names[1];
+        sname='';
+      });
+    }
+    break;
+    case 3: {
+      setState(() {
+        fname=names[0];
+        sname=names[1];
+        lname=names[2];
+      });
+    }
+    break;
+    default:{
+      setState(() {
+        
+      });
+    }
+  }
+}
 
-  Future <int>_createLead( String email, String name,String type) async {
+  Future <int>_createLead( String email, String photoUrl, String fname,String sname,String lname, String type) async {
 //  showAlertDialog(context);
   int result=0;
+  
     final http.Response response = await http.post(
         '${webhook}crm.lead.add',
          headers: {"Content-Type": "application/json"},
        body: jsonEncode({
          
         "fields":{  "TITLE": "digitAT $type", 
-                    "NAME": name, 
-                    "SECOND_NAME": " ", 
-                    "LAST_NAME": " ", 
+                    "NAME": fname, 
+                    "SECOND_NAME":sname, 
+                    "LAST_NAME": lname, 
                     "STATUS_ID": "NEW", 
                     "OPENED": "Y", 
                     "HAS_PHONE": "Y",
                     "HAS_EMAIL": "Y",
+                    "UF_CRM_1597424448103":photoUrl,
                     "ASSIGNED_BY_ID": 1, 
                     "ADDRESS_CITY":"Harare",
                     "EMAIL":  [ { "VALUE": email, "VALUE_TYPE": "WORK" } ],

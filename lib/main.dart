@@ -96,7 +96,7 @@ class AfterSplash extends StatelessWidget {
  
   @override
   Widget build(BuildContext context) {
-    
+    print(id[1]);
     return MaterialApp(
       title: 'digitAT',
       home:id[0]==null?Welcome():TabsWidget(acountInfos: [id[1],id[0],id[2]]),

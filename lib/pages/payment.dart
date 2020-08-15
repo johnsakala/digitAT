@@ -1,29 +1,46 @@
 import 'dart:convert';
-
+import 'package:digitAT/models/medecine.dart';
+import 'package:paynow/paynow.dart';
 import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/payment.dart';
 import 'package:digitAT/models/pharmacist.dart';
 import 'package:digitAT/models/profile.dart';
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-class Payment extends StatefulWidget {
+class Paymnt extends StatefulWidget {
   final Payments payment;
-  const Payment({Key key,this.payment}) : super(key: key);
+  const Paymnt({Key key,this.payment}) : super(key: key);
   @override
   _PaymentState createState() => _PaymentState();
 }
 
-class _PaymentState extends State<Payment> {
+class _PaymentState extends State<Paymnt> {
   Pharmacist officer;
-  String aid, number;
+  String aid, number, paymentMethod;
   bool _loading = false;
+  int _radioValue;
+
+   void _handleRadioValueChange(int value) {
+    setState(() {
+      _radioValue = value;
+  
+      switch (_radioValue) {
+        case 0:
+         paymentMethod = 'ecocash';
+          break;
+        case 1:
+          paymentMethod = 'onemoney';
+          break;
+        
+      }
+    });
+  }
   Future _createPaymentOrder() async {
 //  showAlertDialog(context);
   SharedPreferences preferences= await SharedPreferences.getInstance();
@@ -275,11 +292,29 @@ setState(() {
                              return null;
                                   },
                             )),
+                             Center(child: Text('Select payment metho')),
+                            new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Radio(
+                          value: 0,
+                          groupValue: _radioValue,
+                          onChanged: _handleRadioValueChange,
+                        ),
+                        new Text('EcoCash'),
+                        new Radio(
+                          value: 1,
+                          groupValue: _radioValue,
+                          onChanged: _handleRadioValueChange,
+                        ),
+                        new Text('OneMoney'),
                         SizedBox(height: 25.0,),
                       
                   
                       ]),
-                )],
+                      ])
+                )
+                ],
             ),
         
       );
@@ -320,8 +355,9 @@ setState(() {
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: () async{
-                       await _createTask();
-                       await _createPaymentOrder();
+                        await paynowPayment();
+                       /*await _createTask();
+                       await _createPaymentOrder();*/
                         SharedPreferences preferences= await SharedPreferences.getInstance();
                        int id= preferences.getInt('id');
                        String name= preferences.getString('name');
@@ -387,6 +423,26 @@ setState(() {
             ],
           );
         });
+  }
+  Future paynowPayment() async{
+
+  List <Medecine> medicines= widget.payment.medicines;
+      Paynow paynow = Paynow(integrationKey: "5c8a12c7-0782-463c-bb1e-3c91e2324921", integrationId: "10554", returnUrl: "http://google.com", resultUrl: "http://google.co");
+  Payment payment = paynow.createPayment("Test ${widget.payment.responsibleID}", "payments@digitat.info");
+   
+  for(int i=0; i< medicines.length;i++){
+    payment.add(medicines[i].name, double.parse(medicines[i].price));
+  }
+      InitResponse response = await paynow.sendMobile(payment, "0771111111"); 
+print("/////////////////////////////////"+response.error);
+
+   StatusResponse statusResponse = await paynow.checkTransactionStatus(response.pollUrl);
+
+    if (statusResponse.paid){
+        print("Client Paid");
+    }else{
+        print("Transaction was unsuccessful");
+    }
   }
 
   Future <int>_createDeal(String g, String name, String lname, String city, String phoneNumber, DateTime dob) async {

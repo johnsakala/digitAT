@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:digitAT/models/doc_booking.dart';
+import 'package:digitAT/models/medecine.dart';
+
 import 'package:digitAT/models/payment.dart';
-import 'package:dropdown_formfield/dropdown_formfield.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:digitAT/models/doctor.dart';
@@ -308,7 +310,10 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                      /*  if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+ nameController.text+" "+ emailController.text+" "+ phoneNumberController.text+" "+"payment $aid $number", widget.value.doctor.userId);
+                      Medecine medecine= Medecine("Doctor Booking", "600");
+                     List<Medecine>  list;
+                     list.add(medecine);
+                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+ nameController.text+" "+ emailController.text+" "+ phoneNumberController.text+" "+"payment $aid $number", widget.value.doctor.userId,list);
                       Navigator.of(context).pushNamed("/payments",arguments:payments);
                     },
                     shape: RoundedRectangleBorder(

@@ -54,6 +54,7 @@ dependencies:
   flutter_screenutil: ^0.7.0
   fluttertoast: ^3.1.0
   flutter_launcher_icons: "^0.7.3"
+  paynow: ^1.0.6
 
   flutter_country_picker: ^0.1.6
   mobile_number: ^1.0.2

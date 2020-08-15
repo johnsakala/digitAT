@@ -711,6 +711,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
+  paynow:
+    dependency: "direct main"
+    description:
+      name: paynow
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.6"
   pedantic:
     dependency: transitive
     description:

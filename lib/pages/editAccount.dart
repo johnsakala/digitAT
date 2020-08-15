@@ -76,6 +76,11 @@ pref.setString('profilePic', localImage.path);
     email= widget.profile.email;
   }
 
+  setDetails(String name) async{
+   SharedPreferences pref= await SharedPreferences.getInstance();
+pref.setString('name', name); 
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -351,13 +356,13 @@ pref.setString('profilePic', localImage.path);
                             ),
                             child:  TextFormField(
                              initialValue: '${widget.profile.email}',
-                              keyboardType: TextInputType.number,
+                              
                                   decoration: InputDecoration(
                                   
                                labelText: 'Email'
                                             ),
                                onChanged: (value){
-                                phoneNumber=value; 
+                                email=value; 
                                },             
                               
                         validator: (value) {
@@ -406,13 +411,13 @@ pref.setString('profilePic', localImage.path);
                             ),
                             child:  TextFormField(
                              
-                              keyboardType: TextInputType.number,
+                              
                                   decoration: InputDecoration(
                                   
                                labelText: 'Email'
                                             ),
                                onChanged: (value){
-                                phoneNumber=value; 
+                                email=value; 
                                },             
                               
                         validator: (value) {
@@ -629,18 +634,15 @@ pref.setString('profilePic', localImage.path);
                  _result=await _editAccount(gender,name,lname,city,phoneNumber,birthDate);
                         //  await _createContact(gender, name, lname, city, phoneNumber, birthDate);
                   User.init().setCurrentUser(name+' '+lname, phoneNumber, _result.toString());
-                  
-                    /* Navigator.of(context).pushNamed('/home', arguments:[lname]).then((value){
-                   Navigator.of(context).pop();
-                    });*/
+                  setDetails(name);
+                    
                     
                     if(_result){
-                    Navigator.of(context).pushNamed('/home',arguments:[name+' '+lname,id,city]);
+                    Navigator.of(context).pushNamed('/home',arguments:[name,id,city]);
 
                    }
                    else{
-                    /*final snackBar = SnackBar(content: Text('Failed to update profile, please check your internet connection'));
-                    _scaffoldstate.currentState.showSnackBar(snackBar);*/
+                    
                     print("***************************failed to update");
                    }
                   }
@@ -677,15 +679,16 @@ pref.setString('profilePic', localImage.path);
          
          
                     "ID":widget.profile.id,
+                    "fields":{
                     "TITLE": "digitAT", 
                     "NAME": name, 
-                    "SECOND_NAME": " ", 
+                    "SECOND_NAME": sname, 
                     "LAST_NAME": lname, 
                     "STATUS_ID": "NEW", 
                     "OPENED": "Y", 
                     "ASSIGNED_BY_ID": 1, 
                     "PHONE": [ { "VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
-       
+                    }
        })
         
          ).catchError((error) => print('///////////////////////error'+error));

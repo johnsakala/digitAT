@@ -23,8 +23,8 @@ class AcountWidget extends StatefulWidget {
 
 class _AcountWidgetState extends State<AcountWidget> {
   
-    List<dynamic> _user= [];
-  String fullname, fname=' ', sname=' ', lname=' '; 
+    
+  String fullname, photoUrl='https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU'; 
   void _getResults() async{
  print('**********************'+this.widget.acountInfos.toString());
   /*    _user= await _fetchUser(this.widget.acountInfos);
@@ -65,6 +65,7 @@ class _AcountWidgetState extends State<AcountWidget> {
       body:FutureBuilder(builder: (BuildContext context, AsyncSnapshot snapshot){
       if(snapshot.hasData)
       {
+       
      return SingleChildScrollView(
         child: Column(
           children: <Widget>[
@@ -100,7 +101,8 @@ class _AcountWidgetState extends State<AcountWidget> {
                         
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          ball('https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU', Colors.transparent),
+                          snapshot.data['UF_CRM_1597424448103']==null?ball(photoUrl, Colors.transparent):
+                          ball(snapshot.data['UF_CRM_1597424448103'], Colors.transparent),
                          Expanded(
                           
                            child: Row(
@@ -148,9 +150,13 @@ class _AcountWidgetState extends State<AcountWidget> {
                       child:Icon(Icons.edit,size: 25,
                         color: Theme.of(context).primaryColor
                     ),
-                    onPressed: (){
-                     splitNames(snapshot.data['NAME']);
-                      Profile profile= Profile(int.parse(snapshot.data['ID']), fname,sname,lname, snapshot.data['PHONE'][0]['VALUE'],snapshot.data['ADDRESS_CITY'], snapshot.data['EMAIL'][0]['VALUE']);
+                    onPressed: ()async{
+                      SharedPreferences preferences= await SharedPreferences.getInstance();
+                      preferences.setString('city', snapshot.data['ADDRESS_CITY']);
+                      preferences.setString('city', snapshot.data['NAME']);
+                         
+                  
+                      Profile profile= Profile(int.parse(snapshot.data['ID']),snapshot.data['NAME'],snapshot.data['SECOND_NAME'],snapshot.data['LAST_NAME'], snapshot.data['PHONE'][0]['VALUE'],snapshot.data['ADDRESS_CITY'], snapshot.data['EMAIL'][0]['VALUE']);
                        Navigator.of(context).pushNamed('/editAcount',arguments: profile);
                     },),
                   ),
@@ -277,38 +283,7 @@ Future _fetchUser(accountInfos) async {
     }
     return result;
   }
-void splitNames(String name){
-  List<String> names= name.split(" ");
-  switch(names.length){
-    case 1:{
-      setState(() {
-        fname=names[0];
-      });
-    }
-    break;
-    case 2: {
-       setState(() {
-        fname=names[0];
-        lname=names[1];
-        sname='';
-      });
-    }
-    break;
-    case 3: {
-      setState(() {
-        fname=names[0];
-        sname=names[1];
-        lname=names[2];
-      });
-    }
-    break;
-    default:{
-      setState(() {
-        
-      });
-    }
-  }
-}
+
 Widget ball(String image,Color color){
     return Container(
       height: 90,width: 90.0,

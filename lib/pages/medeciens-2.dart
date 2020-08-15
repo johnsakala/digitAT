@@ -275,7 +275,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                        if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                      Payments payments= Payments('Medicines Order',medicines.toString()+" bill"+bill.toString(), widget.value.pharmacistID);
+                      Payments payments= Payments('Medicines Order',medicines.toString()+" bill"+bill.toString(), widget.value.pharmacistID,medicines);
                       Navigator.of(context).pushNamed("/payments",arguments:payments);
                       /*if(result!=null){
                        print('*********************************order created');

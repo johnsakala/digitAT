@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:digitAT/api/url.dart';
+import 'package:digitAT/config/constants.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:digitAT/api/doctors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class Home extends StatefulWidget {
   final List<dynamic> value;
   const Home( {Key key, this.value}) : super(key: key);
@@ -20,6 +22,19 @@ class Home extends StatefulWidget {
 
 User currentUser=new User.init().getCurrentUser();
 class _HomeState extends State<Home> {
+  String name;
+  @override
+  void initState()  {
+    // TODO: implement initState
+    super.initState();
+ 
+   SharedPreferences.getInstance().then((SharedPreferences sp) {
+      setState((){
+        name = sp.getString('name');
+      });
+      
+   });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +50,7 @@ class _HomeState extends State<Home> {
                //Navigator.of(context).pushNamed('/account',arguments: widget.value[2]);
      },
       child: /*currentUser.name==null?Text('Update Profile'):*/Text(
-                              "${widget.value[0]}",
+                              name,
                               style: TextStyle(
                           
                                 fontFamily: 'Poppins',
@@ -457,7 +472,7 @@ class _HomeState extends State<Home> {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      '${webhook}user.get.json?UF_DEPARTMENT=30&PERSONAL_CITY=${widget.value[1]}',
+      '${webhook}user.get.json?UF_DEPARTMENT=$doctorsId&PERSONAL_CITY=${widget.value[1]}',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
@@ -508,5 +523,6 @@ class _HomeState extends State<Home> {
         children: _doctorsList,
         );
   }
+  
 }
 
