@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:digitAT/config/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class DoctorAcount extends StatefulWidget {
   final Doctor doctor;
   const DoctorAcount({Key key,this.doctor}) : super(key: key);
@@ -11,8 +15,11 @@ class DoctorAcount extends StatefulWidget {
 class _DoctorAcountState extends State<DoctorAcount> {
   Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
   User currentUser = new User.init().getCurrentUser();
+  String _message;
   @override
   Widget build(BuildContext context) {
+      print('----------------'+ widget.doctor.resId);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -22,7 +29,8 @@ class _DoctorAcountState extends State<DoctorAcount> {
               color:Theme.of(context).primaryColor
           ),
           onPressed: (){
-            Navigator.of(context).pop();
+           //Navigator.of(context).pushNamed("/doctors");
+           Navigator.of(context).pop();
           },
         ),
         title: Text(
@@ -119,14 +127,26 @@ class _DoctorAcountState extends State<DoctorAcount> {
                                   color:Theme.of(context).hintColor,
                                 ),
                               ),
-                              Text(
-                                "89% ( 4356 votes )",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14.0,
-                                  color:Theme.of(context).hintColor,
-                                ),
-                              ),
+                             widget.doctor.resId==''? IconButton(
+              onPressed: () async{
+                  setState(() {
+                    
+                     widget.doctor.isFavorited= !widget.doctor.isFavorited;
+                     widget.doctor.isFavorited? myDoctors.add(int.parse(widget.doctor.userId)):
+                      myDoctors.remove(int.parse(widget.doctor.userId));
+                      widget.doctor.isFavorited
+                  ? _message='added to'
+                  : _message='removed from';
+                     print(myDoctors);
+                     });
+                     await persistDoctors(myDoctors);
+                     await confirmDialog(context,_message);
+                     },
+                  
+              icon:widget.doctor.isFavorited
+                  ? Icon(Icons.favorite,color:Colors.red)
+                  : Icon(Icons.favorite_border),
+            ):SizedBox(),
                             ],
                           ),
                           SizedBox(height: 30,),
@@ -278,7 +298,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
                     ],
                   ),
                   SizedBox(height: 6.0,),
-                  SizedBox(
+                 widget.doctor.resId==''?  SizedBox(
                     height: 120,
                     width: double.maxFinite,
                     child: Container(
@@ -290,12 +310,12 @@ class _DoctorAcountState extends State<DoctorAcount> {
                         )
                       ),
                     ),
-                  ),
+                  ):SizedBox(),
                   SizedBox(height: 30.0,child: Center(child: Container(height: 1.0,color: Colors.grey[400].withOpacity(0.1),),)),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                    Text(
+                   widget.doctor.resId==''? Text(
                       'FEEDBACK',
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -303,8 +323,8 @@ class _DoctorAcountState extends State<DoctorAcount> {
                         color: Colors.grey,
 
                       ),
-                    ),
-                    Text(
+                    ):SizedBox(),
+                    widget.doctor.resId==''?Text(
                       'Very good,courteous and efficient staff',
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -312,7 +332,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
                         //fontWeight: FontWeight.bold,
                         color:Theme.of(context).hintColor,
                       ),
-                    ),
+                    ):SizedBox(),
                     ],
                   ),
                   SizedBox(height: 30.0,child: Center(child: Container(height: 1.0,color: Colors.grey[400].withOpacity(0.1),),)),
@@ -352,22 +372,22 @@ class _DoctorAcountState extends State<DoctorAcount> {
                     ),
                   ),
                   SizedBox(height: 30.0,child: Center(child: Container(height: 1.0,color: Colors.grey[400].withOpacity(0.1),),)),
-                  Text(
+                 widget.doctor.resId==''? Text(
                     'ALSO PRACTICES AT',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14.0,
                       color: Colors.grey,
                     ),
-                  ),
+                  ):SizedBox(),
                   SizedBox(height: 6.0,),
-                  Column(
+                  widget.doctor.resId==''?Column(
                     children: <Widget>[
                       card("images/asset-2.png","Dr.Mickel Nick","B.Sc DDVL Demilitologist","4.2"),
                       SizedBox(height: 30.0,child: Center(child: Container(height: 1.0,color: Colors.grey[350].withOpacity(0.1),),)),
                       card("images/asset-3.png","Dr.Steve Robert","B.Sc DDVL Demilitologist","3.6"),
                     ],
-                  ),
+                  ):SizedBox(),
                 ],
               ),
             ),
@@ -489,5 +509,41 @@ class _DoctorAcountState extends State<DoctorAcount> {
         ),
       ],
     ),);
+  }
+  Future<bool> confirmDialog(BuildContext context, String message) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Message'),
+            content: Container(
+              height: 40,
+              child:Text('Doctor $message your favourite doctors'),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
+  }
+
+  Future persistDoctors(List docs) async{
+ var list = jsonEncode(docs);
+SharedPreferences preferences= await SharedPreferences.getInstance();
+preferences.setString('docs', list);
   }
 }

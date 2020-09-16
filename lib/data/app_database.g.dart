@@ -339,12 +339,168 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   }
 }
 
+class Doctr extends DataClass implements Insertable<Doctr> {
+  final String doctorList;
+  Doctr({@required this.doctorList});
+  factory Doctr.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    return Doctr(
+      doctorList: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}doctor_list']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || doctorList != null) {
+      map['doctor_list'] = Variable<String>(doctorList);
+    }
+    return map;
+  }
+
+  DoctrsCompanion toCompanion(bool nullToAbsent) {
+    return DoctrsCompanion(
+      doctorList: doctorList == null && nullToAbsent
+          ? const Value.absent()
+          : Value(doctorList),
+    );
+  }
+
+  factory Doctr.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return Doctr(
+      doctorList: serializer.fromJson<String>(json['doctorList']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'doctorList': serializer.toJson<String>(doctorList),
+    };
+  }
+
+  Doctr copyWith({String doctorList}) => Doctr(
+        doctorList: doctorList ?? this.doctorList,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Doctr(')
+          ..write('doctorList: $doctorList')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf(doctorList.hashCode);
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is Doctr && other.doctorList == this.doctorList);
+}
+
+class DoctrsCompanion extends UpdateCompanion<Doctr> {
+  final Value<String> doctorList;
+  const DoctrsCompanion({
+    this.doctorList = const Value.absent(),
+  });
+  DoctrsCompanion.insert({
+    @required String doctorList,
+  }) : doctorList = Value(doctorList);
+  static Insertable<Doctr> custom({
+    Expression<String> doctorList,
+  }) {
+    return RawValuesInsertable({
+      if (doctorList != null) 'doctor_list': doctorList,
+    });
+  }
+
+  DoctrsCompanion copyWith({Value<String> doctorList}) {
+    return DoctrsCompanion(
+      doctorList: doctorList ?? this.doctorList,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (doctorList.present) {
+      map['doctor_list'] = Variable<String>(doctorList.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DoctrsCompanion(')
+          ..write('doctorList: $doctorList')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DoctrsTable extends Doctrs with TableInfo<$DoctrsTable, Doctr> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $DoctrsTable(this._db, [this._alias]);
+  final VerificationMeta _doctorListMeta = const VerificationMeta('doctorList');
+  GeneratedTextColumn _doctorList;
+  @override
+  GeneratedTextColumn get doctorList => _doctorList ??= _constructDoctorList();
+  GeneratedTextColumn _constructDoctorList() {
+    return GeneratedTextColumn('doctor_list', $tableName, false,
+        minTextLength: 1, maxTextLength: 200);
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [doctorList];
+  @override
+  $DoctrsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'doctrs';
+  @override
+  final String actualTableName = 'doctrs';
+  @override
+  VerificationContext validateIntegrity(Insertable<Doctr> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('doctor_list')) {
+      context.handle(
+          _doctorListMeta,
+          doctorList.isAcceptableOrUnknown(
+              data['doctor_list'], _doctorListMeta));
+    } else if (isInserting) {
+      context.missing(_doctorListMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
+  @override
+  Doctr map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return Doctr.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  $DoctrsTable createAlias(String alias) {
+    return $DoctrsTable(_db, alias);
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   $UsersTable _users;
   $UsersTable get users => _users ??= $UsersTable(this);
+  $DoctrsTable _doctrs;
+  $DoctrsTable get doctrs => _doctrs ??= $DoctrsTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [users];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [users, doctrs];
 }

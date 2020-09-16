@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'package:digitAT/config/constants.dart';
+import 'package:digitAT/data/app_database.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/doctor.dart' as model;
+import 'package:shared_preferences/shared_preferences.dart';
 class DoctorsCardWidget extends StatefulWidget {
   final model.Doctor doctors;
   const DoctorsCardWidget({Key key, this.doctors}) : super(key: key);
@@ -9,10 +13,11 @@ class DoctorsCardWidget extends StatefulWidget {
 }
 
 class _DoctorsCardWidgetState extends State<DoctorsCardWidget> {
+  String _message;
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 150.0,
+      height: 180.0,
         padding: const EdgeInsets.all(6.0),
         child:FlatButton(        
           highlightColor: Theme.of(context).primaryColor,
@@ -99,9 +104,36 @@ class _DoctorsCardWidgetState extends State<DoctorsCardWidget> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        widget.doctors.resId==''?IconButton(
+              onPressed: () async{
+                  setState(() {
+                    
+                     widget.doctors.isFavorited= !widget.doctors.isFavorited;
+                     widget.doctors.isFavorited? myDoctors.add(int.parse(widget.doctors.userId)):
+                      myDoctors.remove(int.parse(widget.doctors.userId));
+                      
+
+                      widget.doctors.isFavorited
+                  ? _message='added to'
+                  : _message='removed from';
+                     print(myDoctors);
+                     });
+                     List docs =[];
+                     docs.addAll(myDoctors);
+                    
+                      await persistDoctors(docs);
+                     await confirmDialog(context,_message);
+                     },
+                  
+              icon:widget.doctors.isFavorited
+                  ? Icon(Icons.favorite,color:Colors.red)
+                  : Icon(Icons.favorite_border),
+            ):SizedBox(),
                       ],
                     ),
-                  ],
+                    
+          
+            ],
                 ),
               ),
             ),
@@ -120,5 +152,45 @@ class _DoctorsCardWidgetState extends State<DoctorsCardWidget> {
       ),
       
     );
+  }
+Future<bool> confirmDialog(BuildContext context, String message) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Message'),
+            content: Container(
+              height: 40,
+              child:Text('Doctor $message your favourite doctors'),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
+  }
+  final database= AppDatabase();
+ Future persistDoctors(List docs) async{
+ var list = jsonEncode(docs);
+SharedPreferences preferences= await SharedPreferences.getInstance();
+preferences.setString('docs', list);
+  /* final doctr = Doctr(
+    doctorList:list 
+  );
+  database.insertList(doctr);*/
   }
 }

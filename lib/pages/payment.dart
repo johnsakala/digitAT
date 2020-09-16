@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:digitAT/models/medecine.dart';
+import 'package:intl/intl.dart';
 import 'package:paynow/paynow.dart';
 import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/payment.dart';
@@ -22,9 +23,11 @@ class Paymnt extends StatefulWidget {
 
 class _PaymentState extends State<Paymnt> {
   Pharmacist officer;
-  String aid, number, paymentMethod;
+  var newFormat = DateFormat("dd-MMM-yyyy");
+  String aid, number, paymentMethod,cty, fname, email,phone;
   bool _loading = false;
   int _radioValue;
+  final _formKey = GlobalKey<FormState>();
 
    void _handleRadioValueChange(int value) {
     setState(() {
@@ -46,6 +49,7 @@ class _PaymentState extends State<Paymnt> {
   SharedPreferences preferences= await SharedPreferences.getInstance();
   int id= preferences.getInt('id');
  //int result=0;
+ print("///////"+ widget.payment.bill.toString());
      final http.Response response = await http.post(
         '${webhook}tasks.task.add',
        headers: {"Content-Type": "application/json"},
@@ -53,7 +57,9 @@ class _PaymentState extends State<Paymnt> {
   "fields":{ 
    "TITLE":widget.payment.title,
    "DESCRIPTION":widget.payment.description+" medical aid number"+number,
-   "CREATED_BY":id,
+   "UF_AUTO_831530867848":id,
+   "UF_AUTO_621898573172":widget.payment.bill,
+   "UF_AUTO_229319567783":"payment",
    "RESPONSIBLE_ID":officer.id
   }
 
@@ -62,7 +68,6 @@ class _PaymentState extends State<Paymnt> {
        {
          Map<String, dynamic> responseBody = jsonDecode(response.body);     
            
-        print('//////////////////////////////zvaita');
  
        }
        else{
@@ -85,7 +90,6 @@ class _PaymentState extends State<Paymnt> {
           
             medicalAids = responseBody["result"];
         
-          print('********************'+medicalAids.toString());     
             
         } else {
           
@@ -120,7 +124,6 @@ Pharmacist officer;
         if (responseBody["result"] != null) {
                result = responseBody["result"];
                   officer= Pharmacist(result[0]["ID"], result[0]["NAME"], result[0]["LAST_NAME"]);            
-        print('zvaita');
         } else {
           
           print('-----------------'+response.body);
@@ -137,7 +140,6 @@ Pharmacist officer;
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     return officer;
   }
    Future _createTask() async {
@@ -153,16 +155,18 @@ setState(() {
        body: jsonEncode({
   "fields":{ 
    "TITLE":widget.payment.title,
-   "DESCRIPTION":widget.payment.description+" "+"payment $aid $number",
-   "CREATED_BY":id,
-   "RESPONSIBLE_ID":widget.payment.responsibleID
+   "DESCRIPTION":widget.payment.description,
+   "UF_AUTO_831530867848":id,
+   "UF_AUTO_621898573172":widget.payment.bill,
+   "UF_AUTO_229319567783": "booking",
+   "UF_AUTO_206323634806":newFormat.format(widget.payment.due),
+   "RESPONSIBLE_ID":widget.payment.resId==''?widget.payment.responsibleID:widget.payment.resId
   }
 
 }),).catchError((error) => print(error));
        if(response.statusCode==200)
        {
          Map<String, dynamic> responseBody = jsonDecode(response.body);     
-           print('***********************zvaita');
         
  
        }
@@ -172,11 +176,40 @@ setState(() {
       
   }
 
-  User currentUser=new User.init().getCurrentUser();
-  Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
-  TextEditingController emailController= new TextEditingController();
-  TextEditingController nameController= new TextEditingController();
-  TextEditingController phoneNumberController= new TextEditingController();
+ @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    SharedPreferences.getInstance().then((SharedPreferences sp) {
+      String _name,_email,_phone, _city;
+      int _testValue;
+
+      _testValue = sp.getInt('id')??'';
+      _name = sp.getString('name')??'';
+      _email = sp.getString('email')??'';
+      _phone = sp.getString('phone')??'';
+       _city = sp.getString('city')??'';
+      
+
+      // will be null if never previously saved
+      if (_testValue == null ) {
+        _testValue = null;
+       
+         // set an initial value
+      }
+     
+      setState(() {
+        
+        fname=_name;
+        email=_email;
+        phone=_phone;
+        cty=_city;
+        
+
+      });
+    
+    });
+  }
   @override
   Widget build(BuildContext context) {
    return Scaffold(
@@ -208,10 +241,102 @@ setState(() {
         builder:(BuildContext context, AsyncSnapshot<List<dynamic>> snapshot){
           if(snapshot.hasData){
           return SingleChildScrollView(
-        child: Column(
+        child:Form(
+                      key: _formKey,
+                     
+                      child: Column(
           children: <Widget>[
             
-                
+                 Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                          
+                            ),
+                            child:
+                            
+                            TextFormField(
+                              initialValue: fname,
+                                  decoration: InputDecoration(
+                               labelText: 'Name'
+                                            ),
+                                            
+                             onChanged: (value){
+                               setState(() {
+                                 fname=value;
+                               });  
+                               },     
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Name can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )),
+                            Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                          
+                            ),
+                            child:
+                            
+                            TextFormField(
+                              initialValue: email,
+                                  decoration: InputDecoration(
+                               labelText: 'Email'
+                                            ),
+                                            
+                             onChanged: (value){
+                               setState(() {
+                                email=value;
+                               });  
+                               },
+                                          
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Email can not be empty!';
+                         }
+                             return null;
+                                  },     
+                        
+                            )),
+                            Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                          
+                            ),
+                            child:
+                            
+                            TextFormField(
+                              initialValue: phone,
+                              keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                               labelText: 'Phone'
+                                            ),
+                                            
+                             onChanged: (value){
+                               setState(() {
+                                 phone=value;
+                               });  
+                               },     
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Phone number can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )),
                 Container(
                     padding:EdgeInsets.only(top:20.0,right: 12.0,left: 12.0,bottom: 12.0),
                     margin:EdgeInsets.only(right: 12.0,left: 12.0,bottom: 12.0,top: 0),
@@ -292,7 +417,7 @@ setState(() {
                              return null;
                                   },
                             )),
-                             Center(child: Text('Select payment metho')),
+                             Center(child: Text('Select payment method')),
                             new Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -316,6 +441,7 @@ setState(() {
                 )
                 ],
             ),
+        )
         
       );
       }
@@ -355,9 +481,12 @@ setState(() {
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: () async{
-                        await paynowPayment();
-                       /*await _createTask();
-                       await _createPaymentOrder();*/
+                      if (_formKey.currentState.validate()) {
+                        //await paynowPayment();
+                       await _createTask();
+                       await _createPaymentOrder();
+                       int contactId=await _createContact(fname, cty, phone);
+                       await _createDeal(contactId);
                         SharedPreferences preferences= await SharedPreferences.getInstance();
                        int id= preferences.getInt('id');
                        String name= preferences.getString('name');
@@ -370,7 +499,7 @@ setState(() {
                      /*  if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                      
+                      }
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -424,10 +553,10 @@ setState(() {
           );
         });
   }
-  Future paynowPayment() async{
+  /*Future paynowPayment() async{
 
   List <Medecine> medicines= widget.payment.medicines;
-      Paynow paynow = Paynow(integrationKey: "5c8a12c7-0782-463c-bb1e-3c91e2324921", integrationId: "10554", returnUrl: "http://google.com", resultUrl: "http://google.co");
+      Paynow paynow = Paynow(integrationKey: "5c8a12c7-0782-463c-bb1e-3c91e2324921", integrationId: "10554", returnUrl: "https://my.digitat.info", resultUrl: "https://my.digitat.info");
   Payment payment = paynow.createPayment("Test ${widget.payment.responsibleID}", "payments@digitat.info");
    
   for(int i=0; i< medicines.length;i++){
@@ -443,24 +572,27 @@ print("/////////////////////////////////"+response.error);
     }else{
         print("Transaction was unsuccessful");
     }
-  }
+  }*/
 
-  Future <int>_createDeal(String g, String name, String lname, String city, String phoneNumber, DateTime dob) async {
+  Future <int>_createDeal(int contact) async {
 
   int result=0;
     final http.Response response = await http.post(
-        '${webhook}crm.contact.add',
+        '${webhook}crm.deal.add',
          headers: {"Content-Type": "application/json"},
        body: jsonEncode({
          
-         "fields":{  "TITLE": "digitAT", 
-                    "NAME": name, 
-                    "SECOND_NAME": " ", 
-                    "LAST_NAME": lname, 
-                     
-                    "OPENED": "Y", 
-                    "ASSIGNED_BY_ID": 1, 
-                    "PHONE": [ { "VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
+         "fields":{  
+           "TITLE": widget.payment.title, 
+            "STAGE_ID": "NEW", 					
+            "COMPANY_ID": 3,
+            "CONTACT_ID": contact,
+            "OPENED": "Y", 
+            "ASSIGNED_BY_ID": 1, 
+            "PROBABILITY": 30,
+            "OPPORTUNITY":widget.payment.bill,
+            "BEGINDATE": "",
+            "CLOSEDATE": ""
        }
        })
         
@@ -471,6 +603,42 @@ print("/////////////////////////////////"+response.error);
         
          Map<String, dynamic> responseBody = jsonDecode(response.body);     
            result=responseBody['result'];
+       }
+       else{
+         print(response.statusCode);
+       }
+       return result;
+  }
+  Future <int>_createContact( String name, String city, String phoneNumber) async {
+
+  int result=0;
+    final http.Response response = await http.post(
+        '${webhook}crm.contact.add',
+         headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+         
+         "fields":{ 
+                    "NAME": name, 
+                    "LAST_NAME": " ", 
+                    "OPENED": "Y", 
+                    "ASSIGNED_BY_ID": 1, 
+                    "TYPE_ID": "CLIENT",
+                    "ADDRESS_CITY":city,
+                
+                            "PHONE": [ { "VALUE":phoneNumber, "VALUE_TYPE": "WORK" } ] 
+       }
+       })
+        
+         ).catchError((error) => print('///////////////////////error'+error));
+       if(response.statusCode==200)
+       {  
+         setState(() {
+           _loading=false;
+         }); 
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           result=responseBody['result'];
+        print("//////////"+result.toString());
+ 
        }
        else{
          print(response.statusCode);

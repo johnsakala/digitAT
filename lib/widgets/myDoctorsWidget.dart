@@ -18,7 +18,7 @@ class _MyDoctorsCardWidgetState extends State<MyDoctorsCardWidget> {
           FlatButton(
             padding: EdgeInsets.all(0),
             onPressed: (){
-              Navigator.of(context).pushNamed('/doctorProfil');
+              Navigator.of(context).pushNamed('/doctorProfil', arguments: widget.doctors);
             },
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),
@@ -60,7 +60,7 @@ class _MyDoctorsCardWidgetState extends State<MyDoctorsCardWidget> {
                               ),
                               SizedBox(height: 12,),
                               Text(
-                                '${widget.doctors.description}',
+                                widget.doctors.description==null?'${widget.doctors.profession}':'${widget.doctors.description}',
                                 textWidthBasis: TextWidthBasis.longestLine,
                                 
                                 style: TextStyle(
@@ -104,7 +104,7 @@ class _MyDoctorsCardWidgetState extends State<MyDoctorsCardWidget> {
       decoration: BoxDecoration(
 
         borderRadius: BorderRadius.circular(100.0),
-        image: DecorationImage(image: AssetImage(image), fit: BoxFit.cover,)
+        image: DecorationImage(image: Image.network(image).image, fit: BoxFit.cover,)
 
       ),
     );

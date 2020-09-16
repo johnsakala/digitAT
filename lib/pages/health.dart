@@ -22,7 +22,7 @@ class _HealthTipsState extends State<HealthTips> {
              
          ,
           onPressed: (){
-            Navigator.of(context).pushNamed('/home', arguments:[currentUser.name,currentUser.phoneNumber]);
+            Navigator.of(context).pop();
           },
         ),
         backgroundColor: Theme.of(context).accentColor,

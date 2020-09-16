@@ -9,14 +9,20 @@ class Doctor{
   String userId;
   Color color;
   String avatar;
+  String resId;
   String profession;
-
+  bool isFavorited;
+ void setIsFavourite(bool isFavourite){
+   this.isFavorited= isFavourite;
+ }
   Doctor.init();
-  Doctor.min(this.name,this.profession,this.avatar,this.state,this.color,this.userId, this.description);
-  Doctor(this.name,this.description,this.avatar,this.state,this.color,this.userId);
+  
+  Doctor.app(this.name, this.avatar);
+    Doctor.min(this.name,this.profession,this.avatar,this.state,this.color,this.userId, this.description, this.isFavorited, this.resId);
+  Doctor(this.name,this.description,this.avatar,this.state,this.color,this.userId,this.isFavorited, this.resId);
   Doctor getCurrentDoctor() {
     return Doctor("Dr.Alina james", "B.Sc DDVL Demilitologist",
-                  "images/asset-1.png","Closed To day", Colors.red,"1");
+                  "images/asset-1.png","Closed To day", Colors.red,"1",false,"");
   }
 }
 class DoctorsList{

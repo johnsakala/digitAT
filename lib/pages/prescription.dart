@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:digitAT/api/url.dart';
 import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:digitAT/models/user.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -76,7 +78,6 @@ class _PrescriptionState extends State<Prescription > {
        {
          Map<String, dynamic> responseBody = jsonDecode(response.body);     
            
-        print('//////////////////////////////zvaita');
  
        }
        else{
@@ -106,7 +107,7 @@ class _PrescriptionState extends State<Prescription > {
        {
          Map<String, dynamic> responseBody = jsonDecode(response.body);     
            
-        print('//////////////////////////////zvaita');
+      
  
        }
        else{
@@ -114,9 +115,7 @@ class _PrescriptionState extends State<Prescription > {
        }
        //return responseBody['result'];
   }
-  final _formKey = GlobalKey<FormState>();
-   final GlobalKey<ScaffoldState> _scaffoldstate =
-      new GlobalKey<ScaffoldState>();
+
   void initState() {
     //this.medecinesList = new model.MedecinesList();
     super.initState();
@@ -125,22 +124,45 @@ class _PrescriptionState extends State<Prescription > {
     });
   
   }
+ 
+  List<int> list=[];
+  File _image;
+  String baseImage,imageJson;
+   Future _getPhoto(BuildContext context) async{
+    print('picking image');
+     
+    final image= await ImagePicker.pickImage(source: ImageSource.camera);
+    setState(() {
+      _image=image;
+           final bytes = _image.readAsBytesSync();
+    String img64 = base64Encode(bytes);
+    baseImage=img64;
+    imageJson=baseImage;
+    
+    });
+   await confirmDialog(context);
+    print('image path //////////////'+imageJson);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldstate,
       appBar: AppBar(
         elevation: 0,
-        
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(bottomLeft:Radius.circular(16.0),bottomRight: Radius.circular(16.0)),
+        ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor ),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).primaryColor,
+          ),
           onPressed: (){
             Navigator.of(context).pop();
           },
         ),
         backgroundColor: Theme.of(context).accentColor,
         title: Text(
-          'PharmaHub',
+          'Prescription',
           style: TextStyle(
             fontSize:22.0,
             fontFamily: 'Poppins',
@@ -150,33 +172,14 @@ class _PrescriptionState extends State<Prescription > {
         ),
 
       ),
-      body:FutureBuilder(
-        future: _fetchAids(),
-        builder:(BuildContext context, AsyncSnapshot<List<dynamic>> snapshot){
-          if(snapshot.hasData){
-          return
-          SingleChildScrollView(
-        child: Column(
+      body: SingleChildScrollView(
+        child:Column(
           children: <Widget>[
-            Stack(
-              children: <Widget>[
-                Container(
-                    height: 20,
-                    padding: const EdgeInsets.only(left:0.0,right: 0.0),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(bottomLeft:Radius.circular(25.0),bottomRight: Radius.circular(25.0)),
-                      color: Theme.of(context).accentColor,
-                    ),
-                    
-                  ),
-                 
-              ],
-            ),
             Container(
               padding:EdgeInsets.only(top:12.0,right: 12.0,left: 12.0,bottom: 12.0),
               alignment: Alignment.topLeft,
               child: Text(
-                'Paste prescription below :',
+                'Upload Picture',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 16.0,
@@ -186,193 +189,73 @@ class _PrescriptionState extends State<Prescription > {
               ),
             ),
             Container(
-              
-              child:  Form(
-                      key: _formKey,
-                     
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            height: 300.0,
-                            margin:  const EdgeInsets.only(top: 12.0),
-                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(width: 1.5,color: Colors.grey),
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.grey.withOpacity(0.4)                          
-                            ),
-                            child:
-                            
-                            TextFormField(
-                                 maxLines: 8, 
-                                            
-                             onChanged: (value){
-                               setState(() {
-                                 prescription=value;
-                               });  
-                               },     
-                        validator: (value) {
-                      if (value.isEmpty) {
-                       return 'can not be empty!';
-                         }
-                             return null;
-                                  },
-                            ),
-                            ), 
-                             Container(
-                            height: 100.0,
-                            margin:  const EdgeInsets.only(top: 12.0),
-                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(width: 1.5,color: Colors.grey),
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.grey.withOpacity(0.4)                           
-                            ),
-                            child:DropDownFormField(
-                  titleText: 'Medical Aid',
-                  value: aid,
-                  onSaved: (value) {
-                    setState(() {
-                      aid = value;
-                    });
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                     aid = value;
-                    });
-                  },
-                  dataSource: [
-                         {
-                          "display": "${snapshot.data[0]['NAME']}",
-                      "value": "${snapshot.data[0]['NAME']}",
-                         },
-                           {
-                          "display": "${snapshot.data[1]['NAME']}",
-                      "value": "${snapshot.data[1]['NAME']}",
-                         }
-                  ],
-                  textField: 'display',
-                  valueField: 'value',
-                ),
-                          ),
-                           Container(
-                            height: 100.0,
-                            margin:  const EdgeInsets.only(top: 12.0),
-                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(width: 1.5,color: Colors.grey),
-                              borderRadius: BorderRadius.circular(12.0),
-                              color: Colors.grey.withOpacity(0.4)                          
-                            ),
-                            child:
-                            
-                            TextFormField(
-                                  decoration: InputDecoration(
-                               labelText: 'Medical aid Number'
-                                            ),
-                                            
-                             onChanged: (value){
-                               setState(() {
-                                 number=value;
-                               });  
-                               },     
-                        validator: (value) {
-                      if (value.isEmpty) {
-                       return 'Number can not be empty!';
-                         }
-                             return null;
-                                  },
-                            )),
-                        ]),
-               ),) 
-               ],
-        ),
-      );}
-      else{
-        Center(child: CircularProgressIndicator(),);
-      }
-      }),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 0,
-        color: Colors.transparent,
-        child: Container(
-              padding:EdgeInsets.only(right: 0.0,left: 30.0,bottom: 0.0,top: 0),
-              margin:EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20.0),
-                border: Border.all(width: 1,color: Colors.grey.withOpacity(0.6)),
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(            
+               color: Colors.transparent,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        '',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12.0,
-                          color: Colors.grey
-                        ),
+              child: Container(
+                    margin: EdgeInsets.only(right:30.0,left: 30.0 ),
+                    height: 60,
+                                            
+                              child: RaisedButton(
+                      color: Theme.of(context).accentColor,
+                      onPressed: () async{
+                        _getPhoto(context);
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
                       ),
-                      Text(
-                        '',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.bold
+                      child: Center(child:Container(
+                        child:  Center(
+                          child:Text(
+                            'Upload', 
+                            style:  TextStyle(
+                              fontSize: 18.0, 
+                              color: Theme.of(context).primaryColor,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),  
                         ),
-                      ),
-                    ],
-                  ),
-                  RaisedButton(
-                    elevation: 0,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onPressed: ()async {
-                   if (_formKey.currentState.validate()) {
-                      
-                   await _createOrder();
-                   await _createPaymentOrder();
-                   final snackBar = SnackBar(content: Text('Order Sent, you will receive a notification from the pharmacy'));
-                    _scaffoldstate.currentState.showSnackBar(snackBar);
-                   SharedPreferences preferences= await SharedPreferences.getInstance();
-                       int id= preferences.getInt('id');
-                       String name= preferences.getString('name');
-                       String city= preferences.getString('city');
-                     /*  if(result!=null){
-                       print('*********************************appointment created');
-                      }*/
-                      Navigator.of(context).pushNamed("/home",arguments:[name,id,city]);
-                      /*if(result!=null){
-                       print('*********************************order created');
-                      }*/
-                     // Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.userID]);
-                    
-                   }
-                    },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)
+                      )
+                      ),   
                     ),
-                    color: Theme.of(context).accentColor,
-                    child:Container(
-                      margin: EdgeInsets.only(left: 45.0,right: 45.0,top: 12,bottom: 12),
-                      child:Text(
-                        'Checkout',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12.0,
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              )
+                            ),
             ),
-      ),
-    );
+          ],
+        ),      
+     ) );
+    
+       }
+
+         Future<bool> confirmDialog(BuildContext context) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Confirmation'),
+            content: Container(
+              height: 85,
+              child:Text('Prescription uploaded successfully'),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
   }
 }

@@ -30,7 +30,7 @@ class _OffersListState extends State<OffersList> {
              
          ,
           onPressed: (){
-            Navigator.of(context).pushNamed('/home', arguments:[widget.currentUser.name,widget.currentUser.phoneNumber]);
+            Navigator.of(context).pop();
           },
         ),
         backgroundColor: Theme.of(context).accentColor,

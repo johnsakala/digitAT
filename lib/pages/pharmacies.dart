@@ -3,6 +3,7 @@ import 'package:digitAT/api/url.dart';
 import 'package:digitAT/config/constants.dart';
 import 'package:digitAT/models/medecine.dart';
 import 'package:digitAT/models/medicine_list.dart';
+import 'package:digitAT/models/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:http/http.dart' as http;
@@ -10,6 +11,8 @@ import 'package:digitAT/widgets/searchWidget.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 class Pharmacies extends StatefulWidget {
+  final PageNav pageNav;
+  const Pharmacies({Key key, this.pageNav}):super(key:key);
   @override
   _PharmaciesState createState() => _PharmaciesState();
 }
@@ -21,7 +24,7 @@ class _PharmaciesState extends State<Pharmacies> {
   Future< List< dynamic >> _fetchPharmacies() async {
 //  showAlertDialog(context);
     final http.Response response = await http
-        .get('${webhook}department.get?PARENT=$pharmahubId',
+        .get('${webhook}department.get?PARENT=${widget.pageNav.id}',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
@@ -30,10 +33,8 @@ class _PharmaciesState extends State<Pharmacies> {
       try {
         if (responseBody["result"] != null) {
          
-            print('result //////////////////////////////'+ responseBody["result"].toString());
       result = responseBody["result"];
          
-                      print('list //////////////////////////////'+ result.toString());
    
         } else {
           
@@ -51,7 +52,6 @@ class _PharmaciesState extends State<Pharmacies> {
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     return result;
   }
       
@@ -78,7 +78,7 @@ class _PharmaciesState extends State<Pharmacies> {
         ),
         backgroundColor: Theme.of(context).accentColor,
         title: Text(
-          'PharmaHub',
+          widget.pageNav.title,
           style: TextStyle(
             fontSize:22.0,
             fontFamily: 'Poppins',
@@ -140,7 +140,14 @@ class _PharmaciesState extends State<Pharmacies> {
                 },
                 itemBuilder: (context,index){
                   return 
-                  Column(
+                  InkWell(
+                    onTap: (){
+                      print('add');
+                    List<Medecine> meds=[];
+                    MedList list =MedList(snapshot.data[index]["ID"], meds, 0.0, snapshot.data[index]["NAME"],widget.pageNav.responsibleId,0);
+           Navigator.of(context).pushNamed('/medecines',arguments:list );
+                    },
+                                      child: Column(
       children: <Widget>[
         Container(
           padding: EdgeInsets.only(left: 12.0,right: 12.0),
@@ -150,24 +157,21 @@ class _PharmaciesState extends State<Pharmacies> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    '${snapshot.data[index]['NAME']}',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14.0,
-                      color: Theme.of(context).focusColor,
-                      fontWeight: FontWeight.bold,
+                    Text(
+                      '${snapshot.data[index]['NAME']}',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14.0,
+                        color: Theme.of(context).focusColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
                
                 ],
               ),
               IconButton(
                 onPressed: (){
-                  print('add');
-                  List<Medecine> meds=[];
-                  MedList list =MedList(snapshot.data[index]["ID"], meds, 0.0, snapshot.data[index]["NAME"]);
-           Navigator.of(context).pushNamed('/medecines',arguments:list );
+                    
                 
                  },
                 icon: Icon(Icons.arrow_forward),
@@ -180,7 +184,8 @@ class _PharmaciesState extends State<Pharmacies> {
         ),
         SizedBox(height: 15.0,child: Center(child: Container(height: 1.0,color: Colors.grey.withOpacity(0.1),),),),
       ],
-    );
+    ),
+                  );
                 },
               ),                
             ),

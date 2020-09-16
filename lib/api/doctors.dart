@@ -118,7 +118,7 @@ class Result {
     sECONDNAME = json['SECOND_NAME'];
     pERSONALGENDER = json['PERSONAL_GENDER'];
     pERSONALPROFESSION = json['PERSONAL_PROFESSION'];
-    pERSONALWWW = json['PERSONAL_WWW'];
+    pERSONALWWW = json['PERSONAL_WWW']??"";
     pERSONALBIRTHDAY = json['PERSONAL_BIRTHDAY'];
     if(pERSONALPHOTO.isEmpty || pERSONALPHOTO==null){
       pERSONALPHOTO="images/asset-1.png";

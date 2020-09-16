@@ -11,6 +11,7 @@ import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 class DoctorBookSecondeStep extends StatefulWidget {
@@ -22,7 +23,7 @@ class DoctorBookSecondeStep extends StatefulWidget {
 
 class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
 
-  String aid, number;
+  String aid, number, name='',phone='',email='';
   bool _loading = false;
 
  
@@ -32,6 +33,8 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
   TextEditingController emailController= new TextEditingController();
   TextEditingController nameController= new TextEditingController();
   TextEditingController phoneNumberController= new TextEditingController();
+ var newFormat = DateFormat("dd-MMM-yyyy");
+  
   @override
   Widget build(BuildContext context) {
    return Scaffold(
@@ -131,7 +134,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                   ),
                                   SizedBox(height: 15.0,),
                                   Text(
-                                    "Tomorrow ${widget.value.timeSlot}",
+                                    "${newFormat.format(widget.value.date)} ${widget.value.timeSlot}",
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14.0,
@@ -154,7 +157,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                   ),
                                   SizedBox(height: 15.0,),
                                   Text(
-                                    "600\$",
+                                    "\$600",
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14.0,
@@ -167,7 +170,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                           ),
                         ),
                         SizedBox(height: 20.0,child: Center(child: Container(height: 2.0,color: Colors.grey.withOpacity(0.1),),),),
-                        Container(
+                        /*Container(
                         child: Column(
                           children: <Widget>[
                             Container(
@@ -182,7 +185,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                             child:FormBuilderTextField(
                               attribute: "Full Name",
                               controller: nameController,
-                              initialValue: '',//for testing
+                              initialValue: name,//for testing
                               decoration: InputDecoration(
                                 hintText: "Name",
                                 hintStyle: TextStyle(
@@ -211,7 +214,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                             child:FormBuilderTextField(
                               attribute: "Email",
                               controller:emailController ,
-                              initialValue: '',//for testing
+                              initialValue: email,//for testing
                               decoration: InputDecoration(
                                 hintText: "E-mail",
                                 hintStyle: TextStyle(
@@ -240,7 +243,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                             child: FormBuilderTextField(
                               attribute: "phone Number",
                               controller: phoneNumberController,
-                              initialValue: '',//for testing
+                              initialValue: phone,//for testing
                               decoration: InputDecoration(border: InputBorder.none,hintText: "Phone Number",hintStyle: TextStyle(fontFamily: 'Poppins'),prefixText: "+",),
                               keyboardType: TextInputType.number,
                               validators: [
@@ -251,7 +254,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                           ),
                           ],
                         ),
-                      ),
+                      ),*/
                      
      
                         SizedBox(height: 25.0,),
@@ -311,9 +314,9 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                        print('*********************************appointment created');
                       }*/
                       Medecine medecine= Medecine("Doctor Booking", "600");
-                     List<Medecine>  list;
+                     List<Medecine>  list=[];
                      list.add(medecine);
-                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+ nameController.text+" "+ emailController.text+" "+ phoneNumberController.text+" "+"payment $aid $number", widget.value.doctor.userId,list);
+                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+newFormat.format(widget.value.date), widget.value.doctor.userId,list,600.0, widget.value.date, widget.value.doctor.resId);
                       Navigator.of(context).pushNamed("/payments",arguments:payments);
                     },
                     shape: RoundedRectangleBorder(

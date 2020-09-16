@@ -1,7 +1,20 @@
+import 'dart:convert';
+
+import 'package:date_picker_timeline/date_picker_widget.dart';
+import 'package:digitAT/api/doctors.dart';
+import 'package:digitAT/api/url.dart';
+import 'package:digitAT/models/medicine_list.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:digitAT/models/payment.dart';
+import 'package:intl/intl.dart';
 class BookTestsOnlineThirdStep extends StatefulWidget {
+  final MedList value;
+  const BookTestsOnlineThirdStep( {Key key, this.value}) : super(key: key);
   @override
   _BookTestsOnlineThirdStepState createState() => _BookTestsOnlineThirdStepState();
 }
@@ -11,6 +24,10 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
   List<String> afternoonList=["13.00","14.00","15.00","16.00","17.00","18.00",];
   List<String> nightList=["19.00","20.00","21.00","22.00","23.00","00.00"];
   String selectedChoice = "";
+  String _userId;
+  var newFormat = DateFormat("dd-MMM-yyyy");
+  DateTime _selectedValue = DateTime.now();
+  DatePickerController _controller = DatePickerController();
   User currentUser=new User.init().getCurrentUser();
   Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
   @override
@@ -33,7 +50,7 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
         ),
         backgroundColor: Theme.of(context).accentColor,
         title: Text(
-          'ScaniT',
+          widget.value.pharmacy,
           style: TextStyle(
             fontSize:18.0,
             fontFamily: 'Poppins',
@@ -43,7 +60,9 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
         ),
 
       ),
-      body: SingleChildScrollView(
+      body:FutureBuilder(builder: (BuildContext context, AsyncSnapshot snapshot){
+       if(snapshot.hasData){
+      return  SingleChildScrollView(
         child: Column(
           children: <Widget>[
             Container(
@@ -124,32 +143,8 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                             ),
                           ),
                         ),
-                        Center(
-                          child: Container(
-                            width: 50,
-                            height: 3,
-                            color: Colors.grey.withOpacity(0.6),
-                          ),
-                        ),
-                        Container(
-                          height: 25,width: 25,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100.0),
-                            border: Border.all(width: 1,color: Colors.grey.withOpacity(0.8)),
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          child: Center(
-                            child: Text(
-                              "4",
-                               style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).accentColor,
-                            ),
-                            ),
-                          ),
-                        ),
+                     
+                        
                       ],
                     )),
                   ),
@@ -168,12 +163,12 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      ball(currentDoctor.avatar, Colors.transparent),
+                      ball(snapshot.data[0].avatar, Colors.transparent),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            currentDoctor.name,
+                            snapshot.data[0].name,
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 14.0,
@@ -184,7 +179,7 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                           Container(
                             width: 200,
                             child:Text(
-                              currentDoctor.description,
+                             snapshot.data[0].profession==null?"Radiographer":snapshot.data[0].profession,
                               style: TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 12.0,
@@ -196,35 +191,38 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                       )
                     ],
                   ),
+                 
                   SizedBox(height: 15.0,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Container(
-                        child: IconButton(
-                          onPressed: (){},
-                          icon: Icon(Icons.chevron_left),
-                        ),
-                      ),
-                      Container(
-                        child: Text(
-                          'Tomorrow,9 Dec',
-                          style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                        ),
-                      ),
-                      Container(
-                        child: IconButton(
-                          onPressed: (){},
-                          icon: Icon(Icons.chevron_right),
-                        ),
-                      ),
-                      
-                    ],
-                  ),
+             
+              Container(
+                 height: 90,
+                child: DatePicker(
+                  DateTime.now(),
+                  width: 60,
+                  height: 70,
+                  controller: _controller,
+                  initialSelectedDate: DateTime.now(),
+                  selectionColor: Colors.black,
+                  selectedTextColor: Colors.white,
+               
+                  onDateChange: (date) {
+                    // New date selected
+                    setState(() {
+                      _selectedValue = date;
+                       
+                    });
+                  },
+                ),
+              ),
+               SizedBox(height: 10.0,),
+               Text('Date: '+ newFormat.format( _selectedValue),
+               style: TextStyle(
+            fontSize:15.0,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            
+          ),),
+               SizedBox(height: 15.0,),
                   SizedBox(height: 15.0,),
                   Container(
                     child: Stack(
@@ -357,7 +355,14 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
             ),
           ],
         ),
-      ),
+      );
+       }
+      else{
+       return Center(child:CircularProgressIndicator());
+      }
+      },
+     future: _fetchDoctors() ,
+    ),
       bottomNavigationBar: BottomAppBar(
         elevation: 0,
         color: Colors.transparent,
@@ -376,7 +381,7 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '1 test Added',
+                        '${widget.value.list.length} test Added',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
@@ -384,7 +389,7 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                         ),
                       ),
                       Text(
-                        '\$ 300',
+                        '\$ ${widget.value.bill}',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
@@ -397,8 +402,15 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                   RaisedButton(
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onPressed: (){
-                      Navigator.of(context).pushNamed("/fourthBookTest");
+                    onPressed: () async{
+                      if(selectedChoice==""){
+                       await errorDialog(context);
+                      }else{
+                      //Navigator.of(context).pushNamed("/fourthBookTest");
+                      Payments payments= Payments("Scan Booking", selectedChoice+ " "+newFormat.format(_selectedValue),_userId,widget.value.list,widget.value.bill, _selectedValue,widget.value.responsibleId);
+                      Navigator.of(context).pushNamed("/payments",arguments:payments);
+                    
+                    }
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -429,7 +441,7 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(100.0),
-        image: DecorationImage(image: AssetImage(image), fit: BoxFit.cover,)
+        image: DecorationImage(image: Image.network(image).image, fit: BoxFit.cover,)
 
       ),
      
@@ -455,5 +467,101 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
       );
     }
     );return choices;
+  }
+  List<Doctor> _doctorsList;
+  Future<List<Doctor>> _fetchDoctors() async {
+//  showAlertDialog(context);
+ List serverResponse = [];
+ _doctorsList = [];
+ 
+  
+    final http.Response response = await http
+        .get(
+      '${webhook}user.get.json?UF_DEPARTMENT=${widget.value.pid}',
+    )
+        .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+   
+    
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+       print(responseBody);
+          //DepartmentUsers doctorsList = DepartmentUsers.fromJson(responseBody);
+         // serverResponse = doctorsList.result;
+          responseBody["result"].forEach((user) {
+            print("------\n");
+            print(user['NAME']);
+            
+            print("------\n");
+            if(user['PERSONAL_PHOTO']==null){
+              user['PERSONAL_PHOTO']="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
+            }
+            setState(() {
+              _userId=user['ID'];
+            });
+            _doctorsList.add(
+                Doctor.min(user['NAME']+' '+user['LAST_NAME'], user['WORK_POSITION'], user['PERSONAL_PHOTO'], "4.2", Colors.transparent, user['ID'], user['PERSONAL_PROFESSION'],false,'')
+            );
+            
+          });
+
+          
+        } else {
+          serverResponse = [];
+          print(response.body);
+        }
+      } catch (error) {
+        print(error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+  
+  serverResponse = _doctorsList;
+  print("//////////////////////"+serverResponse.toString());
+    return serverResponse;
+  }
+   Future<bool> errorDialog(BuildContext context) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Error',
+            style: TextStyle(
+             color: Colors.red 
+            ),),
+            content: Container(
+              height: 40,
+              child:Text('Please select a timeslot before proceeding!',
+            style: TextStyle(
+             color: Colors.red 
+            ),),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
   }
 }

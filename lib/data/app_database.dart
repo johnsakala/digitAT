@@ -10,15 +10,21 @@ class Users extends Table{
   TextColumn get city => text().withLength(min: 1,max: 50)();
   
 }
-@UseMoor(tables: [Users])
+class Doctrs extends Table{
+  TextColumn get doctorList => text().withLength(min:1,max:200)();
+}
+@UseMoor(tables: [Users, Doctrs])
 class AppDatabase extends _$AppDatabase{
 AppDatabase():super(FlutterQueryExecutor.inDatabaseFolder(path: 'db.sqlite',
 logStatements: true));
 
 @override 
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
 
 Future insertUser(User user)=> into(users).insert(user);
 Future<List<User>>getUser()=> select(users).get();
+
+Future insertList(Doctr doctr)=> into(doctrs).insert(doctr);
+Future<Doctr>getList()=> select(doctrs).getSingle();
 }

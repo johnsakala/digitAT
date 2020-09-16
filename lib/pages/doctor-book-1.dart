@@ -1,7 +1,9 @@
+import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:digitAT/models/doc_booking.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
+import 'package:intl/intl.dart';
 class DoctorBookFirstStep extends StatefulWidget {
     final Doctor doctor;
   const DoctorBookFirstStep({Key key,this.doctor}) : super(key: key);
@@ -14,8 +16,13 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
   List<String> afternoonList=["13.00","14.00","15.00","16.00","17.00","18.00",];
   List<String> nightList=["19.00","20.00","21.00","22.00","23.00","00.00"];
   String selectedChoice = "";
+   DatePickerController _controller = DatePickerController();
+var newFormat = DateFormat("dd-MMM-yyyy");
+  DateTime _selectedValue = DateTime.now();
+  
   User currentUser=new User.init().getCurrentUser();
   Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
+
   @override
   Widget build(BuildContext context) {
    return Scaffold(
@@ -85,7 +92,7 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
                               Container(
                                 width: 200,
                                 child:Text(
-                                  currentDoctor.description,
+                                  widget.doctor.description,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 12.0,
@@ -98,36 +105,37 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
                         ],
                       ),
                       SizedBox(height: 15.0,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Container(
-                            child: IconButton(
-                              onPressed: (){},
-                              icon: Icon(Icons.chevron_left),
-                            ),
-                          ),
-                          Container(
-                            child: Text(
-                              'Tomorrow',
-                              style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                            ),
-                          ),
-                          Container(
-                            child: IconButton(
-                              onPressed: (){},
-                              icon: Icon(Icons.chevron_right),
-                            ),
-                          ),
-                      
-                        ],
-                      ),
-                      SizedBox(height: 15.0,),
-                      Container(
+             
+              Container(
+                 height: 90,
+                child: DatePicker(
+                  DateTime.now(),
+                  width: 60,
+                  height: 70,
+                  controller: _controller,
+                  initialSelectedDate: DateTime.now(),
+                  selectionColor: Colors.black,
+                  selectedTextColor: Colors.white,
+               
+                  onDateChange: (date) {
+                    // New date selected
+                    setState(() {
+                      _selectedValue = date;
+                       
+                    });
+                  },
+                ),
+              ),
+               SizedBox(height: 10.0,),
+               Text('Date: '+ newFormat.format( _selectedValue),
+               style: TextStyle(
+            fontSize:15.0,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            
+          ),),
+               SizedBox(height: 15.0,),
+                    Container(
                         child: Stack(
                           children: <Widget>[
                             Container(
@@ -293,9 +301,13 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
                   RaisedButton(
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onPressed: (){
-                      DoctorBooking doctorBooking= DoctorBooking(widget.doctor, selectedChoice);
+                    onPressed: () async{
+                      if(selectedChoice==""){
+                          await errorDialog(context);
+                      }else{
+                      DoctorBooking doctorBooking= DoctorBooking(widget.doctor,selectedChoice, _selectedValue);
                       Navigator.of(context).pushNamed("/secondeDoctorBook" ,arguments: doctorBooking);
+                    }
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -349,5 +361,41 @@ class _DoctorBookFirstStepState extends State<DoctorBookFirstStep> {
       );
     }
     );return choices;
+  }
+ Future<bool> errorDialog(BuildContext context) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Error',
+            style: TextStyle(
+             color: Colors.red 
+            ),),
+            content: Container(
+              height: 40,
+              child:Text('Please select a timeslot before proceeding!',
+            style: TextStyle(
+             color: Colors.red 
+            ),),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
   }
 }

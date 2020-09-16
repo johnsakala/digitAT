@@ -1,9 +1,20 @@
 import 'package:digitAT/pages/acount.dart';
+import 'package:digitAT/pages/book_dignostics1.dart';
+import 'package:digitAT/pages/book_dignostics2.dart';
+import 'package:digitAT/pages/book_dignostics3.dart';
+import 'package:digitAT/pages/covid_services.dart';
+import 'package:digitAT/pages/doctor_catergories.dart';
 import 'package:digitAT/pages/editAccount.dart';
 import 'package:digitAT/pages/home_options.dart';
+import 'package:digitAT/pages/hospital_options.dart';
+import 'package:digitAT/pages/hospitals.dart';
+import 'package:digitAT/pages/imaging_centres.dart';
+import 'package:digitAT/pages/labs.dart';
+import 'package:digitAT/pages/my_payments.dart';
 import 'package:digitAT/pages/payment.dart';
 import 'package:digitAT/pages/pharmacies.dart';
 import 'package:digitAT/pages/prescription.dart';
+import 'package:digitAT/pages/waiting_room.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/pages/appointment.dart';
 import 'package:digitAT/pages/book-test-online1.dart';
@@ -52,7 +63,7 @@ class RouteGenerator {
       case '/chat' :
         return MaterialPageRoute(builder: (_) => ChatWidget());
       case '/doctors':
-        return MaterialPageRoute(builder: (_) => DoctorsList());  
+        return MaterialPageRoute(builder: (_) => DoctorsList(pageNav: args,));  
       case '/doctorProfil':
         return MaterialPageRoute(builder: (_) => DoctorAcount(doctor: args,));
       case '/firstDoctorBook':
@@ -62,11 +73,11 @@ class RouteGenerator {
       case '/offers':
         return MaterialPageRoute(builder: (_) => OffersList());
       case '/bookTest':
-        return MaterialPageRoute(builder: (_) => BookTestsOnline());
+        return MaterialPageRoute(builder: (_) => BookTestsOnline(pageNav: args));
       case '/secondeBookTest':
-        return MaterialPageRoute(builder: (_) => BookTestsOnlineSecondeStep());
+        return MaterialPageRoute(builder: (_) => BookTestsOnlineSecondeStep(value: args,));
       case '/thirdBookTest':
-        return MaterialPageRoute(builder: (_) => BookTestsOnlineThirdStep());
+        return MaterialPageRoute(builder: (_) => BookTestsOnlineThirdStep(value: args,));
       case "/fourthBookTest":
         return MaterialPageRoute(builder: (_) => BookTestsOnlineFourthStep());
       case '/medecines':
@@ -80,11 +91,33 @@ class RouteGenerator {
       case '/health':
         return MaterialPageRoute(builder: (_) => HealthTips());
         case '/pharmacies':
-        return MaterialPageRoute(builder: (_) => Pharmacies());
+        return MaterialPageRoute(builder: (_) => Pharmacies(pageNav: args,));
         case '/prescription':
         return MaterialPageRoute(builder: (_) => Prescription());
         case '/payments':
         return MaterialPageRoute(builder: (_) => Paymnt(payment: args,));
+        case '/paymentslist':
+        return MaterialPageRoute(builder: (_) => PaymentsList());
+        case '/doctorcategories':
+        return MaterialPageRoute(builder: (_) => DoctorsCat(pageNav: args,));
+        case '/imagingcentres':
+        return MaterialPageRoute(builder: (_) => ImagingCentres(pageNav:args,));
+        case '/covidservices':
+        return MaterialPageRoute(builder: (_) => CovIDServices(pageNav:args,));
+          case '/labs':
+        return MaterialPageRoute(builder: (_) => Labs(pageNav: args,));
+        case '/hospitals':
+        return MaterialPageRoute(builder: (_) => Hospitals());
+        case '/waitingroom':
+        return MaterialPageRoute(builder: (_) => WaitingRoom());
+        case '/hospitaloptions':
+        return MaterialPageRoute(builder: (_) => HospitalOptions(pageNav: args,));
+        case '/firstlabsbooking':
+        return MaterialPageRoute(builder: (_) => BookDignosticsOnline(pageNav: args,));
+        case '/secondlabsbooking':
+        return MaterialPageRoute(builder: (_) => BookDignosticsOnlineSecondeStep(value: args,));
+        case '/thirdlabsbooking':
+        return MaterialPageRoute(builder: (_) => BookDignosticsOnlineThirdStep(value: args,));
 
 
 

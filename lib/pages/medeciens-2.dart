@@ -1,10 +1,6 @@
-import 'dart:convert';
-
 import 'package:digitAT/models/medecine.dart';
 import 'package:digitAT/models/medicine_list.dart';
 import 'package:digitAT/models/payment.dart';
-import 'package:digitAT/pages/medecines.dart';
-import 'package:digitAT/pages/payment.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/medecine.dart' as model;
 import 'package:digitAT/models/user.dart';
@@ -19,9 +15,42 @@ class MedecinesSlected extends StatefulWidget {
 
 class _MedecinesSlectedState extends State<MedecinesSlected> {
   bool _loading=false;
-  
+int itemcount=0;
+List<Medecine> groupCart(unGroupedCart){
 
+List<Medecine> groupedCart=[];
+int quantity=1;
+for(int i=0;i<unGroupedCart.length;i++)
+{
+	int counter=i+1;
+	while(counter<unGroupedCart.length)
+	{	
+		if(unGroupedCart[i].name==unGroupedCart[counter].name)
+		{
+			quantity++;
+			
+		}
+    counter++;
+	}
+  List names=[];
+for(int j=0;j<groupedCart.length;j++){
   
+  names.add(groupedCart[j].name);
+}
+	if(names.contains(unGroupedCart[i].name)==false)
+	{
+    groupedCart.add(Medecine.cart(unGroupedCart[i].name,(double.parse(unGroupedCart[i].price)*quantity).toString(),quantity,double.parse(unGroupedCart[i].price)));
+
+	}
+	quantity=1;
+}
+setState(() {
+  
+  medicines=groupedCart;
+});
+print(groupedCart);
+return groupedCart;
+    }
 
   User currentUser=User.init().getCurrentUser();
   List<Medecine>medicines= [];
@@ -29,11 +58,12 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
   model.MedecinesList medecinesList;
   void initState() {
     setState(() {
-      medicines.addAll(widget.value.list);
+      itemcount=widget.value.quantity;
       bill=widget.value.bill;
     });
     this.medecinesList = new model.MedecinesList();
-   // print("//////////////////////////////////////////////// pharmacistID"+widget.value[2].toString());
+      groupCart(widget.value.list);
+ 
     super.initState();
   }
    final GlobalKey<ScaffoldState> _scaffoldstate =
@@ -50,7 +80,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
              
          ,
           onPressed: (){
-            MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy);
+            MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId, itemcount);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
           },
         ),
@@ -108,14 +138,26 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(
-                    '${medicines[index].name}',
+                  Row(
+                    children: <Widget>[
+                      Text(
+                        '${medicines[index].name}',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14.0,
+                          color: Theme.of(context).focusColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                       Text(
+                    '   X ${medicines[index].quantity}',
                     style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 14.0,
-                      color: Theme.of(context).focusColor,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 12.0,
+                      color: Colors.grey
                     ),
+                  ),
+                    ],
                   ),
                   Text(
                     '${medicines[index].price}',
@@ -133,8 +175,16 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                     print(double.parse(medicines[index].price));
                     
                       
-                    bill=bill-double.parse(medicines[index].price);
-                    medicines.removeAt(index);
+                    bill-=medicines[index].unitPrice;
+                    if(medicines[index].quantity==1)
+                    {
+                      medicines.removeAt(index);
+                       }
+                    
+                    else
+                    medicines[index].quantity-=1;
+                    itemcount-=1;
+                    
                     
                     
                     
@@ -201,7 +251,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                   FlatButton(
                     onPressed: (){
                       print('-----------------------'+widget.value.pid.toString());
-                      MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy);
+                      MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId,itemcount);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
                     },
                     shape: RoundedRectangleBorder(
@@ -246,7 +296,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '${medicines.length} medecines Added',
+                        '$itemcount medecines Added',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
@@ -275,7 +325,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
                        if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                      Payments payments= Payments('Medicines Order',medicines.toString()+" bill"+bill.toString(), widget.value.pharmacistID,medicines);
+                      Payments payments= Payments('Medicines Order',medicines.toString(), widget.value.pharmacistID,medicines, widget.value.bill,DateTime.now(), widget.value.responsibleId);
                       Navigator.of(context).pushNamed("/payments",arguments:payments);
                       /*if(result!=null){
                        print('*********************************order created');
@@ -305,4 +355,5 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
       ),
     );
   }
+
 }

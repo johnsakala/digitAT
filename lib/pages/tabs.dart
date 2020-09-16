@@ -25,7 +25,7 @@ class _BubblesState extends State<TabsWidget> with SingleTickerProviderStateMixi
     switch (page){
       case 0 :
         currentTitle = 'Home';
-        return Home(value: ["${widget.acountInfos[0]}","${widget.acountInfos[2]}",widget.acountInfos[1]]);
+        return Home();
       case 1 :
         currentTitle = 'chat';  
         return prefix0.Conversation();
@@ -34,7 +34,7 @@ class _BubblesState extends State<TabsWidget> with SingleTickerProviderStateMixi
         return AcountWidget(acountInfos:widget.acountInfos[1]);
       default:
         currentTitle = 'Home';
-        return Home(value: ["${widget.acountInfos[0]}","${widget.acountInfos[2]}",widget.acountInfos[1]]);
+        return Home();
 
     }
     

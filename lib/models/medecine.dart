@@ -4,13 +4,16 @@ class Medecine{
   String id =UniqueKey().toString();
   String name;
   String price;
+  int quantity;
+  double unitPrice;
   Medecine.init();
   Medecine(this.name,this.price);
+  Medecine.cart(this.name,this.price,this.quantity, this.unitPrice);
 
 @override
   String toString() {
     // TODO: implement toString
-    return this.id+" "+ this.name+" "+this.price;
+    return this.quantity.toString()+" "+ this.name+" "+this.price;
   }
 
 }

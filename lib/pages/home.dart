@@ -13,30 +13,33 @@ import 'dart:convert';
 import 'package:digitAT/api/doctors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 class Home extends StatefulWidget {
-  final List<dynamic> value;
-  const Home( {Key key, this.value}) : super(key: key);
+  
+  const Home( {Key key, }) : super(key: key);
  
   @override
   _HomeState createState() => _HomeState();
 }
 
 User currentUser=new User.init().getCurrentUser();
+
+
 class _HomeState extends State<Home> {
-  String name;
+  String name,city;
   @override
   void initState()  {
-    // TODO: implement initState
-    super.initState();
- 
    SharedPreferences.getInstance().then((SharedPreferences sp) {
       setState((){
         name = sp.getString('name');
+        city = sp.getString('city');
+    
       });
       
    });
+    super.initState();
   }
   @override
   Widget build(BuildContext context) {
+    print('-------------city'+city);
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
@@ -99,20 +102,20 @@ class _HomeState extends State<Home> {
             leading: Image(image: AssetImage('images/nurse.png'),),
             title:Text('Doctors'),
            onTap:(){
-              Navigator.of(context).pushNamed('/doctors');
+              Navigator.of(context).pushNamed('/doctorcategories', arguments: pageNavDoc);
            }
           ),
            ListTile(
             leading: Image(image: AssetImage('images/pill.png'),),
             title:Text('PharmaHub'),
                 onTap:(){
-                Navigator.of(context).pushNamed('/pharmacies');
+                Navigator.of(context).pushNamed('/pharmacies',arguments: pageNav);
            }
           ),
            ListTile(
             leading: Image(image: AssetImage('images/microscope.png'),),
           onTap: (){
-             Navigator.of(context).pushNamed('/bookTest');
+             Navigator.of(context).pushNamed('/imagingcentres', arguments: pageNavScan);
 
           },
             title:Text('ScaniT'),
@@ -121,12 +124,29 @@ class _HomeState extends State<Home> {
 
            ListTile(
             leading: Image(image: AssetImage('images/Hospitals.png'),),
+              onTap: (){
+             Navigator.of(context).pushNamed('/hospitals');
+
+          },
             title:Text('Hospitals'),
 
           ),
            ListTile(
             leading: Image(image: AssetImage('images/TheLab.png'),),
+            onTap: (){
+             Navigator.of(context).pushNamed('/labs', arguments: pageNavLab);
+
+          },
             title:Text('TheLab'),
+
+          ),
+             ListTile(
+            leading: Image(image: AssetImage('images/covid19-score.png'),),
+            onTap: (){
+             Navigator.of(context).pushNamed('/covidservices', arguments: pageNavCov);
+
+          },
+            title:Text('Cov-ID'),
 
           ),
 
@@ -173,7 +193,7 @@ class _HomeState extends State<Home> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(150)),
                       onPressed: (){
-                        Navigator.of(context).pushNamed('/doctors');
+                        Navigator.of(context).pushNamed('/doctorcategories', arguments: pageNavDoc);
                       },
                       child:ball("images/nurse.png",Theme.of(context).scaffoldBackgroundColor),
                     ),
@@ -184,7 +204,8 @@ class _HomeState extends State<Home> {
                       
                         borderRadius: BorderRadius.circular(150)),
                       onPressed: (){
-                        Navigator.of(context).pushNamed('/pharmacies');
+                        
+                        Navigator.of(context).pushNamed('/pharmacies',arguments: pageNav);
                       },
                       child:ball("images/pill.png",Theme.of(context).scaffoldBackgroundColor),
                     ),
@@ -194,7 +215,7 @@ class _HomeState extends State<Home> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(150)),
                       onPressed: (){
-                        Navigator.of(context).pushNamed('/bookTest');
+                        Navigator.of(context).pushNamed('/imagingcentres', arguments: pageNavScan);
                       },
                       child:ball("images/microscope.png",Theme.of(context).scaffoldBackgroundColor),
                     ),
@@ -340,7 +361,7 @@ class _HomeState extends State<Home> {
                 ),
                 FlatButton(
                   onPressed: (){
-                    Navigator.of(context).pushNamed("/doctors");
+                    Navigator.of(context).pushNamed('/doctorcategories', arguments: pageNavDoc);
                   },
                   child: Text(
                     'See All',
@@ -364,7 +385,7 @@ class _HomeState extends State<Home> {
                     List<Widget> data = snapshot.data;
                     return _doctorsListView(data);
                   } else if (snapshot.hasError) {
-                    return Text("${snapshot.error}");
+                    return Text("Please check your internet connection!");
                   }
                   return Container(
                       height: 80.0,
@@ -437,7 +458,7 @@ class _HomeState extends State<Home> {
                     subtitle: Column(
                       children: <Widget>[
                         Text(
-                          doctor.profession,
+                          doctor.profession==null?doctor.description:doctor.profession,
                           textAlign: TextAlign.left,
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -448,6 +469,26 @@ class _HomeState extends State<Home> {
                           children: <Widget>[
                             Icon(Icons.star,color: Colors.yellow,),
                             Text(doctor.state,style: TextStyle(fontFamily: 'Poppins',),),
+                           /* IconButton(
+              onPressed: () async{
+                  setState(() {
+                    
+                     doctor.isFavorited = !doctor.isFavorited;
+                     doctor.isFavorited? myDoctors.add(int.parse(doctor.userId)):
+                      myDoctors.remove(int.parse(doctor.userId));
+                      doctor.isFavorited
+                  ? _message='added to'
+                  : _message='removed from';
+                     
+                     });
+                     //await confirmDialog(context,_message);
+                     print(doctor.isFavorited);
+                     },
+                  
+              icon:doctor.isFavorited
+                  ? Icon(Icons.favorite,color:Colors.red)
+                  : Icon(Icons.favorite_border),
+            ),*/
                           ],
                         )
                       ],
@@ -468,11 +509,63 @@ class _HomeState extends State<Home> {
 
   }
   List<Widget> _doctorsList;
-  Future<List<Widget>> _fetchDoctors() async {
+   Future<List<Widget>> _fetchDoctors() async {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      '${webhook}user.get.json?UF_DEPARTMENT=$doctorsId&PERSONAL_CITY=${widget.value[1]}',
+      '${webhook}user.get.json?UF_DEPARTMENT=$doctorsId&PERSONAL_CITY=$city',
+    )
+        .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    List serverResponse = [];
+   _doctorsList = [];
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+        
+          //DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
+          
+          //serverResponse = doctors_list.result;
+          responseBody['result'].forEach((user) {
+          
+            print("------\n");
+            print(user['NAME']);
+            print("------\n");
+            if(user['PERSONAL_PHOTO']==null){
+              user['PERSONAL_PHOTO']="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
+            }
+          bool isFavoured= myDoctors.contains(user['ID']);
+            Doctor doc = Doctor.min(user['NAME']+' '+user['LAST_NAME'], user['PERSONAL_PROFESSION'], user['PERSONAL_PHOTO'], "4.2", Colors.transparent, user['ID'], user['WORK_POSITION'],isFavoured,'');
+            _doctorsList.add(
+               card(doc)
+            );
+          });
+          serverResponse = _doctorsList;
+          
+        } else {
+          serverResponse = [];
+          print(response.body);
+        }
+      } catch (error) {
+        print(error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    return serverResponse;
+  }
+
+ /* Future<List<Widget>> _fetchDoctors() async {
+//  showAlertDialog(context);
+    final http.Response response = await http
+        .get(
+      '${webhook}user.get.json?UF_DEPARTMENT=$doctorsId&PERSONAL_CITY=$city',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
@@ -491,7 +584,8 @@ class _HomeState extends State<Home> {
             if(user.pERSONALPHOTO==null){
               user.pERSONALPHOTO="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
             }
-            Doctor doc = Doctor.min(user.nAME+' '+user.lASTNAME, user.pERSONALPROFESSION, user.pERSONALPHOTO, "4.2", Colors.transparent, user.iD, user.pERSONALPROFESSION);
+            bool isFavoured= myDoctors.contains(user.iD);
+            Doctor doc = Doctor.min(user.nAME+' '+user.lASTNAME, user.pERSONALPROFESSION, user.pERSONALPHOTO, "4.2", Colors.transparent, user.iD, user.wORKPOSITION,isFavoured,'');
             _doctorsList.add(
                card(doc)
             );
@@ -515,7 +609,7 @@ class _HomeState extends State<Home> {
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
     return serverResponse;
-  }
+  }*/
 
   ListView _doctorsListView(data) {
     return ListView(

@@ -43,7 +43,7 @@ class _AppointmentsWidgetState extends State<AppointmentsWidget> {
                       children: <Widget>[
                         Container(
                           margin: const EdgeInsets.only(right: 25.0),
-                          child: ball(this.widget.appointment.doctor.avatar),
+                          child: ball(widget.appointment.doctor.avatar),
                           
                         ),
                         Container(
@@ -101,7 +101,7 @@ class _AppointmentsWidgetState extends State<AppointmentsWidget> {
       height: 60,width: 60.0,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(100.0),
-        image: DecorationImage(image: AssetImage(image), fit: BoxFit.cover,)
+        image: DecorationImage(image:  Image.network(image).image, fit: BoxFit.cover,)
       ),
     );
   }

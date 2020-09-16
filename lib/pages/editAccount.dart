@@ -74,6 +74,7 @@ pref.setString('profilePic', localImage.path);
     lname=widget.profile.lname;
     id=widget.profile.id;
     email= widget.profile.email;
+    gender= widget.profile.gender;
   }
 
   setDetails(String name) async{
@@ -411,7 +412,7 @@ pref.setString('name', name);
                             ),
                             child:  TextFormField(
                              
-                              
+                              initialValue: '${widget.profile.email}',
                                   decoration: InputDecoration(
                                   
                                labelText: 'Email'
@@ -521,10 +522,7 @@ pref.setString('name', name);
                       "display": "Female",
                       "value": "Female",
                     },
-                    {
-                      "display": "Other",
-                      "value": "Other",
-                    },
+                   
                   
                   
                   ],
@@ -625,13 +623,14 @@ pref.setString('name', name);
                   ),
                 ),
                 onPressed: () async{
+                  
                    if (_formKey.currentState.validate()) {
                   setState(() {
                     _load=true;
                   });
                     
                   // await uploadPhoto(_image);
-                 _result=await _editAccount(gender,name,lname,city,phoneNumber,birthDate);
+                 _result=await _editAccount(gender,name,lname,city,phoneNumber,email,birthDate);
                         //  await _createContact(gender, name, lname, city, phoneNumber, birthDate);
                   User.init().setCurrentUser(name+' '+lname, phoneNumber, _result.toString());
                   setDetails(name);
@@ -669,7 +668,7 @@ pref.setString('name', name);
     );
   }
 
-   Future <bool>_editAccount(String g, String name, String lname, String city, String phoneNumber, DateTime dob) async {
+   Future <bool>_editAccount(String gender, String name, String lname, String city, String phoneNumber, String email , DateTime dob) async {
 
   bool result=false;
     final http.Response response = await http.post(
@@ -686,8 +685,11 @@ pref.setString('name', name);
                     "LAST_NAME": lname, 
                     "STATUS_ID": "NEW", 
                     "OPENED": "Y", 
-                    "ASSIGNED_BY_ID": 1, 
-                    "PHONE": [ { "VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
+                    "ASSIGNED_BY_ID": 1,
+                    //"BIRTHDATE":dob, 
+                    "UF_CRM_5EE0B54E93F39":gender,
+                    "EMAIL": [ { "ID":widget.profile.emailId,"VALUE": email, "VALUE_TYPE": "WORK" } ] ,
+                    "PHONE": [ { "ID":widget.profile.phoneId,"VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
                     }
        })
         
@@ -699,7 +701,7 @@ pref.setString('name', name);
          }); 
          Map<String, dynamic> responseBody = jsonDecode(response.body);     
            result=responseBody['result'];
-        print(result);
+        print("/*/*/*/*/*"+result.toString());
  
        }
        else{
