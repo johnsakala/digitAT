@@ -26,7 +26,7 @@ class _EditAcountState extends State<EditAcount> {
   File _image;
      final _formKey = GlobalKey<FormState>();
     int id;
-    String city,baseImage, gender, name,sname,lname,email, phoneNumber;
+    String city,baseImage,imageName, gender, name,sname,lname,email, phoneNumber;
     bool  _result;
     var newFormat = DateFormat("dd-MMM-yyyy");
    bool _load= false;
@@ -46,15 +46,45 @@ class _EditAcountState extends State<EditAcount> {
            final bytes = _image.readAsBytesSync();
     String img64 = base64Encode(bytes);
     baseImage=img64;
-    imageJson=baseImage;
+    imageName = basename(_image.path);
     
     });
    
-    print('image path //////////////'+imageJson);
+   
   }
+ Future uploadImage()async{
+   var result;
+final http.Response response = await http.post(
+        '${webhook}disk.folder.uploadfile',
+         headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
 
+            "id": 60,
+            "data": {
+                "NAME": widget.profile.id
+            },
+            "fileContent":[imageName, baseImage] 
+       
+                    }
+       )
+        
+         ).catchError((error) => print('///////////////////////error'+error));
+       if(response.statusCode==200)
+       {  
+         setState(() {
+           _load=false;
+         }); 
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           result=responseBody['result'];
+        print("/*/*/*/*/*"+result.toString());
+ 
+       }
+       else{
+         print("***********************lead"+response.statusCode.toString());
+       }
+ }
 
- uploadPhoto(File _image) async{
+ /*uploadPhoto(File _image) async{
  final Directory dir= await getApplicationDocumentsDirectory();
 final String path = dir.path;
 final String fileName = basename(_image.path);
@@ -62,7 +92,7 @@ final File localImage = await _image.copy('$path/$fileName');
 SharedPreferences pref= await SharedPreferences.getInstance();
 pref.setString('profilePic', localImage.path);
   print(dir.listSync());
-}
+}*/
     @override
   void initState() {
     // TODO: implement initState
@@ -629,13 +659,13 @@ pref.setString('name', name);
                     _load=true;
                   });
                     
-                  // await uploadPhoto(_image);
+                  
                  _result=await _editAccount(gender,name,lname,city,phoneNumber,email,birthDate);
-                        //  await _createContact(gender, name, lname, city, phoneNumber, birthDate);
+                        
                   User.init().setCurrentUser(name+' '+lname, phoneNumber, _result.toString());
                   setDetails(name);
                     
-                    
+                    await uploadImage();
                     if(_result){
                     Navigator.of(context).pushNamed('/home',arguments:[name,id,city]);
 

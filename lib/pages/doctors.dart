@@ -1,5 +1,6 @@
 import 'package:digitAT/api/url.dart';
 import 'package:digitAT/config/constants.dart';
+import 'package:digitAT/models/model/ContactModel.dart';
 import 'package:digitAT/models/navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/doctor.dart' as model;
@@ -11,18 +12,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:digitAT/models/doctor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+//List<ContactModel> _searchResult = [];
+//List<ContactModel> _contacts = [];
+
 class DoctorsList extends StatefulWidget {
-  final PageNav pageNav;
- const DoctorsList({Key key,this.pageNav}) : super(key: key); 
+  
+ const DoctorsList({Key key}) : super(key: key); 
   @override
   _DoctorsListState createState() => _DoctorsListState();
 }
@@ -45,7 +47,7 @@ List myDocs=[];
   void initState() {
     this.doctorsList = new model.DoctorsList();
     super.initState();
-    print(widget.pageNav.id);
+    
     _getList().then((value) {
      myDocs.addAll(value);
     });
@@ -69,7 +71,7 @@ List myDocs=[];
         ),
         backgroundColor: Theme.of(context).accentColor,
         title: Text(
-          '${widget.pageNav.title}',
+          'Doctors',
           style: TextStyle(
             fontSize: 22.0,
             fontFamily: 'Poppins',
@@ -111,7 +113,7 @@ List myDocs=[];
                     ),
                     child: Column(
                       children: <Widget>[
-                       /* TypeAheadField(
+                        TypeAheadField(
   textFieldConfiguration: TextFieldConfiguration(
   
     
@@ -152,7 +154,7 @@ List myDocs=[];
   onSuggestionSelected: (suggestion) {
    Navigator.of(context).pushNamed('/doctorProfil', arguments: suggestion);
   },
-),*/
+),
           
             Container(
                 decoration: BoxDecoration(
@@ -163,7 +165,7 @@ List myDocs=[];
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         List<Doctor> data = snapshot.data;
-                        print("*-*-*-*-*-*-*-*-*-*-*-*-"+snapshot.data[0].resId);
+                      
                         return _jobsListView(data);
                       } else if (snapshot.hasError) {
                         return Text("${snapshot.error}");
@@ -189,42 +191,42 @@ List responseList = [];
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      '${webhook}user.get.json?UF_DEPARTMENT=${widget.pageNav.id}',
+      '${webhook}crm.contact.list?filter[UF_CRM_1604303008535]=30',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
-    List serverResponse = [];
+    List <Doctor> serverResponse = [];
     List<Doctor> _doctorsList = [];
     if (response.statusCode == 200) {
       try {
+        print('+++++++++++++++++++++++++++++++++++++++++++++++++++result ${responseBody["result"]}');
         if (responseBody["result"] != null) {
-        
           //DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
           
           //serverResponse = doctors_list.result;
           responseBody['result'].forEach((user) {
-            print("/*/*/*/*/*/*/*/*/*/*/*/* user");
+            print(" user");
             print("------\n");
-            print(user['NAME']);
+            print(user['UF_CRM_1604090065799']);
             print("------\n");
-            if(user['PERSONAL_PHOTO']==null){
-              user['PERSONAL_PHOTO']="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
+            if(user['UF_CRM_1604303532891']==null){
+              user['UF_CRM_1604303532891']="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
             }
-            bool isFavoured= myDocs.contains(int.parse(user['ID']));
+            bool isFavoured= myDocs.contains(int.parse(user['UF_CRM_1598992339725']));
             _doctorsList.add(
               new Doctor(
                   user['NAME'] + " " + user['LAST_NAME'],
-                  " ${user['PERSONAL_PROFESSION']} 26 years of experience ",
-                  user['PERSONAL_PHOTO'],
-                  "Closed To day",
+                  " ${user['UF_CRM_1604090065799']} 26 years of experience ",
+                 "${user['UF_CRM_1604303532891']}",
+                  "Open today",
                   Colors.green,
-                  user['ID'],isFavoured,
-                  widget.pageNav.responsibleId),
+                 "${user['UF_CRM_1598992339725']}",isFavoured,
+                  '1'),
             );
           });
 
           serverResponse = _doctorsList;
-          
+          print('----*------*-------* ${serverResponse.length}');
         } else {
           serverResponse = [];
           print(response.body);
@@ -246,38 +248,40 @@ List responseList = [];
 
 
 Future<List<Doctor>> _fetchSugestions(String name) async {
-//  showAlertDialog(context);
+
     final http.Response response = await http
-        .get(
-      '${webhook}user.get.json?UF_DEPARTMENT=${widget.pageNav.id}&NAME=$name',
+       .get(
+         '${webhook}crm.contact.list?filter[UF_CRM_1604303008535]=30',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
-    List serverResponse = [];
+    List <Doctor> serverResponse = [];
     List<Doctor> _doctorsList = [];
     if (response.statusCode == 200) {
       try {
         if (responseBody["result"] != null) {
-//        print(responseBody);
-          DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
-          serverResponse = doctors_list.result;
-          doctors_list.result.forEach((user) {
+        
+          //DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
+          
+          //serverResponse = doctors_list.result;
+          responseBody['result'].forEach((user) {
+            print("/*/*/*/*/*/*/*/*/*/*/*/* user");
             print("------\n");
-            print(user.nAME);
+            print(user['UF_CRM_1604303008535']);
             print("------\n");
-            if(user.pERSONALPHOTO==null){
-              user.pERSONALPHOTO="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
+            if(user['UF_CRM_1604303532891']==null){
+              user['UF_CRM_1604303532891']="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
             }
-            bool isFavoured= myDoctors.contains(int.parse(user.iD));
+            bool isFavoured= myDocs.contains(int.parse(user['UF_CRM_1598992339725']));
             _doctorsList.add(
               new Doctor(
-                  user.nAME + " " + user.lASTNAME,
-                  " ${user.pERSONALPROFESSION} 26 years of experience ",
-                  user.pERSONALPHOTO,
-                  "Closed To day",
+                  user['NAME'] + " " + user['LAST_NAME'],
+                  " ${user['UF_CRM_1604090065799']} 26 years of experience ",
+                  "${user['UF_CRM_1604303532891']}",
+                  "Open today",
                   Colors.green,
-                  user.iD,isFavoured,
-                  widget.pageNav.responsibleId),
+                  "${user['UF_CRM_1598992339725']}",isFavoured,
+                  '1'),
             );
           });
 

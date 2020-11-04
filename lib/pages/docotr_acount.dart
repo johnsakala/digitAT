@@ -1,11 +1,21 @@
+import 'dart:async';
 import 'dart:convert';
-
+import 'package:digitAT/main.dart';
+import 'package:digitAT/models/model/User.dart';
+import 'package:digitAT/api/url.dart';
 import 'package:digitAT/config/constants.dart';
+import 'package:digitAT/models/model/ContactModel.dart';
+import 'package:digitAT/services/FirebaseHelper.dart';
+import 'package:digitAT/services/helper.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:digitAT/models/doctor.dart';
-import 'package:digitAT/models/user.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+
 class DoctorAcount extends StatefulWidget {
   final Doctor doctor;
   const DoctorAcount({Key key,this.doctor}) : super(key: key);
@@ -14,11 +24,27 @@ class DoctorAcount extends StatefulWidget {
 }
 class _DoctorAcountState extends State<DoctorAcount> {
   Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
-  User currentUser = new User.init().getCurrentUser();
+  
+  User user, usr;
   String _message;
+  ContactModel contactModel = ContactModel.init();
+  
+  final fireStoreUtils = FireStoreUtils();
+  @override
+  void initState(){
+  super.initState();
+   SharedPreferences.getInstance().then((SharedPreferences sp) {
+     setState(() {
+       user=User.fromJson(jsonDecode(sp.getString('user')));
+       
+     });
+   });
+
+   fireStoreUser=user;
+  }
   @override
   Widget build(BuildContext context) {
-      print('----------------'+ widget.doctor.resId);
+      print('---------------- res'+ widget.doctor.resId);
 
     return Scaffold(
       appBar: AppBar(
@@ -425,7 +451,11 @@ class _DoctorAcountState extends State<DoctorAcount> {
                   RaisedButton(
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onPressed: (){
+                    onPressed: ()async{
+                      await _fetchDoctors();
+                      await _onContactButtonClicked(contactModel);
+                                           
+                      hideProgress();
                       Navigator.of(context).pushNamed("/firstDoctorBook", arguments: widget.doctor);
                     },
                     shape: RoundedRectangleBorder(
@@ -545,5 +575,98 @@ class _DoctorAcountState extends State<DoctorAcount> {
  var list = jsonEncode(docs);
 SharedPreferences preferences= await SharedPreferences.getInstance();
 preferences.setString('docs', list);
+  }
+  List responseList = [];
+  Future _fetchDoctors() async {
+
+    final http.Response response = await http
+        .get(
+      '${webhook}crm.contact.list?filter[UF_CRM_1598992339725]=${widget.doctor.userId}&select[]=UF_CRM_1603851628169',
+    )
+        .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+   
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+        var id=responseBody["result"][0]['UF_CRM_1603851628169'];
+ print('**********************************id $id');
+      Stream<User> controller= fireStoreUtils.getUserByID(id);
+       controller.listen((data) {
+         setState(() {
+           contactModel= ContactModel(type:ContactType.UNKNOWN,user:data);
+         });
+         print('---------------------${contactModel.user.userID}');
+        });
+        
+          
+        } else {
+          
+          print(response.body);
+        }
+      } catch (error) {
+        print(error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    
+  }
+String getStatusByType(ContactType type) {
+    switch (type) {
+      case ContactType.ACCEPT:
+        return 'accept';
+        break;
+      case ContactType.PENDING:
+        return 'cancel';
+        break;
+      case ContactType.FRIEND:
+        return 'unfriend';
+        break;
+      case ContactType.UNKNOWN:
+        return 'addFriend';
+        break;
+      case ContactType.BLOCKED:
+        return 'unblock';
+        break;
+      default:
+        return 'addFriend';
+    }
+  }
+
+  Future _onContactButtonClicked(ContactModel contact) async {
+    switch (contact.type) {
+      case ContactType.ACCEPT:
+        showProgress(context, 'please wait...', false);
+        await fireStoreUtils.onFriendAccept(contact.user, MyAppState.currentUser);
+         contact.type = ContactType.FRIEND;
+
+        break;
+      case ContactType.FRIEND:
+       
+    
+        break;
+      case ContactType.PENDING:
+        showProgress(context, 'removingFriendshipRequest', false);
+        await fireStoreUtils.onCancelRequest(
+            contact.user);
+        contact.type = ContactType.UNKNOWN;
+
+        break;
+      case ContactType.BLOCKED:
+        break;
+      case ContactType.UNKNOWN:
+        //showProgress(context, 'please wait...', false);
+       print(contact.user.userID);
+        await fireStoreUtils.sendFriendRequest(contact.user);
+       contact.type = ContactType.PENDING;
+        break;
+    }
   }
 }

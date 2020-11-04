@@ -1,13 +1,12 @@
-import 'package:flutter/gestures.dart';
+
+import 'package:digitAT/config/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:digitAT/widgets/alerts.dart';
 import 'package:flutter_country_picker/flutter_country_picker.dart';
 import 'package:flutter/services.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'package:digitAT/pages/verification_number.dart';
-import 'package:flutter_verification_code_input/flutter_verification_code_input.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 class PhoneLogin extends StatefulWidget {
   @override
@@ -18,8 +17,9 @@ class _PhoneLoginState extends State<PhoneLogin> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String countryCode = "";
   String phoneNumber = "";
-  String smsOTP;
+  static String smsOTP;
   bool _loading=false;
+  
   @override
   Widget build(BuildContext context) {
       return Scaffold(
@@ -110,7 +110,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                           ),
                             child:Center(
                               child: FormBuilderTextField(
-                                initialValue: "",
+                                initialValue: null,
                                 controller: phoneNumberController,
                                 attribute: 'phoneNumber',
                                 validators: [
@@ -172,6 +172,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
   Country _selected=Country.ZW;
   String phoneNo;
   String verificationId;
+  static FirebaseUser user ;
   String errorMessage = '';
   FirebaseAuth _auth = FirebaseAuth.instance;
   TextEditingController phoneNumberController = new TextEditingController();
@@ -221,10 +222,12 @@ class _PhoneLoginState extends State<PhoneLogin> {
            
             AuthResult result = await _auth.signInWithCredential(credential);
 
-          FirebaseUser user = result.user;
+           user = result.user;
+           firebaseUser=user;
 
           if(user != null){
                Navigator.of(context).pop(context);
+
                  Navigator.of(context).pushNamed('/createAcount',arguments: [0,user.phoneNumber]).then((value){
                    Navigator.of(context).pop(context);
                     });

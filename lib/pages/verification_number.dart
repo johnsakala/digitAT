@@ -2,31 +2,43 @@
 import 'dart:convert';
 
 import 'package:digitAT/api/url.dart';
+import 'package:digitAT/config/constants.dart';
+import 'package:digitAT/pages/partner/pages/phoneNumber_login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:digitAT/models/user.dart';
 import'package:flutter_verification_code_input/flutter_verification_code_input.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:digitAT/models/model/User.dart' as fUser;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:digitAT/constants.dart';
+import 'package:digitAT/main.dart';
+import 'package:digitAT/models/model/User.dart';
+import 'package:digitAT/services/FirebaseHelper.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 //import 'package:flutter/services.dart';
 
 class VerificationNumber extends StatefulWidget {
   final String userPhoneNumber, verificationId;
+ 
   VerificationNumber(this.userPhoneNumber, this.verificationId);
   @override
   _VerificationNumberState createState() => _VerificationNumberState();
 }
 
 class _VerificationNumberState extends State<VerificationNumber> {
-  User currentUser=new User.init().getCurrentUser();
+
    var _code;
    bool load=false;
+   final phoneLogin= PhoneLogin();
+   String fname,lname,email;
 
   final GlobalKey<FormState> _formKey =  GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKy =  GlobalKey<FormState>();
     final GlobalKey<ScaffoldState> _scaffoldstate =
       new GlobalKey<ScaffoldState>();
   @override
@@ -298,14 +310,88 @@ class _VerificationNumberState extends State<VerificationNumber> {
   Future verifiedSuccess(String phone) async {
     int _id;
      print('*********************** $phone');
+     await detailsDialog(context);
     SharedPreferences preferences= await SharedPreferences.getInstance();
-     _id= await _createLead( phone);
-     preferences.setInt('id', _id);
-     preferences.setString('name',phone);
+         bool isPartner=preferences.getBool('isPartner');
+
+                 
+                                 fUser.User fuser = fUser.User(
+            email: email,
+            firstName: fname,
+            phoneNumber: widget.userPhoneNumber,
+            userID: firebaseUser.uid,
+            //lastOnlineTimestamp: Timestamp.now(),
+            active: true,
+            fcmToken: await FirebaseMessaging().getToken(),
+            lastName: lname,
+            // settings: Settings(allowPushNotifications: true),
+            
+            
+            profilePictureURL:'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU');
+        
+        
+        await FireStoreUtils.firestore
+            .collection(USERS)
+            .document(firebaseUser.uid)
+            .setData(fuser.toJson());
+        
+        MyAppState.currentUser = fuser;
+        fireStoreUser=fuser;
+  preferences.setInt('id', _id);
+     preferences.setString('name',fname);
      preferences.setString('city','Harare');
-    Navigator.of(context).pushNamed('/home',arguments: [phone,_id,'Harare']);
+     preferences.setString('user', jsonEncode( fuser.toJson()));
+        if(!isPartner){
+     _id= await _createLead( phone);
+     await _createContact(widget.userPhoneNumber, fuser.userID);
+   
+  }
+    isPartner?Navigator.of(context).pushNamed('/createAcount', arguments: [fuser.userID, widget.userPhoneNumber]):Navigator.of(context).pushNamed('/homePatient',
+    arguments: [fname, _id, 'Harare']);
          print("Successfully Verified user number");
   }
+
+  Future <int>_createContact(String phoneNumber,String userID) async {
+
+  int result=0;
+  setState(() {
+    load=true;
+  });
+    final http.Response response = await http.post(
+        '${webhook}crm.contact.add',
+         headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+         
+         "fields":{ 
+                    "NAME": '', 
+                    "LAST_NAME": '', 
+                    "OPENED": "Y", 
+                    "ASSIGNED_BY_ID": 1, 
+                    "TYPE_ID": "CLIENT",
+                    "UF_CRM_1603851628169":userID,
+                    
+                
+                            "PHONE": [ { "VALUE":phoneNumber, "VALUE_TYPE": "WORK" } ] 
+       }
+       })
+        
+         ).catchError((error) => print('///////////////////////error'+error));
+       if(response.statusCode==200)
+       {  
+         setState(() {
+           load=false;
+         }); 
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           result=responseBody['result'];
+        print("//////////"+result.toString());
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       return result;
+  }
+
    Future <int>_createLead( String phoneNumber) async {
 //  showAlertDialog(context);
   int result=0;
@@ -315,14 +401,14 @@ class _VerificationNumberState extends State<VerificationNumber> {
        body: jsonEncode({
          
         "fields":{  "TITLE": "digitAT Phone", 
-                    "NAME": " ", 
+                    "NAME": fname, 
                     "SECOND_NAME": " ", 
-                    "LAST_NAME": " ", 
+                    "LAST_NAME": lname, 
                     "STATUS_ID": "NEW", 
                     "OPENED": "Y", 
                     "ASSIGNED_BY_ID": 1, 
                     "ADDRESS_CITY":"Harare",
-                    "EMAIL":  [ { "VALUE": "me@digitat.info", "VALUE_TYPE": "WORK" } ],
+                    "EMAIL":  [ { "VALUE": email, "VALUE_TYPE": "WORK" } ],
                     "PHONE": [ { "VALUE": phoneNumber, "VALUE_TYPE": "WORK" } ] 
        }
        })
@@ -342,6 +428,110 @@ class _VerificationNumberState extends State<VerificationNumber> {
          print(response.statusCode);
        }
        return result;
+  }
+
+  Future<bool> detailsDialog(
+      BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Personal Details'),
+            content: Container(
+                height: 200,
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      
+                       Form(
+                          key: _formKy,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: TextFormField(
+                                  decoration: InputDecoration(
+                                    hintText: 'First Name'
+                                  ),
+                                 onChanged: (value){
+                                   setState(() {
+                                     fname=value;
+                                   });
+                                 },
+                                 validator: (value) {
+              if (value.isEmpty) {
+                return 'Please enter first name';
+              }
+              return null;
+            },
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: TextFormField(
+                                  decoration: InputDecoration(
+                                    hintText: 'Last Name'
+                                  ),
+                                 onChanged: (value){
+                                   setState(() {
+                                     lname=value;
+                                   });
+                                 },
+                                 validator: (value) {
+              if (value.isEmpty) {
+                return 'Please enter last name';
+              }
+              return null;
+            },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child:TextFormField(
+                                  decoration: InputDecoration(
+                                    hintText: 'Email'
+                                  ),
+                                 onChanged: (value){
+                                   setState(() {
+                                     email=value;
+                                   });
+                                 },
+                                 validator: (value) {
+              if (value.isEmpty) {
+                return 'Please enter email';
+              }
+              return null;
+            },
+                                ),
+                              )
+                            ])
+                    
+                    )
+                    ]
+                    )
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              
+              FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                color: Theme.of(context).accentColor,
+                child: Text('Submit'),
+                onPressed: () {
+                 if (_formKey.currentState.validate()) {
+                                      _formKey.currentState.save();
+                                    
+                  Navigator.of(context).pop();
+                 }
+                },
+              )
+            ],
+          );
+        });
   }
 
 }

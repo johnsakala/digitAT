@@ -249,8 +249,8 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
                               colors: [Colors.red[200],Colors.blue[200]],
                               begin: const FractionalOffset(0.0, 0.0),
                               end: const FractionalOffset(0.5, 0.0),
-                              stops: [0.0,1.0],
-                              tileMode: TileMode.clamp,
+                             stops: [0.0,1.0],
+                            tileMode: TileMode.clamp,
                             )
                           ),
                           child: Text(
@@ -288,7 +288,7 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
                             borderRadius: BorderRadius.circular(20),
                             //color: Colors.grey,
                             gradient: LinearGradient(
-                              colors: [Colors.lightBlue[200],Colors.lightGreen[200]],
+                          colors: [Colors.lightBlue[200],Colors.lightGreen[200]],
                               begin: const FractionalOffset(0.0, 0.0),
                               end: const FractionalOffset(0.5, 0.0),
                               stops: [0.0,1.0],

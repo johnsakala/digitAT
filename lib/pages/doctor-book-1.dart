@@ -203,8 +203,7 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                                   colors: [Colors.lightBlue[200],Colors.lightGreen[200]],
                                   begin: const FractionalOffset(0.0, 0.0),
                                   end: const FractionalOffset(0.5, 0.0),
-                                  stops: [0.0,1.0],
-                                  tileMode: TileMode.clamp,
+                                  
                                 )
                               ),
                               child: Text(
@@ -246,8 +245,8 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                                   colors: [Colors.yellow[100],Colors.green[200]],
                                   begin: const FractionalOffset(0.0, 0.0),
                                   end: const FractionalOffset(0.5, 0.0),
-                                  stops: [0.0,1.0],
-                                  tileMode: TileMode.clamp,
+                                  //stops: [0.0,1.0],
+                                  //tileMode: TileMode.clamp,
                                 )
                               ),
                               child: Text(

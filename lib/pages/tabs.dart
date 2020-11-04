@@ -1,7 +1,13 @@
+import 'dart:convert';
+
+import 'package:digitAT/comm/conversations/ConversationsScreen.dart';
+import 'package:digitAT/config/constants.dart';
+import 'package:digitAT/models/model/User.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:digitAT/pages/acount.dart';
 import 'package:digitAT/pages/conversations.dart' as prefix0;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 
 class TabsWidget extends StatefulWidget {
@@ -18,6 +24,22 @@ class TabsWidget extends StatefulWidget {
 }
 
 class _BubblesState extends State<TabsWidget> with SingleTickerProviderStateMixin {
+  User user;
+  String id;
+ 
+  @override
+  void initState(){
+  super.initState();
+   SharedPreferences.getInstance().then((SharedPreferences sp) {
+     setState(() {
+       user=User.fromJson(jsonDecode(sp.getString('user')));
+     id= sp.getString('id');
+     });
+   });
+   print(id);
+   fireStoreUser=user;
+  }
+  
   AnimationController _controller;
   int _page = 0;
   String currentTitle = 'Home';
@@ -28,7 +50,7 @@ class _BubblesState extends State<TabsWidget> with SingleTickerProviderStateMixi
         return Home();
       case 1 :
         currentTitle = 'chat';  
-        return prefix0.Conversation();
+        return ConversationsScreen(user: user);
       case 2 :
         currentTitle = 'profile';
         return AcountWidget(acountInfos:widget.acountInfos[1]);

@@ -495,7 +495,10 @@ setState(() {
                        Profile profile=Profile.min(id, name, city);
                            
                        await confirmDialog(context);
-                        Navigator.of(context).pushNamed("/home",arguments:[profile.name,profile.id,profile.city]);
+                           Navigator.of(context).pushNamed("/homePatient",
+                            arguments: [fname, 1, 'Harare']);
+                    
+                        //Navigator.of(context).pushNamed("/home",arguments:[profile.name,profile.id,profile.city]);
                      /*  if(result!=null){
                        print('*********************************appointment created');
                       }*/

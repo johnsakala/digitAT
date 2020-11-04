@@ -49,6 +49,7 @@ class _AcountWidgetState extends State<AcountWidget> {
   void initState() {
     super.initState();
     _getResults();
+    print(widget.acountInfos);
   }
 
   User currentUser = new User.init().getCurrentUser();
@@ -94,7 +95,7 @@ class _AcountWidgetState extends State<AcountWidget> {
                                         ? ball(photoUrl, Colors.transparent)
                                         : ball(
                                             snapshot
-                                                .data['UF_CRM_1597424448103'],
+                                                .data['UF_CRM_1597424448103'].toString(),
                                             Colors.transparent)
                                     ,
                                 Expanded(
@@ -188,7 +189,7 @@ class _AcountWidgetState extends State<AcountWidget> {
                                     snapshot.data['EMAIL'][0]['VALUE'],
                                     snapshot.data['EMAIL'][0]['ID'],
                                     snapshot.data['PHONE'][0]['ID'],
-                                    snapshot.data['UF_CRM_5EE0B54E93F39']);
+                                    snapshot.data['UF_CRM_5EE0B54E93F39'].toString());
                                 Navigator.of(context).pushNamed('/editAcount',
                                     arguments: profile);
                               },

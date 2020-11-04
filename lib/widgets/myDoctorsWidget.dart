@@ -1,5 +1,18 @@
+import 'package:digitAT/comm/chat/ChatScreen.dart';
+import 'package:digitAT/models/model/ConversationModel.dart';
+import 'package:digitAT/models/model/HomeConversationModel.dart';
+import 'package:digitAT/models/model/User.dart';
+import 'package:digitAT/services/FirebaseHelper.dart';
+import 'package:digitAT/services/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/doctor.dart' as model;
+import 'package:digitAT/main.dart';
+
+List<User> _friendsSearchResult = [];
+List<HomeConversationModel> _conversationsSearchResult = [];
+List<User> _friends = [];
+List<HomeConversationModel> _conversations = [];
+
 class MyDoctorsCardWidget extends StatefulWidget {
   final model.Doctor doctors;
   const MyDoctorsCardWidget({Key key, this.doctors}) : super(key: key);
@@ -9,6 +22,25 @@ class MyDoctorsCardWidget extends StatefulWidget {
 }
 
 class _MyDoctorsCardWidgetState extends State<MyDoctorsCardWidget> {
+
+  final fireStoreUtils= FireStoreUtils();
+  List<User> _friendsSearchResult = [];
+  
+  Future<List<User>> _friendsFuture;
+  Stream<List<HomeConversationModel>> _conversationsStream;
+  User friend ;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fireStoreUtils.getBlocks().listen((shouldRefresh) {
+      if (shouldRefresh) {
+        setState(() {});
+      }
+    });
+    _friendsFuture = fireStoreUtils.getFriends();
+   // _conversationsStream = fireStoreUtils.getConversations(MyAppState.currentUser.userID);
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -76,17 +108,44 @@ class _MyDoctorsCardWidgetState extends State<MyDoctorsCardWidget> {
                         ),
                       ],
                     ),
-                    Container(
+                    /*Container(
                       child: IconButton(  
                         padding: EdgeInsets.all(0),
-                        onPressed: (){
+                        onPressed: ()async{
+ 
+
+      
+  
                           Navigator.of(context).pushNamed('/chat');
+                          /* String channelID;
+                            if ("1"
+                                .compareTo("2") <
+                                0) {
+                              channelID =
+                                  "1" +"2";
+                            } else {
+                              channelID =
+                                  "2" + "1";
+                            }
+                            ConversationModel conversationModel =
+                            await fireStoreUtils
+                                .getChannelByIdOrNull(
+                                channelID);
+                            push(
+                                context,
+                                ChatScreen(
+                                    homeConversationModel:
+                                    HomeConversationModel(
+                                        isGroupChat: false,
+                                        members: [friend],
+                                        conversationModel:
+                                        conversationModel)));*/
                         },
                         icon: Icon(Icons.chat_bubble_outline),
                         iconSize: 20,
                         color: Theme.of(context).accentColor,
                       ),
-                    ),
+                    ),*/
                   ],
                 ),
               ),
@@ -108,5 +167,36 @@ class _MyDoctorsCardWidgetState extends State<MyDoctorsCardWidget> {
 
       ),
     );
+    _onSearch(String text) {
+    _friendsSearchResult.clear();
+    _conversationsSearchResult.clear();
+    if (text.isEmpty) {
+      setState(() {});
+      return;
+    }
+    _friends.forEach((friend) {
+      if (friend.fullName().toLowerCase().contains(text.toLowerCase())) {
+        _friendsSearchResult.add(friend);
+      }
+    });
+
+    _conversations.forEach((conversation) {
+      if (conversation.isGroupChat) {
+        if (conversation.conversationModel.name
+            .toLowerCase()
+            .contains(text.toLowerCase())) {
+          _conversationsSearchResult.add(conversation);
+        }
+      } else {
+        if (conversation.members.first
+            .fullName()
+            .toLowerCase()
+            .contains(text.toLowerCase())) {
+          _conversationsSearchResult.add(conversation);
+        }
+      }
+    });
+    setState(() {});
+  }
   }
 }

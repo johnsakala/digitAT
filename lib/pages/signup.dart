@@ -1,10 +1,18 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:digitAT/api/url.dart';
+import 'package:digitAT/config/constants.dart';
+import 'package:digitAT/models/model/User.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/user.dart';
+import 'package:digitAT/models/model/User.dart' as fUser;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
+import 'package:digitAT/main.dart';
+import 'package:digitAT/constants.dart';
+import 'package:digitAT/services/FirebaseHelper.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,7 +22,7 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  User currentUser = new User.init().getCurrentUser();
+  AuthResult result;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
   var _user;
@@ -106,10 +114,17 @@ class _SignUpState extends State<SignUp> {
         onLoginStatusChanged(true, profileData: profile);
         AuthCredential credential =
             FacebookAuthProvider.getCredential(accessToken: token);
-
+        
         // this line do auth in firebase with your facebook credential.
         final AuthResult authResult =
             await _auth.signInWithCredential(credential);
+
+            print('///////////////// $authResult');
+            setState(() {
+              result=authResult;
+            });
+
+            
         final FirebaseUser user = authResult.user;
         assert(!user.isAnonymous);
         assert(await user.getIdToken() != null);
@@ -121,6 +136,7 @@ class _SignUpState extends State<SignUp> {
         });
         break;
     }
+     print('///////////////// $result');
   }
 
   Future<String> signInWithGoogle() async {
@@ -217,7 +233,7 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                 ),
-                Container(
+                /*Container(
                   margin: EdgeInsets.only(top: 20.0, right: 50.0, left: 50.0),
                   height: 40,
                   decoration: BoxDecoration(
@@ -238,22 +254,41 @@ class _SignUpState extends State<SignUp> {
                         });
                         SharedPreferences preferences =
                             await SharedPreferences.getInstance();
-                        print(profileData);
-                        List url = profileData.photoUrl.split('/');
+                        print('***********************$profileData');
+                        //List url = profileData.photoUrl.split('/');
 
-                        splitNames(profileData.displayName);
+                        splitNames(profileData['name']);
                         int response = await _createLead(
-                            profileData.email,
-                            'https://graph.facebook.com/${url[3]}/picture?width=200',
+                            profileData['email'],
+                            'https://graph.facebook.com/${profileData['id']}/picture?width=200',
                             fname,
                             sname,
                             lname,
                             'Facebook');
                         preferences.setInt('id', response);
                         preferences.setString('name', fname);
-                        preferences.setString('email',profileData.email);
+                        preferences.setString('email',profileData['email']);
                         preferences.setString('city', 'Harare');
-                        Navigator.of(context).pushNamed("/home",
+                        fUser.User user = fUser.User(
+            email: profileData['email'],
+            firstName: fname,
+            phoneNumber: "0404",
+            userID: result.user.uid,
+            lastOnlineTimestamp: Timestamp.now(),
+            active: true,
+            fcmToken: await FirebaseMessaging().getToken(),
+            lastName: lname,
+            settings: Settings(allowPushNotifications: true),
+            profilePictureURL: 'https://graph.facebook.com/${profileData['id']}/picture?width=200');
+        await FireStoreUtils.firestore
+            .collection(USERS)
+            .document(result.user.uid)
+            .setData(user.toJson());
+      await  _createContact( fname, lname, profileData['email'],result.user.uid);
+        MyAppState.currentUser = user;
+        fireStoreUser=user;
+        print('-----------------------------------${MyAppState.currentUser}');
+                        Navigator.of(context).pushNamed("/homePatient",
                             arguments: [fname, response, 'Harare']);
                       });
                     },
@@ -282,7 +317,7 @@ class _SignUpState extends State<SignUp> {
                       ),
                     ),
                   ),
-                ),
+                ),*/
                 Container(
                   margin: EdgeInsets.only(top: 20.0, right: 50.0, left: 50.0),
                   height: 40,
@@ -304,14 +339,36 @@ class _SignUpState extends State<SignUp> {
                         });
                         SharedPreferences preferences =
                             await SharedPreferences.getInstance();
+                            print(_user.uid);
                         splitNames(_user.displayName);
                         int response = await _createLead(_user.email,
                             _user.photoUrl, fname, sname, lname, "Gmail");
+                          await  _createContact( fname, lname, _user.email,_user.uid);
                         preferences.setInt('id', response);
                         preferences.setString('name', fname);
                         preferences.setString('email',_user.email);
                         preferences.setString('city', 'Harare');
-                        Navigator.of(context).pushNamed("/home",
+
+                                 fUser.User user = fUser.User(
+            email: _user.email,
+            firstName: fname,
+            phoneNumber: "0404",
+            userID: _user.uid,
+            //lastOnlineTimestamp: Timestamp.now(),
+            active: true,
+            fcmToken: await FirebaseMessaging().getToken(),
+            lastName: lname,
+           // settings: Settings(allowPushNotifications: true),
+            profilePictureURL:_user.photoUrl);
+        await FireStoreUtils.firestore
+            .collection(USERS)
+            .document(_user.uid)
+            .setData(user.toJson());
+        
+        MyAppState.currentUser = user;
+        fireStoreUser=user;
+       preferences.setString('user', jsonEncode( user.toJson()));
+                        Navigator.of(context).pushNamed("/homePatient",
                             arguments: [fname, response, 'Harare']);
                       });
                     },
@@ -436,5 +493,46 @@ class _SignUpState extends State<SignUp> {
       print(response.statusCode);
     }
     return result;
+  }
+    
+  Future <int>_createContact( String fName, String lName, String email,String userID) async {
+
+  int result=0;
+  setState(() {
+    isLoading=true;
+  });
+    final http.Response response = await http.post(
+        '${webhook}crm.contact.add',
+         headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+         
+         "fields":{ 
+                    "NAME": fName, 
+                    "LAST_NAME": lName, 
+                    "OPENED": "Y", 
+                    "ASSIGNED_BY_ID": 1, 
+                    "TYPE_ID": "CLIENT",
+                    "UF_CRM_1603851628169":userID,
+                    
+                
+                            "EMAIL": [ { "VALUE":email, "VALUE_TYPE": "WORK" } ] 
+       }
+       })
+        
+         ).catchError((error) => print('///////////////////////error'+error));
+       if(response.statusCode==200)
+       {  
+         setState(() {
+           isLoading=false;
+         }); 
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           result=responseBody['result'];
+        print("//////////"+result.toString());
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       return result;
   }
 }

@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:digitAT/widgets/searchWidget.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class Pharmacies extends StatefulWidget {
   final PageNav pageNav;
   const Pharmacies({Key key, this.pageNav}):super(key:key);
@@ -19,41 +20,9 @@ class Pharmacies extends StatefulWidget {
 
 class _PharmaciesState extends State<Pharmacies> {
   User currentUser=User.init().getCurrentUser();
-  //model.MedecinesList medecinesList;
+ String patientId, pharmacistId;
   
-  Future< List< dynamic >> _fetchPharmacies() async {
-//  showAlertDialog(context);
-    final http.Response response = await http
-        .get('${webhook}department.get?PARENT=${widget.pageNav.id}',
-    )  .catchError((error) => print(error));
-    Map<String, dynamic> responseBody = jsonDecode(response.body);
-    
-    List< dynamic> result=[];
-    if (response.statusCode == 200) {
-      try {
-        if (responseBody["result"] != null) {
-         
-      result = responseBody["result"];
-         
-   
-        } else {
-          
-          print('-----------------'+response.body);
-        }
-      } catch (error) {
-        print('-----------------'+error);
-      }
-    } else {
-      print("Please check your internet connection ");
-      Fluttertoast.showToast(
-          msg: "Please check your internet connection ",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 4,
-          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
-    }
-    return result;
-  }
+  
       
 
   void initState() {
@@ -203,5 +172,75 @@ class _PharmaciesState extends State<Pharmacies> {
       ),
      
     );
+  }
+
+Future< List< dynamic >> _fetchPharmacies() async {
+//  showAlertDialog(context);
+    final http.Response response = await http
+        .get('${webhook}department.get?PARENT=${widget.pageNav.id}',
+    )  .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    
+    List< dynamic> result=[];
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+         
+      result = responseBody["result"];
+         
+   
+        } else {
+          
+          print('-----------------'+response.body);
+        }
+      } catch (error) {
+        print('-----------------'+error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    return result;
+  }
+
+   Future _createMedecineOrder(MedList medList) async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  int id= preferences.getInt('id');
+ //int result=0;
+
+ 
+     final http.Response response = await http.post(
+        '${webhook}tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":"Medecine Order",
+   "DESCRIPTION":"order created by patient ",
+   "UF_AUTO_621898573172":medList.bill,
+   "UF_AUTO_831530867848":id,
+   "UF_AUTO_197852543914":medList.list,
+  
+   "UF_AUTO_229319567783":"prescription",
+   "RESPONSIBLE_ID":medList.responsibleId
+  }
+
+})).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita'+responseBody.toString());
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
   }
 }

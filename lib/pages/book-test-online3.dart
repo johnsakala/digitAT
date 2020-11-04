@@ -246,10 +246,10 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                             borderRadius: BorderRadius.circular(20),
                             //color: Colors.grey,
                             gradient: LinearGradient(
-                              colors: [Colors.red[200],Colors.blue[200]],
+                             colors: [Colors.red[200],Colors.blue[200]],
                               begin: const FractionalOffset(0.0, 0.0),
                               end: const FractionalOffset(0.5, 0.0),
-                              stops: [0.0,1.0],
+                             stops: [0.0,1.0],
                               tileMode: TileMode.clamp,
                             )
                           ),

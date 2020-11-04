@@ -102,13 +102,15 @@ class _HomeState extends State<Home> {
             leading: Image(image: AssetImage('images/nurse.png'),),
             title:Text('Doctors'),
            onTap:(){
-              Navigator.of(context).pushNamed('/doctorcategories', arguments: pageNavDoc);
+              Navigator.of(context).pushNamed('/doctors');
            }
           ),
            ListTile(
             leading: Image(image: AssetImage('images/pill.png'),),
             title:Text('PharmaHub'),
                 onTap:(){
+                  
+                // Navigator.of(context).pushNamed('/pharmaPrescription');
                 Navigator.of(context).pushNamed('/pharmacies',arguments: pageNav);
            }
           ),
@@ -193,7 +195,7 @@ class _HomeState extends State<Home> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(150)),
                       onPressed: (){
-                        Navigator.of(context).pushNamed('/doctorcategories', arguments: pageNavDoc);
+                        Navigator.of(context).pushNamed('/doctors');
                       },
                       child:ball("images/nurse.png",Theme.of(context).scaffoldBackgroundColor),
                     ),
@@ -204,8 +206,8 @@ class _HomeState extends State<Home> {
                       
                         borderRadius: BorderRadius.circular(150)),
                       onPressed: (){
-                        
-                        Navigator.of(context).pushNamed('/pharmacies',arguments: pageNav);
+                        // Navigator.of(context).pushNamed('/pharmaPrescription');
+                        Navigator.of(context).pushNamed('/pharmaPrescription');
                       },
                       child:ball("images/pill.png",Theme.of(context).scaffoldBackgroundColor),
                     ),

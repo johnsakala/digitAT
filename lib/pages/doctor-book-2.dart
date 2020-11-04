@@ -143,29 +143,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                   )
                                 ],
                               ),
-                              SizedBox(height: 60.0,width:2,child: Center(child: Container(height: 60.0,color: Colors.grey.withOpacity(0.1),),),),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(
-                                    "Consultation Fees",
-                                     style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 14.0,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  SizedBox(height: 15.0,),
-                                  Text(
-                                    "\$600",
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 14.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              )
+                             
                             ],
                           ),
                         ),
@@ -313,7 +291,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                      /*  if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                      Medecine medecine= Medecine("Doctor Booking", "600");
+                      Medecine medecine= Medecine("Doctor Booking", "");
                      List<Medecine>  list=[];
                      list.add(medecine);
                       Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+newFormat.format(widget.value.date), widget.value.doctor.userId,list,600.0, widget.value.date, widget.value.doctor.resId);
