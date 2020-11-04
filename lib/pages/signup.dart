@@ -368,6 +368,8 @@ class _SignUpState extends State<SignUp> {
         MyAppState.currentUser = user;
         fireStoreUser=user;
        preferences.setString('user', jsonEncode( user.toJson()));
+
+       print("//////////////////////////////////////////////////////////////////////////"+preferences.getString('user'));
                         Navigator.of(context).pushNamed("/homePatient",
                             arguments: [fname, response, 'Harare']);
                       });

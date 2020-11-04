@@ -108,7 +108,7 @@ class RouteGenerator {
         case '/searchScreen':
         return MaterialPageRoute(builder: (_) => SearchScreen(user: args,));
         case '/home':
-        return MaterialPageRoute(builder: (_) => HospitalDashboardHome(user:args)); 
+        return MaterialPageRoute(builder: (_) => HospitalDashboardHome()); 
          case '/homePatient':
         return MaterialPageRoute(builder: (_) => TabsWidget(acountInfos:args)); 
      case '/homeoptions' :

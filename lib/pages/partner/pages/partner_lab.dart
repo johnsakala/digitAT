@@ -78,6 +78,7 @@ class PartnerLabState extends State<PartnerLab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       drawer: _drawer(context),
       backgroundColor: Colors.white,
       appBar: _buildAppBar(context),
@@ -94,6 +95,9 @@ class PartnerLabState extends State<PartnerLab> {
               color: Theme.of(context).primaryColor,
               fontFamily: 'Bauhaus')),
       backgroundColor: Theme.of(context).accentColor,
+      leading: IconButton(icon: Icon(Icons.message,
+       color: Theme.of(context).primaryColor,), onPressed:(){ 
+         _scaffoldKey.currentState.openDrawer();}),
       elevation: 0,
       actions: <Widget>[
         Icon(

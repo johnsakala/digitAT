@@ -24,15 +24,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 Color primaryColor = Color(0xff0074ff);
 
 class HospitalDashboardHome extends StatefulWidget {
-  final User user;
-  const HospitalDashboardHome({Key key, this.user}) : super(key: key);
+  
+  const HospitalDashboardHome({Key key}) : super(key: key);
   @override
   _HospitalDashboardHomeState createState() => _HospitalDashboardHomeState();
 }
 class _HospitalDashboardHomeState extends State<HospitalDashboardHome>{
    
 
-User user;
+User user=User();
+String id;
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
@@ -46,29 +47,32 @@ final fireStoreUtils = FireStoreUtils();
   void initState(){
   super.initState();
 
-   SharedPreferences.getInstance().then((SharedPreferences sp) {
+  /* SharedPreferences.getInstance().then((SharedPreferences sp) {
       sp.setString('user', jsonEncode( widget.user.toJson()));
        
      });
   setState(() {
     user=widget.user;
-  });
-  /*SharedPreferences.getInstance().then((SharedPreferences sp) {
+  });*/
+  SharedPreferences.getInstance().then((SharedPreferences sp) {
      setState(() {
        user=User.fromJson(jsonDecode(sp.getString('user')));
-       
+       id= user.userID;
+       print('*********************************************'+user.userID.toString());
      });
-   });*/
+   });
    
     fireStoreUtils.getBlocks().listen((shouldRefresh) {
       if (shouldRefresh) {
         setState(() {});
       }
     });
+    setState(() {
     _friendsFuture = fireStoreUtils.getFriends();
-    _conversationsStream = fireStoreUtils.getConversations(user.userID);
+    _conversationsStream = fireStoreUtils.getConversations(user.userID);   
+    });
+   
 
-   fireStoreUser=user;
   }
       final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>(); 
   @override
@@ -203,13 +207,13 @@ final fireStoreUtils = FireStoreUtils();
                               onTap: () async {
                                 String channelID;
                                 if (friend.userID
-                                    .compareTo(user.userID) <
+                                    .compareTo(id) <
                                     0) {
                                   channelID =
-                                      friend.userID + user.userID;
+                                      friend.userID + id;
                                 } else {
                                   channelID =
-                                      user.userID + friend.userID;
+                                      id + friend.userID;
                                 }
                                 ConversationModel conversationModel =
                                 await fireStoreUtils
@@ -274,13 +278,13 @@ final fireStoreUtils = FireStoreUtils();
                                 onTap: () async {
                                   String channelID;
                                   if (friend.userID
-                                      .compareTo(user.userID) <
+                                      .compareTo(id) <
                                       0) {
                                     channelID =
-                                        friend.userID + user.userID;
+                                        friend.userID + id;
                                   } else {
                                     channelID =
-                                        user.userID + friend.userID;
+                                        id + friend.userID;
                                   }
                                   ConversationModel conversationModel =
                                   await fireStoreUtils
@@ -441,7 +445,7 @@ final fireStoreUtils = FireStoreUtils();
               iconSize: 30,
               icon:Image.asset('images/nurse.png'),
               onPressed: (){
-                Navigator.of(context).pushNamed('/home',arguments: widget.user);
+                Navigator.of(context).pushNamed('/home',arguments: user);
               },
               color: Colors.grey,
             ),
@@ -449,7 +453,7 @@ final fireStoreUtils = FireStoreUtils();
               iconSize: 30,
               icon:Image.asset('images/pill-grey.png'),
               onPressed: (){
-                Navigator.of(context).pushNamed('/partnerpharmacy',arguments: widget.user);
+                Navigator.of(context).pushNamed('/partnerpharmacy',arguments: user);
 
               },
               color: Colors.grey,
@@ -458,7 +462,7 @@ final fireStoreUtils = FireStoreUtils();
               iconSize: 30,
               icon:Image.asset('images/TheLab-grey.png'),
               onPressed: (){
-                Navigator.of(context).pushNamed('/partnerlab',arguments: widget.user);
+                Navigator.of(context).pushNamed('/partnerlab',arguments: user);
 
               
               },
@@ -468,7 +472,7 @@ final fireStoreUtils = FireStoreUtils();
               iconSize: 30,
               icon:Image.asset('images/microscope-grey.png'),
               onPressed: (){
-                 Navigator.of(context).pushNamed('/partnerscan',arguments: widget.user);
+                 Navigator.of(context).pushNamed('/partnerscan',arguments: user);
               },
               color: Colors.grey,
             ),

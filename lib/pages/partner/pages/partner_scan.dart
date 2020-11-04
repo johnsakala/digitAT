@@ -76,6 +76,7 @@ final fireStoreUtils = FireStoreUtils();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       drawer: _drawer(context),
       backgroundColor: Colors.white,
       appBar: _buildAppBar(context),
@@ -92,7 +93,9 @@ final fireStoreUtils = FireStoreUtils();
         color: Theme.of(context).primaryColor,
         fontFamily: 'Bauhaus'
       )),
-      
+      leading: IconButton(icon: Icon(Icons.message,
+       color: Theme.of(context).primaryColor,), onPressed:(){ 
+         _scaffoldKey.currentState.openDrawer();}),
       backgroundColor: Theme.of(context).accentColor,
       elevation: 0,
       actions: <Widget>[
