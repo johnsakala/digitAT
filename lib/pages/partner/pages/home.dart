@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:digitAT/api/url.dart';
 import 'package:digitAT/comm/chat/ChatScreen.dart';
-import 'package:digitAT/config/constants.dart';
 import 'package:digitAT/constants.dart';
 import 'package:digitAT/models/model/ConversationModel.dart';
 import 'package:digitAT/models/model/HomeConversationModel.dart';
@@ -34,6 +33,7 @@ class _HospitalDashboardHomeState extends State<HospitalDashboardHome>{
 
 User user=User();
 String id;
+int total=0;
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
@@ -58,7 +58,7 @@ final fireStoreUtils = FireStoreUtils();
      setState(() {
        user=User.fromJson(jsonDecode(sp.getString('user')));
        id= user.userID;
-       print('*********************************************'+user.userID.toString());
+       print('*********************************************userr'+user.userID.toString());
      });
    });
    
@@ -90,7 +90,7 @@ final fireStoreUtils = FireStoreUtils();
 
   Widget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('digitAT',
+      title: Text('Doctors',
       style: TextStyle(
         fontSize: 26,
         color: Theme.of(context).primaryColor,
@@ -556,17 +556,17 @@ final fireStoreUtils = FireStoreUtils();
               child: ListView(
                 children: <Widget>[
                   Text(
-                    "Appointments",
+                    "Summary",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 10),
-                  _buildCard(context, child: AppointmentCard()),
+                  _buildCard(context, child: AppointmentCard(total: total,)),
                   SizedBox(height: 20),
                   Text(
-                    "Today",
+                    "Appointments",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -671,6 +671,9 @@ final fireStoreUtils = FireStoreUtils();
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
+    setState(() {
+      total=_applist.length;
+    });
     return _applist;
   }
 

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'current-data-chart-painter..dart';
 
 class AppointmentCard extends StatelessWidget {
-  const AppointmentCard({Key key}) : super(key: key);
+ final int total;
+  const AppointmentCard({Key key,this.total}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -11,9 +12,9 @@ class AppointmentCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        _buildItem("Today", "18 Patients", Theme.of(context).accentColor),
+        _buildItem("Total", "$total Patients", Theme.of(context).accentColor),
         _buildDivider(),
-        _buildItem("Canceled", "7 Patients", Colors.red),
+        _buildItem("Canceled", "0 Patients", Colors.red),
       ],
     );
   }

@@ -38,6 +38,7 @@ class PartnerLab extends StatefulWidget {
 
 class PartnerLabState extends State<PartnerLab> {
   User user;
+  int total=0;
   List<User> _friendsSearchResult = [];
   List<HomeConversationModel> _conversationsSearchResult = [];
   List<User> _friends = [];
@@ -89,7 +90,7 @@ class PartnerLabState extends State<PartnerLab> {
 
   Widget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('digitAT',
+      title: Text('The Lab',
           style: TextStyle(
               fontSize: 26,
               color: Theme.of(context).primaryColor,
@@ -513,7 +514,7 @@ class PartnerLabState extends State<PartnerLab> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                          "Monthly",
+                          "Weekly",
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -553,17 +554,17 @@ class PartnerLabState extends State<PartnerLab> {
               child: ListView(
                 children: <Widget>[
                   Text(
-                    "Presciptions",
+                    "Summary",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 10),
-                  _buildCard(context, child: AppointmentCard()),
+                  _buildCard(context, child: AppointmentCard(total:total)),
                   SizedBox(height: 20),
                   Text(
-                    "Today",
+                    "Lab tests",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -726,6 +727,9 @@ class PartnerLabState extends State<PartnerLab> {
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
     print('response //////////////////////////////' + _applist.toString());
+       setState(() {
+      total=_applist.length;
+    });
     return _applist;
   }
 

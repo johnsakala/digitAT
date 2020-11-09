@@ -35,6 +35,7 @@ class PartnerPharmacy extends StatefulWidget {
 class _PartnerPharmacyState extends State<PartnerPharmacy>{
 
 User user;
+int total=0;
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
@@ -150,6 +151,9 @@ final fireStoreUtils = FireStoreUtils();
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
     print('response //////////////////////////////'+_applist.toString());
+       setState(() {
+      total=_applist.length;
+    });
     return _applist;
   }
   @override
@@ -166,7 +170,7 @@ final fireStoreUtils = FireStoreUtils();
 
   Widget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('digitAT',
+      title: Text('PharmaHub',
       style: TextStyle(
         fontSize: 26,
         color: Theme.of(context).primaryColor,
@@ -589,7 +593,7 @@ final fireStoreUtils = FireStoreUtils();
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                          "Monthly",
+                          "Weekly",
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -630,17 +634,17 @@ final fireStoreUtils = FireStoreUtils();
               child: ListView(
                 children: <Widget>[
                   Text(
-                    "Presciptions",
+                    "Summary",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 10),
-                  _buildCard(context, child: AppointmentCard()),
+                  _buildCard(context, child: AppointmentCard(total: total,)),
                   SizedBox(height: 20),
                   Text(
-                    "Today",
+                    "Prescriptions",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

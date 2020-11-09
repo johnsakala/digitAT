@@ -110,14 +110,16 @@ class _HomeState extends State<Home> {
             title:Text('PharmaHub'),
                 onTap:(){
                   
-                // Navigator.of(context).pushNamed('/pharmaPrescription');
-                Navigator.of(context).pushNamed('/pharmacies',arguments: pageNav);
+                 Navigator.of(context).pushNamed('/pharmaPrescription');
+               // Navigator.of(context).pushNamed('/pharmacies',arguments: pageNav);
            }
           ),
            ListTile(
             leading: Image(image: AssetImage('images/microscope.png'),),
           onTap: (){
-             Navigator.of(context).pushNamed('/imagingcentres', arguments: pageNavScan);
+
+            Navigator.of(context).pushNamed('/scanPrescription');
+             //Navigator.of(context).pushNamed('/imagingcentres', arguments: pageNavScan);
 
           },
             title:Text('ScaniT'),

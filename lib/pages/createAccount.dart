@@ -629,7 +629,7 @@ final http.Response response = await http.post(
                   //var picUrl = await uploadImage(_result,imageName,baseImage);
                   //print('*************** $picUrl');
                      await confirmDialog(context); 
-                     Navigator.of(context).pushNamed('/homeoptions', arguments: widget.accountInfo[0]); 
+                     Navigator.of(context).pushNamed('/home'); 
                     //Navigator.of(context).pushNamed('/home',arguments:[fname+' '+lname,_result,city]);
                   }
                 },

@@ -33,6 +33,7 @@ class User with ChangeNotifier {
       this.fcmToken,
       this.userID,
       this.profilePictureURL});
+      User.init();
 
   String fullName() {
     return '$firstName $lastName';

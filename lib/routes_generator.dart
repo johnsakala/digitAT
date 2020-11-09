@@ -32,6 +32,7 @@ import 'package:digitAT/pages/payment.dart';
 import 'package:digitAT/pages/pharmaHub_prescription.dart';
 import 'package:digitAT/pages/pharmacies.dart';
 import 'package:digitAT/pages/prescription.dart';
+import 'package:digitAT/pages/scan_prescription.dart';
 import 'package:digitAT/pages/tabs.dart';
 import 'package:digitAT/pages/waiting_room.dart';
 import 'package:digitAT/signup_option.dart';
@@ -153,6 +154,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => Prescription());
         case '/pharmaPrescription':
         return MaterialPageRoute(builder: (_) => PharmaHubPrescription());
+        case '/scanPrescription':
+        return MaterialPageRoute(builder: (_) => ScanPrescription());
         case '/payments':
         return MaterialPageRoute(builder: (_) => Paymnt(payment: args,));
         case '/paymentslist':

@@ -33,6 +33,7 @@ class PartnerScan extends StatefulWidget {
 class PartnerScanState extends State<PartnerScan>{
 
 User user;
+int total=0;
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
@@ -87,7 +88,7 @@ final fireStoreUtils = FireStoreUtils();
 
   Widget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('digitAT',
+      title: Text('ScaniT',
       style: TextStyle(
         fontSize: 26,
         color: Theme.of(context).primaryColor,
@@ -510,7 +511,7 @@ final fireStoreUtils = FireStoreUtils();
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                          "Monthly",
+                          "Weekly",
                           style: TextStyle(
                             color: Colors.white,
                           ),
@@ -551,17 +552,17 @@ final fireStoreUtils = FireStoreUtils();
               child: ListView(
                 children: <Widget>[
                   Text(
-                    "Presciptions",
+                    "Summary",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 10),
-                  _buildCard(context, child: AppointmentCard()),
+                  _buildCard(context, child: AppointmentCard(total: total,)),
                   SizedBox(height: 20),
                   Text(
-                    "Today",
+                    "Scans",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -720,6 +721,10 @@ final fireStoreUtils = FireStoreUtils();
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
     print('response //////////////////////////////'+_applist.toString());
+
+     setState(() {
+      total=_applist.length;
+    });
     return _applist;
   }
 Widget _buildConversationRow(HomeConversationModel homeConversationModel) {

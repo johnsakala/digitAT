@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:digitAT/main.dart';
 import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/model/ContactModel.dart';
 import 'package:digitAT/models/model/User.dart';
@@ -27,8 +27,8 @@ class AccountCard extends StatefulWidget {
    String date;
   String hour;
   String id;
-  User user;
-  ContactModel contactModel;
+  User user= User.init();
+  ContactModel contactModel= ContactModel.init();
   final fireStoreUtils= FireStoreUtils();
 
 Future _fetchDetails() async {
@@ -93,27 +93,21 @@ Future _fetchDetails() async {
     switch (contact.type) {
       case ContactType.ACCEPT:
         
-
+       showProgress(context, 'acceptingFriendship', false);
+        await fireStoreUtils.onFriendAccept(contact.user, MyAppState.currentUser);
+        contact.type= ContactType.FRIEND;
+        hideProgress();
         break;
       case ContactType.FRIEND:
-        showProgress(context, 'removingFriendship', false);
-        await fireStoreUtils.onUnFriend(contact.user);
-    contact.type = ContactType.UNKNOWN;
+        
         break;
       case ContactType.PENDING:
-        showProgress(context, 'removingFriendshipRequest', false);
-        await fireStoreUtils.onCancelRequest(
-            contact.user);
-        contact.type = ContactType.UNKNOWN;
-
+        
         break;
       case ContactType.BLOCKED:
         break;
       case ContactType.UNKNOWN:
-        showProgress(context, 'please wait...', false);
-       print(contact.user.userID);
-        await fireStoreUtils.sendFriendRequest(contact.user);
-       contact.type = ContactType.PENDING;
+        
         break;
     }
   }

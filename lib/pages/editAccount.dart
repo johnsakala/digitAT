@@ -667,7 +667,7 @@ pref.setString('name', name);
                     
                     await uploadImage();
                     if(_result){
-                    Navigator.of(context).pushNamed('/home',arguments:[name,id,city]);
+                    Navigator.of(context).pushNamed('/homePatient',arguments:[name,id,city]);
 
                    }
                    else{
