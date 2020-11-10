@@ -400,7 +400,7 @@ return groupedCart;
    "TITLE":payments.title,
    "DESCRIPTION":payments.description,
    "UF_AUTO_831530867848":widget.value.pageNav.patientId,
-   "UF_AUTO_197852543914":payments.medicines,
+   "UF_AUTO_197852543914":payments.medicines.toJson(),
   
    "UF_AUTO_229319567783":"prescription",
    "RESPONSIBLE_ID":widget.value.pageNav.docName

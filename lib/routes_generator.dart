@@ -11,6 +11,7 @@ import 'package:digitAT/pages/editAccount.dart';
 import 'package:digitAT/pages/conversations.dart' as con;
 import 'package:digitAT/pages/home.dart';
 import 'package:digitAT/pages/hospital_options.dart';
+import 'package:digitAT/pages/lab_prescription.dart';
 import 'package:digitAT/pages/partner/pages/Welcome.dart' as partnerWelcome;
 import 'package:digitAT/pages/hospitals.dart';
 import 'package:digitAT/pages/imaging_centres.dart';
@@ -24,6 +25,7 @@ import 'package:digitAT/pages/createAccount.dart';
 import 'package:digitAT/pages/partner/pages/home.dart';
 import 'package:digitAT/pages/partner/pages/home_options.dart';
 import 'package:digitAT/pages/partner/pages/hospital_reg.dart';
+import 'package:digitAT/pages/partner/pages/medecines.dart';
 import 'package:digitAT/pages/partner/pages/partner_lab.dart';
 import 'package:digitAT/pages/partner/pages/partner_pharmacy.dart';
 import 'package:digitAT/pages/partner/pages/partner_scan.dart';
@@ -46,7 +48,7 @@ import 'package:digitAT/pages/doctor-book-1.dart';
 import 'package:digitAT/pages/doctor-book-2.dart';
 import 'package:digitAT/pages/health.dart';
 import 'package:digitAT/pages/medeciens-2.dart';
-import 'package:digitAT/pages/medecines.dart';
+
 import 'package:digitAT/pages/my-doctors.dart';
 import 'package:digitAT/pages/offers.dart';
 import 'package:digitAT/pages/Welcome.dart';
@@ -114,6 +116,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => TabsWidget(acountInfos:args)); 
      case '/homeoptions' :
         return MaterialPageRoute(builder: (_) => HomeOptions(user:args));
+        case '/labPrescription' :
+        return MaterialPageRoute(builder: (_) => LabPresciption());
         case '/conversation':
         return MaterialPageRoute(builder: (_) => con.Conversation()); 
         case '/covidServices':
@@ -141,7 +145,7 @@ class RouteGenerator {
       case '/medecines':
         return MaterialPageRoute(builder: (_) => Medecines(value: args));
       case '/medecinesSeconde':
-        return MaterialPageRoute(builder: (_) => MedecinesSlected(value: args,));
+        return MaterialPageRoute(builder: (_) => MedecinesSlected(value: args));
       case '/mydoctors':
         return MaterialPageRoute(builder: (_) => MyDoctorsList());
       case '/appointment':

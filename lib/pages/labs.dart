@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:digitAT/api/url.dart';
-import 'package:digitAT/config/constants.dart';
 import 'package:digitAT/models/medecine.dart';
 import 'package:digitAT/models/navigation.dart';
 import 'package:flutter/material.dart';

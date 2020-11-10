@@ -37,8 +37,9 @@ class PartnerLab extends StatefulWidget {
 }
 
 class PartnerLabState extends State<PartnerLab> {
-  User user;
-  int total=0;
+  User user= User.init();
+  int total=0, id;
+  String docName;
   List<User> _friendsSearchResult = [];
   List<HomeConversationModel> _conversationsSearchResult = [];
   List<User> _friends = [];
@@ -47,24 +48,41 @@ class PartnerLabState extends State<PartnerLab> {
   Future<List<User>> _friendsFuture;
   Stream<List<HomeConversationModel>> _conversationsStream;
   TextEditingController controller = new TextEditingController();
+@override
+  void initState(){
+  super.initState();
+   SharedPreferences.getInstance().then((SharedPreferences sp) {
+      String _name;
+      int _testValue;
+      _testValue = sp.getInt('id');
+      _name = sp.getString('name');
+      sp.setString('user', jsonEncode( widget.user.toJson()));
+       
 
-  @override
-  void initState() {
-    super.initState();
+      // will be null if never previously saved
+      if (_testValue == null ) {
+        _testValue = null;
+       
+         // set an initial value
+      }
+      
+      setState(() {
+        id=_testValue;
+        docName=_name;
+        user=widget.user;
 
-    SharedPreferences.getInstance().then((SharedPreferences sp) {
-      sp.setString('user', jsonEncode(widget.user.toJson()));
+      });
+    
     });
-    setState(() {
-      user = widget.user;
-    });
-    /*SharedPreferences.getInstance().then((SharedPreferences sp) {
+  
+
+  /*SharedPreferences.getInstance().then((SharedPreferences sp) {
      setState(() {
        user=User.fromJson(jsonDecode(sp.getString('user')));
        
      });
    });*/
-
+   
     fireStoreUtils.getBlocks().listen((shouldRefresh) {
       if (shouldRefresh) {
         setState(() {});
@@ -72,6 +90,8 @@ class PartnerLabState extends State<PartnerLab> {
     });
     _friendsFuture = fireStoreUtils.getFriends();
     _conversationsStream = fireStoreUtils.getConversations(user.userID);
+
+   
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -656,7 +676,7 @@ class PartnerLabState extends State<PartnerLab> {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-          '${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Test Booking&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
+          '${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Test Booking&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
         )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);

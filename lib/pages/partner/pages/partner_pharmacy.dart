@@ -20,9 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 Color primaryColor = Color(0xff0074ff);
-PatientCard patientCard= PatientCard('20-Oct-2020', 'Lewis Moyo', false, 'harare',"1");
-PatientCard patientCard1= PatientCard('21-Sep-2020',' Tinotenda Ruzane', false, 'haare',"2");
-PatientCard patientCard2= PatientCard('10-Jan-2021', 'Blessing Chamu', false, 'harare',"3");
+
 
 class PartnerPharmacy extends StatefulWidget {
   final User user;
@@ -34,11 +32,13 @@ class PartnerPharmacy extends StatefulWidget {
 }
 class _PartnerPharmacyState extends State<PartnerPharmacy>{
 
-User user;
+User user=User.init();
 int total=0;
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
+int id;
+String docName;
 List<HomeConversationModel> _conversations = [];
 final fireStoreUtils = FireStoreUtils();
   Future<List<User>> _friendsFuture;
@@ -48,14 +48,31 @@ final fireStoreUtils = FireStoreUtils();
  @override
   void initState(){
   super.initState();
-
    SharedPreferences.getInstance().then((SharedPreferences sp) {
+      String _name;
+      int _testValue;
+      _testValue = sp.getInt('id');
+      _name = sp.getString('name');
       sp.setString('user', jsonEncode( widget.user.toJson()));
        
-     });
-  setState(() {
-    user=widget.user;
-  });
+
+      // will be null if never previously saved
+      if (_testValue == null ) {
+        _testValue = null;
+       
+         // set an initial value
+      }
+      
+      setState(() {
+        id=_testValue;
+        docName=_name;
+        user=widget.user;
+
+      });
+    
+    });
+  
+
   /*SharedPreferences.getInstance().then((SharedPreferences sp) {
      setState(() {
        user=User.fromJson(jsonDecode(sp.getString('user')));
@@ -81,8 +98,9 @@ final fireStoreUtils = FireStoreUtils();
      int resposibleId=preferences.getInt('id');
      print(resposibleId);
 //  showAlertDialog(context);
+
     final http.Response response = await http
-        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Medicines Order&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
+        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Medicines Order&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     

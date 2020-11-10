@@ -3,15 +3,16 @@ import 'dart:convert';
 import 'package:date_picker_timeline/date_picker_widget.dart';
 import 'package:digitAT/api/doctors.dart';
 import 'package:digitAT/api/url.dart';
-import 'package:digitAT/models/medicine_list.dart';
+import 'package:digitAT/models/partner/models/medicine_list.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:digitAT/models/doctor.dart';
-import 'package:digitAT/models/user.dart';
+import 'package:digitAT/models/partner/models/doctor.dart';
+import 'package:digitAT/models/partner/models/user.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:digitAT/models/payment.dart';
+import 'package:digitAT/models/partner/models/payment.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class BookDignosticsOnlineThirdStep extends StatefulWidget {
   final MedList value;
   const BookDignosticsOnlineThirdStep( {Key key, this.value}) : super(key: key);
@@ -246,11 +247,11 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
                             borderRadius: BorderRadius.circular(20),
                             //color: Colors.grey,
                             gradient: LinearGradient(
-                              colors: [Colors.red[200],Colors.blue[200]],
+                             colors: [Colors.red[200],Colors.blue[200]],
                               begin: const FractionalOffset(0.0, 0.0),
                               end: const FractionalOffset(0.5, 0.0),
-                             stops: [0.0,1.0],
-                            tileMode: TileMode.clamp,
+                            stops: [0.0,1.0],
+                              tileMode: TileMode.clamp,
                             )
                           ),
                           child: Text(
@@ -288,7 +289,7 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
                             borderRadius: BorderRadius.circular(20),
                             //color: Colors.grey,
                             gradient: LinearGradient(
-                          colors: [Colors.lightBlue[200],Colors.lightGreen[200]],
+                              colors: [Colors.lightBlue[200],Colors.lightGreen[200]],
                               begin: const FractionalOffset(0.0, 0.0),
                               end: const FractionalOffset(0.5, 0.0),
                               stops: [0.0,1.0],
@@ -407,9 +408,10 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
                        await errorDialog(context);
                       }else{
                       //Navigator.of(context).pushNamed("/fourthBookTest");
-                      Payments payments= Payments("Test Booking", selectedChoice+ " "+newFormat.format(_selectedValue),_userId,widget.value.list,widget.value.bill, _selectedValue, widget.value.responsibleId);
-                      Navigator.of(context).pushNamed("/payments",arguments:payments);
-                    
+                      Payments payments= Payments('Lab Prescription',widget.value.list.toString(), widget.value.pharmacistID,widget.value.list, widget.value.bill,DateTime.now(), widget.value.responsibleId);
+                     await _createPresciption(payments);
+                      await confirmDialog( context, 'Prescription created');
+                      Navigator.of(context).pushNamed('/patientacc');                   
                     }
                     },
                     shape: RoundedRectangleBorder(
@@ -501,7 +503,7 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
               _userId=user.iD;
             });
             _doctorsList.add(
-                Doctor.min(user.nAME+' '+user.lASTNAME, user.wORKPOSITION, user.pERSONALPHOTO, "4.2", Colors.transparent, user.iD, user.pERSONALPROFESSION,false,'')
+                Doctor.min(user.nAME+' '+user.lASTNAME, user.wORKPOSITION, user.pERSONALPHOTO, "4.2", Colors.transparent, user.iD, user.pERSONALPROFESSION,false)
             );
             
           });
@@ -563,5 +565,68 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
             ],
           );
         });
+  }
+  Future<bool> confirmDialog(BuildContext context,String message) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Confirmation'),
+            content: Container(
+              height: 85,
+              child:Text('$message for Tinotenda Ruzane completed successfully'),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
+  }
+Future _createPresciption(Payments payments) async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  int id= preferences.getInt('id');
+ //int result=0;
+ 
+     final http.Response response = await http.post(
+        '${webhook}tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":payments.title,
+   "DESCRIPTION":payments.description,
+   "UF_AUTO_831530867848":widget.value.pageNav.patientId,
+   "UF_AUTO_197852543914":payments.medicines,
+  
+   "UF_AUTO_229319567783":"prescription",
+   "RESPONSIBLE_ID":widget.value.pageNav.docName
+  }
+
+})).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita'+responseBody.toString());
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
   }
 }

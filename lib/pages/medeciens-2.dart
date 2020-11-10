@@ -1,9 +1,16 @@
-import 'package:digitAT/models/medecine.dart';
-import 'package:digitAT/models/medicine_list.dart';
-import 'package:digitAT/models/payment.dart';
+import 'dart:convert';
+
+import 'package:digitAT/api/url.dart';
+import 'package:digitAT/models/partner/models/medecine.dart';
+import 'package:digitAT/models/partner/models/medicine_list.dart';
+import 'package:digitAT/models/partner/models/payment.dart';
+import 'package:digitAT/pages/partner/pages/medecines.dart';
+import 'package:digitAT/pages/partner/pages/payment.dart';
 import 'package:flutter/material.dart';
-import 'package:digitAT/models/medecine.dart' as model;
-import 'package:digitAT/models/user.dart';
+import 'package:http/http.dart' as http;
+import 'package:digitAT/models/partner/models/medecine.dart' as model;
+import 'package:digitAT/models/partner/models/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class MedecinesSlected extends StatefulWidget {
@@ -14,6 +21,7 @@ class MedecinesSlected extends StatefulWidget {
 }
 
 class _MedecinesSlectedState extends State<MedecinesSlected> {
+ 
   bool _loading=false;
 int itemcount=0;
 List<Medecine> groupCart(unGroupedCart){
@@ -75,12 +83,9 @@ return groupedCart;
        appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor )
-              
-             
-         ,
+          icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor ),
           onPressed: (){
-            MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId, itemcount);
+            MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId, itemcount,widget.value.pageNav);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
           },
         ),
@@ -251,7 +256,7 @@ return groupedCart;
                   FlatButton(
                     onPressed: (){
                       print('-----------------------'+widget.value.pid.toString());
-                      MedList list=MedList(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId,itemcount);
+                      MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId,itemcount,widget.value.pageNav);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
                     },
                     shape: RoundedRectangleBorder(
@@ -319,18 +324,12 @@ return groupedCart;
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: () async{
                    
-                /* final snackBar = SnackBar(content: Text('Order Sent, you will receive a notification from the pharmacy'));
-                    _scaffoldstate.currentState.showSnackBar(snackBar);
-                  
-                       if(result!=null){
-                       print('*********************************appointment created');
-                      }*/
-                      Payments payments= Payments('Medicines Order',medicines.toString(), widget.value.pharmacistID,medicines, widget.value.bill,DateTime.now(), widget.value.responsibleId);
-                      Navigator.of(context).pushNamed("/payments",arguments:payments);
-                      /*if(result!=null){
-                       print('*********************************order created');
-                      }*/
-                     // Navigator.of(context).pushNamed('/home',arguments: [currentUser.name,currentUser.userID]);
+                
+                      Payments payments= Payments('Medicines Prescription',medicines.toJson(), widget.value.pharmacistID,medicines, widget.value.bill,DateTime.now(), widget.value.responsibleId);
+                     await _createPresciption(payments);
+                      await confirmDialog( context, 'Prescription created'); 
+                      Navigator.of(context).pushNamed('/patientacc'); 
+                      
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -356,4 +355,68 @@ return groupedCart;
     );
   }
 
+  Future<bool> confirmDialog(BuildContext context,String message) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Confirmation'),
+            content: Container(
+              height: 85,
+              child:Text('$message'),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
+  }
+
+    Future _createPresciption(Payments payments) async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  int id= preferences.getInt('id');
+ //int result=0;
+ 
+     final http.Response response = await http.post(
+        '${webhook}tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":payments.title,
+   "DESCRIPTION":payments.description,
+   "UF_AUTO_831530867848":widget.value.pageNav.patientId,
+   "UF_AUTO_197852543914":payments.medicines,
+  
+   "UF_AUTO_229319567783":"prescription",
+   "RESPONSIBLE_ID":widget.value.pageNav.docName
+  }
+
+})).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita'+responseBody.toString());
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
+  }
 }

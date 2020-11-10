@@ -626,8 +626,8 @@ final http.Response response = await http.post(
                      await setDetails(_result, fname+" "+lname,phoneNo,city);
                    int cid=  await _createCompany(cname,physicalAddress,city, contactID);
                     
-                  //var picUrl = await uploadImage(_result,imageName,baseImage);
-                  //print('*************** $picUrl');
+                  await uploadImage(_result,imageName,baseImage);
+                  
                      await confirmDialog(context); 
                      Navigator.of(context).pushNamed('/home'); 
                     //Navigator.of(context).pushNamed('/home',arguments:[fname+' '+lname,_result,city]);

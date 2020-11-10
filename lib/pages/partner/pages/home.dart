@@ -32,8 +32,9 @@ class _HospitalDashboardHomeState extends State<HospitalDashboardHome>{
    
 
 User user=User();
-String id;
-int total=0;
+String id, imageurl;
+
+int total=0, pid;
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
@@ -54,10 +55,12 @@ final fireStoreUtils = FireStoreUtils();
   setState(() {
     user=widget.user;
   });*/
+
   SharedPreferences.getInstance().then((SharedPreferences sp) {
      setState(() {
        user=User.fromJson(jsonDecode(sp.getString('user')));
        id= user.userID;
+       pid=sp.getInt('id');
        print('*********************************************userr'+user.userID.toString());
      });
    });
@@ -71,7 +74,12 @@ final fireStoreUtils = FireStoreUtils();
     _friendsFuture = fireStoreUtils.getFriends();
     _conversationsStream = fireStoreUtils.getConversations(user.userID);   
     });
-   
+     _fetchProfile().then((value) {
+  setState(() {
+    imageurl=value;
+  });
+
+  });
 
   }
       final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>(); 
@@ -119,8 +127,8 @@ final fireStoreUtils = FireStoreUtils();
                   color: Colors.grey,
                   image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: AssetImage(
-                        "images/asset-1.png"),
+                    image: imageurl==null?AssetImage(
+                        "images/asset-1.png"):NetworkImage(imageurl),
                   ),
                 ),
               ),
@@ -866,6 +874,37 @@ final fireStoreUtils = FireStoreUtils();
         ],
       ),
     );
+  }
+  Future <String> _fetchProfile() async {
+String imageUrl;
+    final http.Response response = await http
+        .get(
+      '${webhook}disk.folder.getchildren?id=60&filter[NAME]=$pid',
+    )
+        .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+   
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+             imageUrl=responseBody['result'][0]['DETAIL_URL'];
+        } else {
+          
+          print(response.body);
+        }
+      } catch (error) {
+        print(error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    return imageUrl;
   }
 
 }

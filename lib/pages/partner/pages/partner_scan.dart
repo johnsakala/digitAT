@@ -32,8 +32,9 @@ class PartnerScan extends StatefulWidget {
 }
 class PartnerScanState extends State<PartnerScan>{
 
-User user;
-int total=0;
+User user= User.init();
+int total=0, id;
+String docName;
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
@@ -43,17 +44,34 @@ final fireStoreUtils = FireStoreUtils();
   Stream<List<HomeConversationModel>> _conversationsStream;
   TextEditingController controller = new TextEditingController();
   
- @override
+@override
   void initState(){
   super.initState();
-
    SharedPreferences.getInstance().then((SharedPreferences sp) {
+      String _name;
+      int _testValue;
+      _testValue = sp.getInt('id');
+      _name = sp.getString('name');
       sp.setString('user', jsonEncode( widget.user.toJson()));
        
-     });
-  setState(() {
-    user=widget.user;
-  });
+
+      // will be null if never previously saved
+      if (_testValue == null ) {
+        _testValue = null;
+       
+         // set an initial value
+      }
+      
+      setState(() {
+        id=_testValue;
+        docName=_name;
+        user=widget.user;
+
+      });
+    
+    });
+  
+
   /*SharedPreferences.getInstance().then((SharedPreferences sp) {
      setState(() {
        user=User.fromJson(jsonDecode(sp.getString('user')));
@@ -652,7 +670,7 @@ final fireStoreUtils = FireStoreUtils();
      print(resposibleId);
 //  showAlertDialog(context);
     final http.Response response = await http
-        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Scan Booking&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
+        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Booking&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
