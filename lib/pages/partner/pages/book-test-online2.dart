@@ -15,17 +15,15 @@ class BookTestsOnlineSecondeStep extends StatefulWidget {
 
 class _BookTestsOnlineSecondeStepState extends State<BookTestsOnlineSecondeStep> {
   bool _loading=false;
-  
-
-  
-
   User currentUser=User.init().getCurrentUser();
   List<Medecine>medicines= [];
+  List<String> medNames=[];
   double bill=0.0;
   model.MedecinesList medecinesList;
   void initState() {
     setState(() {
       medicines.addAll(widget.value.list);
+      medNames.addAll(widget.value.medNames);
       bill=widget.value.bill;
     });
     this.medecinesList = new model.MedecinesList();
@@ -131,6 +129,7 @@ class _BookTestsOnlineSecondeStepState extends State<BookTestsOnlineSecondeStep>
                       
                     bill=bill-double.parse(medicines[index].price);
                     medicines.removeAt(index);
+                    medNames.removeAt(index);
                     
                     
                     
@@ -271,7 +270,7 @@ class _BookTestsOnlineSecondeStepState extends State<BookTestsOnlineSecondeStep>
                        if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                       MedList list= MedList.scan(widget.value.pharmacy, widget.value.pid, bill, medicines, widget.value.responsibleId);
+                       MedList list= MedList.scan(widget.value.pharmacy, widget.value.pid, bill, medicines, widget.value.responsibleId,medNames);
                       Navigator.of(context).pushNamed("/thirdBookTest",arguments: list);
                       /*if(result!=null){
                        print('*********************************order created');

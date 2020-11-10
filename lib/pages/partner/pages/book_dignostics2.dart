@@ -21,12 +21,14 @@ class _BookDignosticsOnlineSecondeStepState extends State<BookDignosticsOnlineSe
 
   User currentUser=User.init().getCurrentUser();
   List<Medecine>medicines= [];
+  List<String> medNames=[];
   double bill=0.0;
   model.MedecinesList medecinesList;
   void initState() {
     setState(() {
       medicines.addAll(widget.value.list);
       bill=widget.value.bill;
+      medNames.addAll(widget.value.medNames);
     });
     this.medecinesList = new model.MedecinesList();
    // print("//////////////////////////////////////////////// pharmacistID"+widget.value[2].toString());
@@ -131,6 +133,7 @@ class _BookDignosticsOnlineSecondeStepState extends State<BookDignosticsOnlineSe
                       
                     bill=bill-double.parse(medicines[index].price);
                     medicines.removeAt(index);
+                    medNames.removeAt(index);
                     
                     
                     
@@ -271,7 +274,7 @@ class _BookDignosticsOnlineSecondeStepState extends State<BookDignosticsOnlineSe
                        if(result!=null){
                        print('*********************************appointment created');
                       }*/
-                       MedList list= MedList.scan(widget.value.pharmacy, widget.value.pid, bill, medicines, widget.value.responsibleId);
+                       MedList list= MedList.scan(widget.value.pharmacy, widget.value.pid, bill, medicines, widget.value.responsibleId, medNames);
                       Navigator.of(context).pushNamed("/thirdlabsbooking",arguments: list);
                       /*if(result!=null){
                        print('*********************************order created');

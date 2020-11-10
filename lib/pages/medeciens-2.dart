@@ -24,6 +24,7 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
  
   bool _loading=false;
 int itemcount=0;
+List<String> medNames=[];
 List<Medecine> groupCart(unGroupedCart){
 
 List<Medecine> groupedCart=[];
@@ -85,7 +86,7 @@ return groupedCart;
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor ),
           onPressed: (){
-            MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId, itemcount,widget.value.pageNav);
+            MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId, itemcount,widget.value.pageNav, medNames);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
           },
         ),
@@ -256,7 +257,7 @@ return groupedCart;
                   FlatButton(
                     onPressed: (){
                       print('-----------------------'+widget.value.pid.toString());
-                      MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId,itemcount,widget.value.pageNav);
+                      MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId,itemcount,widget.value.pageNav, medNames);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
                     },
                     shape: RoundedRectangleBorder(
@@ -325,7 +326,7 @@ return groupedCart;
                     onPressed: () async{
                    
                 
-                      Payments payments= Payments('Medicines Prescription',medicines.toJson(), widget.value.pharmacistID,medicines, widget.value.bill,DateTime.now(), widget.value.responsibleId);
+                      Payments payments= Payments('Medicines Prescription',medicines.toString(), widget.value.pharmacistID,medicines, widget.value.bill,DateTime.now(), widget.value.responsibleId, medNames);
                      await _createPresciption(payments);
                       await confirmDialog( context, 'Prescription created'); 
                       Navigator.of(context).pushNamed('/patientacc'); 

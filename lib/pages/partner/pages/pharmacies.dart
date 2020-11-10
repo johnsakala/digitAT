@@ -20,6 +20,7 @@ class Pharmacies extends StatefulWidget {
 class _PharmaciesState extends State<Pharmacies> {
   User currentUser=User.init().getCurrentUser();
   //model.MedecinesList medecinesList;
+  List<String> medNames=[];
   
   Future< List< dynamic >> _fetchPharmacies() async {
 //  showAlertDialog(context);
@@ -169,7 +170,7 @@ class _PharmaciesState extends State<Pharmacies> {
                 onPressed: (){
                   print('add');
                   List<Medecine> meds=[];
-                  MedList list =MedList.p(snapshot.data[index]["ID"], meds, 0.0, snapshot.data[index]["NAME"],widget.pageNav.responsibleId,0,widget.pageNav);
+                  MedList list =MedList.p(snapshot.data[index]["ID"], meds, 0.0, snapshot.data[index]["NAME"],widget.pageNav.responsibleId,0,widget.pageNav,medNames);
            Navigator.of(context).pushNamed('/medecines',arguments:list );
                 
                  },

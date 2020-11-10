@@ -408,7 +408,7 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
                        await errorDialog(context);
                       }else{
                       //Navigator.of(context).pushNamed("/fourthBookTest");
-                      Payments payments= Payments('Scan Prescription',widget.value.list.toString(), widget.value.pharmacistID,widget.value.list, widget.value.bill,DateTime.now(), widget.value.responsibleId);
+                      Payments payments= Payments('Scan Prescription',widget.value.list.toString(), widget.value.pharmacistID,widget.value.list, widget.value.bill,DateTime.now(), widget.value.responsibleId, widget.value.medNames);
                      await _createPresciption(payments);
                       await confirmDialog( context, 'Prescription created');
                       Navigator.of(context).pushNamed('/patientacc');  
@@ -613,7 +613,7 @@ class _BookTestsOnlineThirdStepState extends State<BookTestsOnlineThirdStep> {
    "TITLE":payments.title,
    "DESCRIPTION":payments.description,
    "UF_AUTO_831530867848":widget.value.pageNav.patientId,
-   "UF_AUTO_197852543914":payments.medicines,
+   "UF_AUTO_197852543914":payments.medNames,
   
    "UF_AUTO_229319567783":"prescription",
    "RESPONSIBLE_ID":widget.value.pageNav.docName

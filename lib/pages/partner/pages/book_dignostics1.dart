@@ -25,6 +25,7 @@ class BookDignosticsOnline extends StatefulWidget {
 class _BookDignosticsOnlineState extends State<BookDignosticsOnline> {
   User currentUser=User.init().getCurrentUser();
    List<Medecine>medicines= [];
+   List<String>medNames=[];
   double bill=0.0;
   model.TestsList testsList;
   void initState() {
@@ -32,6 +33,7 @@ class _BookDignosticsOnlineState extends State<BookDignosticsOnline> {
     super.initState();
     bill= widget.pageNav.bill;
       medicines= widget.pageNav.list;
+      
   }
     Future <List<dynamic>> _fetchScans() async {
 //  showAlertDialog(context);
@@ -180,6 +182,7 @@ class _BookDignosticsOnlineState extends State<BookDignosticsOnline> {
                  setState(() {
                    bill= bill+ double.parse(snapshot.data[index]['PRICE']);
                  medicines.add(model.Medecine(snapshot.data[index]['NAME'], snapshot.data[index]['PRICE']));
+                 medNames.add(snapshot.data[index]['NAME']);
              });
                 
                  },
@@ -250,7 +253,7 @@ class _BookDignosticsOnlineState extends State<BookDignosticsOnline> {
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: (){
-                      MedList list= MedList.scan(widget.pageNav.title, widget.pageNav.id, bill, medicines, widget.pageNav.responsibleId);
+                      MedList list= MedList.scan(widget.pageNav.title, widget.pageNav.id, bill, medicines, widget.pageNav.responsibleId,medNames);
                       Navigator.of(context).pushNamed("/secondlabsbooking",arguments: list);
                     },
                     shape: RoundedRectangleBorder(

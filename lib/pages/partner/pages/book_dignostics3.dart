@@ -26,11 +26,19 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
   List<String> nightList=["19.00","20.00","21.00","22.00","23.00","00.00"];
   String selectedChoice = "";
   String _userId;
+  List<String> medNames=[];
   var newFormat = DateFormat("dd-MMM-yyyy");
   DateTime _selectedValue = DateTime.now();
   DatePickerController _controller = DatePickerController();
   User currentUser=new User.init().getCurrentUser();
   Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
+@override
+  void initState() {
+    // TODO: implement initState
+    
+    
+  }
+
   @override
   Widget build(BuildContext context) {
    return Scaffold(
@@ -408,7 +416,7 @@ class _BookDignosticsOnlineThirdStepState extends State<BookDignosticsOnlineThir
                        await errorDialog(context);
                       }else{
                       //Navigator.of(context).pushNamed("/fourthBookTest");
-                      Payments payments= Payments('Lab Prescription',widget.value.list.toString(), widget.value.pharmacistID,widget.value.list, widget.value.bill,DateTime.now(), widget.value.responsibleId);
+                      Payments payments= Payments('Lab Prescription',widget.value.list.toString(), widget.value.pharmacistID,widget.value.list, widget.value.bill,DateTime.now(), widget.value.responsibleId, widget.value.medNames);
                      await _createPresciption(payments);
                       await confirmDialog( context, 'Prescription created');
                       Navigator.of(context).pushNamed('/patientacc');                   
@@ -610,7 +618,7 @@ Future _createPresciption(Payments payments) async {
    "TITLE":payments.title,
    "DESCRIPTION":payments.description,
    "UF_AUTO_831530867848":widget.value.pageNav.patientId,
-   "UF_AUTO_197852543914":payments.medicines,
+   "UF_AUTO_197852543914":payments.medNames,
   
    "UF_AUTO_229319567783":"prescription",
    "RESPONSIBLE_ID":widget.value.pageNav.docName

@@ -21,6 +21,7 @@ class _BookDignosticsOnlineSecondeStepState extends State<BookDignosticsOnlineSe
 
   User currentUser=User.init().getCurrentUser();
   List<Medecine>medicines= [];
+  List<String> medecineName=[];
   double bill=0.0;
   model.MedecinesList medecinesList;
   void initState() {

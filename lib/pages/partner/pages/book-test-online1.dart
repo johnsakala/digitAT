@@ -25,6 +25,7 @@ class BookTestsOnline extends StatefulWidget {
 class _BookTestsOnlineState extends State<BookTestsOnline> {
   User currentUser=User.init().getCurrentUser();
    List<Medecine>medicines= [];
+   List<String> medNames=[];
   double bill=0.0;
   model.TestsList testsList;
   void initState() {
@@ -181,6 +182,7 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
                  setState(() {
                    bill= bill+ double.parse(snapshot.data[index]['PRICE']);
                  medicines.add(model.Medecine(snapshot.data[index]['NAME'], snapshot.data[index]['PRICE']));
+                 medNames.add(snapshot.data[index]['NAME']);
              });
                 
                  },
@@ -251,7 +253,7 @@ class _BookTestsOnlineState extends State<BookTestsOnline> {
                     elevation: 0,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onPressed: (){
-                      MedList list= MedList.scan(widget.pageNav.title, widget.pageNav.id, bill, medicines,widget.pageNav.responsibleId);
+                      MedList list= MedList.scan(widget.pageNav.title, widget.pageNav.id, bill, medicines,widget.pageNav.responsibleId, medNames);
                       Navigator.of(context).pushNamed("/secondeBookTest",arguments: list);
                     },
                     shape: RoundedRectangleBorder(

@@ -30,6 +30,7 @@ class _MedecinesState extends State<Medecines> {
   User currentUser = User.init().getCurrentUser();
   //model.MedecinesList medecinesList;
   List<Medecine> medicines = [];
+  List<String> medNames=[];
   List<dynamic> allmeds = [];
   double bill = 0.0;
   List<dynamic> medicalAids = [];
@@ -164,6 +165,7 @@ class _MedecinesState extends State<Medecines> {
     setState(() {
       bill = widget.value.bill;
       medicines = widget.value.list;
+      medNames= widget.value.medNames;
       getPharmacist();
       _quantity = widget.value.quantity;
     });
@@ -471,7 +473,7 @@ class _MedecinesState extends State<Medecines> {
                   onPressed: () {
                     print(_pharmacist.id);
                     MedList list = MedList.psecond(widget.value.pid, medicines,
-                        bill, widget.value.pharmacy, _pharmacist.id, _quantity, widget.value.pageNav);
+                        bill, widget.value.pharmacy, _pharmacist.id, _quantity, widget.value.pageNav, medNames);
                     Navigator.of(context)
                         .pushNamed("/medecinesSeconde", arguments: list);
                   },
@@ -585,6 +587,7 @@ class _MedecinesState extends State<Medecines> {
 
                       if (medicines.contains(medecine) == false) {
                         medicines.add(medecine);
+                        medNames.add(medecine.name);
                       }
                     });
                   }

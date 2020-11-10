@@ -295,7 +295,11 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                       Medecine medecine= Medecine("Doctor Booking", "");
                      List<Medecine>  list=[];
                      list.add(medecine);
-                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+newFormat.format(widget.value.date), widget.value.doctor.userId,list,600.0, widget.value.date, widget.value.doctor.resId);
+                     List <String> medNames=[];
+                     for(int i=0;i<list.length;i++){
+                       medNames.add(list[i].name);
+                     }
+                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+newFormat.format(widget.value.date), widget.value.doctor.userId,list,600.0, widget.value.date, widget.value.doctor.resId, medNames);
                       await confirmDialog( context, 'Doctors booking');
                       Navigator.of(context).pushNamed('/patientacc');  
                     },

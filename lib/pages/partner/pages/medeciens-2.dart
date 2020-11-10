@@ -24,10 +24,12 @@ class _MedecinesSlectedState extends State<MedecinesSlected> {
  
   bool _loading=false;
 int itemcount=0;
+List<String> medNames=[];
 List<Medecine> groupCart(unGroupedCart){
 
 List<Medecine> groupedCart=[];
 int quantity=1;
+
 for(int i=0;i<unGroupedCart.length;i++)
 {
 	int counter=i+1;
@@ -68,6 +70,7 @@ return groupedCart;
     setState(() {
       itemcount=widget.value.quantity;
       bill=widget.value.bill;
+      medNames.addAll(widget.value.medNames);
     });
     this.medecinesList = new model.MedecinesList();
       groupCart(widget.value.list);
@@ -85,7 +88,7 @@ return groupedCart;
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color:Theme.of(context).primaryColor ),
           onPressed: (){
-            MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId, itemcount,widget.value.pageNav);
+            MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId, itemcount,widget.value.pageNav, medNames);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
           },
         ),
@@ -184,6 +187,7 @@ return groupedCart;
                     if(medicines[index].quantity==1)
                     {
                       medicines.removeAt(index);
+                      medNames.removeAt(index);
                        }
                     
                     else
@@ -256,7 +260,7 @@ return groupedCart;
                   FlatButton(
                     onPressed: (){
                       print('-----------------------'+widget.value.pid.toString());
-                      MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId,itemcount,widget.value.pageNav);
+                      MedList list=MedList.p(widget.value.pid, medicines, bill,widget.value.pharmacy,widget.value.responsibleId,itemcount,widget.value.pageNav, medNames);
                       Navigator.of(context).pushNamed('/medecines',arguments: list);
                     },
                     shape: RoundedRectangleBorder(
@@ -325,7 +329,7 @@ return groupedCart;
                     onPressed: () async{
                    
                 
-                      Payments payments= Payments('Medicines Prescription',medicines.toString(), widget.value.pharmacistID,medicines, widget.value.bill,DateTime.now(), widget.value.responsibleId);
+                      Payments payments= Payments('Medicines Prescription',medicines.toString(), widget.value.pharmacistID,medicines, widget.value.bill,DateTime.now(), widget.value.responsibleId, medNames);
                      await _createPresciption(payments);
                       await confirmDialog( context, 'Prescription created'); 
                       Navigator.of(context).pushNamed('/patientacc'); 
@@ -400,7 +404,7 @@ return groupedCart;
    "TITLE":payments.title,
    "DESCRIPTION":payments.description,
    "UF_AUTO_831530867848":widget.value.pageNav.patientId,
-   "UF_AUTO_197852543914":payments.medicines.toJson(),
+   "UF_AUTO_197852543914":payments.medNames,
   
    "UF_AUTO_229319567783":"prescription",
    "RESPONSIBLE_ID":widget.value.pageNav.docName

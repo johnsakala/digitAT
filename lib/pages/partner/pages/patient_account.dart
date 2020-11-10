@@ -24,6 +24,7 @@ class _PatientAccountState extends State<PatientAccount>{
   bool _scanConfirmed= false;
   String docName;
   int id;
+  List<String> medNames=[];
   
 
 
@@ -588,7 +589,7 @@ class _PatientAccountState extends State<PatientAccount>{
 
                         if(value){
                           List<Medecine> meds=[];
-                          MedList list =MedList.p("1", meds, 0.0, "Medicines","1",0,pageNavi);
+                          MedList list =MedList.p("1", meds, 0.0, "Medicines","1",0,pageNavi, medNames);
                           Navigator.of(context).pushNamed('/medecines',arguments:list );
                         }
                        // Navigator.of(context).pushNamed('/pharmacies',arguments: pageNavi);
