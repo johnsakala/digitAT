@@ -158,24 +158,23 @@ class _DoctorsListState extends State<DoctorsList> {
       try {
         if (responseBody["result"] != null) {
 //        print(responseBody);
-          DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
-          serverResponse = doctors_list.result;
-          doctors_list.result.forEach((user) {
+          
+          responseBody["result"].forEach((user) {
             print("------\n");
-            print(user.nAME);
+            print(user['NAME']);
             print("------\n");
-            if(user.pERSONALPHOTO==null){
-              user.pERSONALPHOTO="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
+            if(user['PERSONAL_PHOTO']==null){
+              user['PERSONAL_PHOTO']="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
             }
-            bool isFavoured= myDoctors.contains(int.parse(user.iD));
+            bool isFavoured= myDoctors.contains(int.parse(user['ID']));
             _doctorsList.add(
               new Doctor(
-                  user.nAME + " " + user.lASTNAME,
-                  " ${user.pERSONALPROFESSION} 26 years of experience ",
-                  user.pERSONALPHOTO,
+                  user['NAME'] + " " + user['LAST_NAME'],
+                  " ${user['PERSONAL_PROFESSION']} 26 years of experience ",
+                  user['PERSONAL_PHOTO'],
                   "Closed To day",
                   Colors.green,
-                  user.iD,isFavoured,
+                  user['ID'],isFavoured,
                   widget.pageNav.responsibleId),
             );
           });
