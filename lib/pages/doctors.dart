@@ -1,30 +1,21 @@
 import 'package:digitAT/api/url.dart';
 import 'package:digitAT/config/constants.dart';
-import 'package:digitAT/models/model/ContactModel.dart';
 import 'package:digitAT/models/navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:digitAT/models/doctor.dart' as model;
-import 'package:digitAT/models/user.dart';
-import 'package:digitAT/widgets/doctorsWidget.dart';
-import 'package:digitAT/widgets/searchWidget.dart';
+import 'package:digitAT/models/partner/models/doctor.dart' as model;
+import 'package:digitAT/widgets/partner/widgets/doctorsWidget.dart';
 import 'package:digitAT/api/doctors.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:digitAT/models/doctor.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-//List<ContactModel> _searchResult = [];
-//List<ContactModel> _contacts = [];
+import 'package:digitAT/models/partner/models/doctor.dart';
 
 class DoctorsList extends StatefulWidget {
-  
- const DoctorsList({Key key}) : super(key: key); 
+  final PageNav pageNav;
+ const DoctorsList({Key key,this.pageNav}) : super(key: key); 
   @override
   _DoctorsListState createState() => _DoctorsListState();
 }
@@ -35,22 +26,10 @@ String searchString;
 @override
 class _DoctorsListState extends State<DoctorsList> {
   model.DoctorsList doctorsList;
-List myDocs=[];
-  Future<List> _getList()async{
-    SharedPreferences preferences= await SharedPreferences.getInstance();
-    String list= preferences.getString('docs');
-    List result= jsonDecode(list);
-    return result;
-  
-  }
   @override
   void initState() {
-    this.doctorsList = new model.DoctorsList();
     super.initState();
-    
-    _getList().then((value) {
-     myDocs.addAll(value);
-    });
+    print('0000000000000000000000000000000${widget.pageNav}');
     searchDoctorController.addListener(() {
       setState(() {
         searchString = searchDoctorController.text;
@@ -60,6 +39,7 @@ List myDocs=[];
 
   @override
   Widget build(BuildContext context) {
+  
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -71,7 +51,7 @@ List myDocs=[];
         ),
         backgroundColor: Theme.of(context).accentColor,
         title: Text(
-          'Doctors',
+          '${widget.pageNav.title}',
           style: TextStyle(
             fontSize: 22.0,
             fontFamily: 'Poppins',
@@ -111,50 +91,34 @@ List myDocs=[];
                             blurRadius: 10)
                       ],
                     ),
-                    child: Column(
+                    child: Stack(
+                      alignment: Alignment.centerRight,
                       children: <Widget>[
-                        TypeAheadField(
-  textFieldConfiguration: TextFieldConfiguration(
-  
-    
-    decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(12),
-              hintText: 'Search',
-              hintStyle: TextStyle(color: Theme.of(context).hintColor,fontFamily: 'Poppins'),
-              prefixIcon: Icon(Icons.search, size: 20, color: Theme.of(context).hintColor),
-              border: UnderlineInputBorder(borderSide: BorderSide.none),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide.none),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide.none),
+                        TextField(
+                          controller: searchDoctorController,
+                          onTap: () {},
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.all(12),
+                            hintText: 'Search',
+                            hintStyle: TextStyle(
+                                color: Theme.of(context).hintColor,
+                                fontFamily: 'Poppins'),
+                            prefixIcon: Icon(Icons.search,
+                                size: 20, color: Theme.of(context).hintColor),
+                            border: UnderlineInputBorder(
+                                borderSide: BorderSide.none),
+                            enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide.none),
+                            focusedBorder: UnderlineInputBorder(
+                                borderSide: BorderSide.none),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-  ),
- suggestionsCallback: (pattern) async {
-    return await _fetchSugestions(pattern);
-  },
-  itemBuilder: (context, suggestion) {
-    return ListTile(
-      contentPadding: EdgeInsets.all(10.0),
-      leading: Container(
-      height: 40.0,width: 40.0,
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(100.0),
-        image: DecorationImage(image: NetworkImage(suggestion.avatar), fit: BoxFit.cover,
-      ),
-
-      ),
-      
-    ),
-      title: Text(suggestion.name,
-      style: TextStyle(
-        fontWeight: FontWeight.bold
-      ),),
-      subtitle: Text(suggestion.description),
-    );
-  },
-  onSuggestionSelected: (suggestion) {
-   Navigator.of(context).pushNamed('/doctorProfil', arguments: suggestion);
-  },
-),
           
             Container(
                 decoration: BoxDecoration(
@@ -165,7 +129,7 @@ List myDocs=[];
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         List<Doctor> data = snapshot.data;
-                      
+                        print("*-*-*-*-*-*-*-*-*-*-*-*-"+snapshot.data[0].resId);
                         return _jobsListView(data);
                       } else if (snapshot.hasError) {
                         return Text("${snapshot.error}");
@@ -176,121 +140,50 @@ List myDocs=[];
           ],
         ),
       ),
-              
-                )
-              ]
-          
-          )
-          ]
-          ))
     );
-              
   }
-List responseList = [];
+
   Future<List<Doctor>> _fetchDoctors() async {
 //  showAlertDialog(context);
     final http.Response response = await http
         .get(
-      '${webhook}crm.contact.list?filter[UF_CRM_1604303008535]=30',
+      '${webhook}user.get.json?UF_DEPARTMENT=${widget.pageNav.id}',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
-    List <Doctor> serverResponse = [];
+    List serverResponse = [];
     List<Doctor> _doctorsList = [];
     if (response.statusCode == 200) {
+      print('9999999999999999999999${responseBody['result']}');
       try {
-        print('+++++++++++++++++++++++++++++++++++++++++++++++++++result ${responseBody["result"]}');
         if (responseBody["result"] != null) {
-          //DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
-          
-          //serverResponse = doctors_list.result;
-          responseBody['result'].forEach((user) {
-            print(" user");
+//        print(responseBody);
+          DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
+          serverResponse = doctors_list.result;
+          doctors_list.result.forEach((user) {
             print("------\n");
-            print(user['UF_CRM_1604090065799']);
+            print(user.nAME);
             print("------\n");
-            if(user['UF_CRM_1604303532891']==null){
-              user['UF_CRM_1604303532891']="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
+            if(user.pERSONALPHOTO==null){
+              user.pERSONALPHOTO="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
             }
-            bool isFavoured= myDocs.contains(int.parse(user['UF_CRM_1598992339725']));
+            bool isFavoured= myDoctors.contains(int.parse(user.iD));
             _doctorsList.add(
               new Doctor(
-                  user['NAME'] + " " + user['LAST_NAME'],
-                  " ${user['UF_CRM_1604090065799']} 26 years of experience ",
-                 "${user['UF_CRM_1604303532891']}",
-                  "Open today",
+                  user.nAME + " " + user.lASTNAME,
+                  " ${user.pERSONALPROFESSION} 26 years of experience ",
+                  user.pERSONALPHOTO,
+                  "Closed To day",
                   Colors.green,
-                 "${user['UF_CRM_1598992339725']}",isFavoured,
-                  '1'),
+                  user.iD,isFavoured,
+                  widget.pageNav.responsibleId),
             );
           });
 
           serverResponse = _doctorsList;
-          print('----*------*-------* ${serverResponse.length}');
         } else {
-          serverResponse = [];
-          print(response.body);
-        }
-      } catch (error) {
-        print(error);
-      }
-    } else {
-      print("Please check your internet connection ");
-      Fluttertoast.showToast(
-          msg: "Please check your internet connection ",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 4,
-          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
-    }
-    return serverResponse;
-  }
-
-
-Future<List<Doctor>> _fetchSugestions(String name) async {
-
-    final http.Response response = await http
-       .get(
-         '${webhook}crm.contact.list?filter[UF_CRM_1604303008535]=30',
-    )
-        .catchError((error) => print(error));
-    Map<String, dynamic> responseBody = jsonDecode(response.body);
-    List <Doctor> serverResponse = [];
-    List<Doctor> _doctorsList = [];
-    if (response.statusCode == 200) {
-      try {
-        if (responseBody["result"] != null) {
-        
-          //DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
-          
-          //serverResponse = doctors_list.result;
-          responseBody['result'].forEach((user) {
-            print("/*/*/*/*/*/*/*/*/*/*/*/* user");
-            print("------\n");
-            print(user['UF_CRM_1604303008535']);
-            print("------\n");
-            if(user['UF_CRM_1604303532891']==null){
-              user['UF_CRM_1604303532891']="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
-            }
-            bool isFavoured= myDocs.contains(int.parse(user['UF_CRM_1598992339725']));
-            _doctorsList.add(
-              new Doctor(
-                  user['NAME'] + " " + user['LAST_NAME'],
-                  " ${user['UF_CRM_1604090065799']} 26 years of experience ",
-                  "${user['UF_CRM_1604303532891']}",
-                  "Open today",
-                  Colors.green,
-                  "${user['UF_CRM_1598992339725']}",isFavoured,
-                  '1'),
-            );
-          });
-
-          serverResponse = _doctorsList;
-          setState(() {
-            responseList=_doctorsList;
-          });
-        } else {
-          serverResponse = [];
+          List<Doctor> doctorList = [];
+          serverResponse =doctorList; ;
           print(response.body);
         }
       } catch (error) {

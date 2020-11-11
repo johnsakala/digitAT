@@ -225,7 +225,7 @@ class _AcountWidgetState extends State<AcountWidget> {
                               ),
                               'Appointments',
                               1,
-                              '/appointment',
+                              '/appointmentList',
                               context),
                           _dropDownListe(
                               Icon(

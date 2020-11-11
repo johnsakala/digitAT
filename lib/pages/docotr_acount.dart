@@ -30,6 +30,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
   ContactModel contactModel = ContactModel.init();
   
   final fireStoreUtils = FireStoreUtils();
+  String docid;
   @override
   void initState(){
   super.initState();
@@ -166,7 +167,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
                      print(myDoctors);
                      });
                      await persistDoctors(myDoctors);
-                     await confirmDialog(context,_message);
+                     await confirmDialog(context,'Doctor $_message your favourite doctors');
                      },
                   
               icon:widget.doctor.isFavorited
@@ -454,9 +455,9 @@ class _DoctorAcountState extends State<DoctorAcount> {
                     onPressed: ()async{
                       await _fetchDoctors();
                       await _onContactButtonClicked(contactModel);
-                                           
-                      hideProgress();
-                      Navigator.of(context).pushNamed("/firstDoctorBook", arguments: widget.doctor);
+                      await _createTask();                    
+                      await confirmDialog(context, "Booking completed successfully");
+                      Navigator.of(context).pop();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -550,7 +551,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
             title: Text('Message'),
             content: Container(
               height: 40,
-              child:Text('Doctor $message your favourite doctors'),
+              child:Text('$message'),
             ),
             contentPadding: EdgeInsets.all(10),
             actions: <Widget>[
@@ -589,7 +590,10 @@ preferences.setString('docs', list);
     if (response.statusCode == 200) {
       try {
         if (responseBody["result"] != null) {
-        var id=responseBody["result"][0]['UF_CRM_1603851628169'];
+          setState(() {
+            docid=responseBody["result"][0]['ID'];
+          });
+         var id=responseBody["result"][0]['UF_CRM_1603851628169'];
  print('**********************************id $id');
       Stream<User> controller= fireStoreUtils.getUserByID(id);
        controller.listen((data) {
@@ -639,7 +643,37 @@ String getStatusByType(ContactType type) {
         return 'addFriend';
     }
   }
+   Future _createTask() async {
 
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  int id= preferences.getInt('id');
+ 
+     final http.Response response = await http.post(
+        '${webhook}tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":'Doctor Appointment Booking',
+   "DESCRIPTION":'',
+   "UF_AUTO_831530867848":id,
+   "UF_AUTO_621898573172":'',
+   "UF_AUTO_229319567783": "booking",
+   "UF_AUTO_206323634806":'',
+   "RESPONSIBLE_ID":widget.doctor.userId
+  }
+
+}),).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+        
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+      
+  }
   Future _onContactButtonClicked(ContactModel contact) async {
     switch (contact.type) {
       case ContactType.ACCEPT:
@@ -669,4 +703,5 @@ String getStatusByType(ContactType type) {
         break;
     }
   }
+  
 }

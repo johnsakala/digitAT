@@ -667,11 +667,12 @@ pref.setString('name', name);
                     
                     await uploadImage();
                     if(_result){
+                    await  confirmDialog(context);
                     Navigator.of(context).pushNamed('/homePatient',arguments:[name,id,city]);
 
                    }
                    else{
-                    
+                   await errorDialog(context);
                     print("***************************failed to update");
                    }
                   }
@@ -739,6 +740,68 @@ pref.setString('name', name);
        }
        return result;
   }
+   Future<bool> confirmDialog(BuildContext context) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Confirmation'),
+            content: Container(
+              height: 85,
+              child:Text('Account edited successfully'),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
+  }
+
+   Future<bool> errorDialog(BuildContext context) {
+
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Error!', style: TextStyle(color: Colors.red),),
+            content: Container(
+              height: 85,
+              child:Text('Error occured during updating Account ', style: TextStyle(color: Colors.red),),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            actions: <Widget>[
+              FlatButton(
+                 shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                color: Theme.of(context).accentColor,
+                child: Text('OK'),
+                onPressed: () {
+                
+                                     Navigator.of(context).pop();
+
+                },
+              )
+            ],
+          );
+        });
+  }
+
 
 /*Future <int>_createContact(String g, String name, String lname, String city, String phoneNumber, DateTime dob) async {
 

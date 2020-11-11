@@ -146,8 +146,8 @@ class _DoctorsCatState extends State<DoctorsCat> {
                     onTap: (){
                         print('add');
                     List<Medecine> list=[];
-                    PageNav pageNav= PageNav(snapshot.data[index]['NAME'], snapshot.data[index]['ID'],0.0,list, widget.pageNav.responsibleId);
-                    Navigator.of(context).pushNamed("/doctors", arguments: pageNav);
+                    PageNav pageNavi= PageNav(snapshot.data[index]['NAME'], snapshot.data[index]['ID'],0.0,list, widget.pageNav.responsibleId);
+                    Navigator.of(context).pushNamed("/doctors", arguments: pageNavi);
                     },
                                       child: Column(
       children: <Widget>[

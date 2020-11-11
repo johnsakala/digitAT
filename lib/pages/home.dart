@@ -102,7 +102,7 @@ class _HomeState extends State<Home> {
             leading: Image(image: AssetImage('images/nurse.png'),),
             title:Text('Doctors'),
            onTap:(){
-              Navigator.of(context).pushNamed('/doctors');
+              Navigator.of(context).pushNamed('/doctorcategories', arguments: pageNavDoc);
            }
           ),
            ListTile(
@@ -197,7 +197,7 @@ class _HomeState extends State<Home> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(150)),
                       onPressed: (){
-                        Navigator.of(context).pushNamed('/doctors');
+                        Navigator.of(context).pushNamed('/doctorcategories', arguments: pageNavDoc);
                       },
                       child:ball("images/nurse.png",Theme.of(context).scaffoldBackgroundColor),
                     ),

@@ -125,7 +125,7 @@ class RouteGenerator {
      case '/account' :
         return MaterialPageRoute(builder: (_) => AcountWidget(acountInfos: args,));
       case '/doctors':
-        return MaterialPageRoute(builder: (_) => DoctorsList());  
+        return MaterialPageRoute(builder: (_) => DoctorsList(pageNav: args,));  
       case '/doctorProfil':
         return MaterialPageRoute(builder: (_) => DoctorAcount(doctor: args,));
       case '/firstDoctorBook':
@@ -150,6 +150,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => MyDoctorsList());
       case '/appointment':
         return MaterialPageRoute(builder: (_) => AppointmentCard());
+        case '/appointmentList':
+        return MaterialPageRoute(builder: (_) => AppointmentsList());
       case '/health':
         return MaterialPageRoute(builder: (_) => HealthTips());
         case '/pharmacies':
