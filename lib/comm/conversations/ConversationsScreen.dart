@@ -72,14 +72,14 @@ class _ConversationsState extends State<ConversationsScreen> {
           },
           icon: Icon(Icons.arrow_back,color: Theme.of(context).accentColor),
         ),
-       /* actions:<Widget>[IconButton(
+        actions:<Widget>[IconButton(
           color: Theme.of(context).primaryColor,
           icon: Icon(Icons.contact_phone),
           onPressed: (){
-             Navigator.of(context).pop();
+             Navigator.of(context).pushNamed('/contacts', arguments: widget.user);
             
           },
-        ),],*/
+        ),],
         title: Text(
           "Chats",
           style:TextStyle(

@@ -456,7 +456,7 @@ class _DoctorAcountState extends State<DoctorAcount> {
                       await _fetchDoctors();
                       await _onContactButtonClicked(contactModel);
                       await _createTask();                    
-                      await confirmDialog(context, "Booking completed successfully");
+                      await confirmDialog(context, "Booking request has been submitted successfully");
                       Navigator.of(context).pop();
                     },
                     shape: RoundedRectangleBorder(

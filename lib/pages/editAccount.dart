@@ -667,6 +667,10 @@ pref.setString('name', name);
                     
                     await uploadImage();
                     if(_result){
+                      SharedPreferences.getInstance().then((SharedPreferences sp) {
+                            sp.setString('city', city);
+      
+                    });
                     await  confirmDialog(context);
                     Navigator.of(context).pushNamed('/homePatient',arguments:[name,id,city]);
 
@@ -716,6 +720,7 @@ pref.setString('name', name);
                     "LAST_NAME": lname, 
                     "STATUS_ID": "NEW", 
                     "OPENED": "Y", 
+                    "ADDRESS_CITY":city,
                     "ASSIGNED_BY_ID": 1,
                     //"BIRTHDATE":dob, 
                     "UF_CRM_5EE0B54E93F39":gender,
