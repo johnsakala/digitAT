@@ -295,7 +295,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                      List<Medecine>  list=[];
                      list.add(medecine);
                       Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+newFormat.format(widget.value.date), widget.value.doctor.userId,list,600.0, widget.value.date, widget.value.doctor.resId);
-                      Navigator.of(context).pushNamed("/payments",arguments:payments);
+                     // Navigator.of(context).pushNamed("/payments",arguments:payments);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)

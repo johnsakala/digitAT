@@ -8,18 +8,28 @@ import 'package:digitAT/services/FirebaseHelper.dart';
 import 'package:digitAT/services/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:digitAT/widgets/partner/widgets/doctorsWidget.dart';
+import 'package:digitAT/api/doctors.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:async';
+
+import 'package:digitAT/models/partner/models/doctor.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../config/constants.dart';
 
 Color primaryColor = Color(0xff0074ff);
 
 class AccountCard extends StatefulWidget {
-  final PatientCard patient;
   const AccountCard({Key key,this.patient}) : super(key:key);
+
+  final PatientCard patient;
+
   @override
   _AccountCardState createState()=> _AccountCardState();
-
 }
  class _AccountCardState extends State<AccountCard>{
     bool attended;
@@ -73,6 +83,10 @@ Future _fetchDetails() async {
     
   }
 
+ 
+
+
+Doctor doctor= Doctor.init();
 @override
   void initState() {
   
@@ -82,6 +96,11 @@ Future _fetchDetails() async {
     date= widget.patient.date;
     hour=widget.patient.hour;
     id=widget.patient.id;
+    _fetchDoctor().then((value){
+      setState((){
+  doctor=value;
+      });
+    });
   SharedPreferences.getInstance().then((SharedPreferences sp) {
       
       user=User.fromJson(jsonDecode(sp.getString('user')));
@@ -145,6 +164,7 @@ Future _fetchDetails() async {
         onTap: ()async{
         await  _fetchDetails();
          await _onContactButtonClicked(contactModel);
+        // Navigator.of(context).pushNamed('/firstDoctorBook',arguments: doctor) ;},
           Navigator.of(context).pushNamed('/patientacc',arguments: widget.patient);        },
               child:
               Container(
@@ -158,7 +178,7 @@ Future _fetchDetails() async {
                   ),
                   subtitle: Text(date),
                 ),
-              ),),
+              )),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -205,5 +225,65 @@ Future _fetchDetails() async {
         ),
       
     );
+  }
+    Future<Doctor> _fetchDoctor() async {
+//  showAlertDialog(context);
+int docId;
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+    docId= preferences.getInt("id");
+  
+
+    final http.Response response = await http
+        .get(
+      '${webhook}user.get.json?UF_DEPARTMENT=30&ID=$docId',
+    )
+        .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    Doctor serverResponse = Doctor.init();
+    List<Doctor> _doctorsList = [];
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+//        print(responseBody);
+          DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
+      
+          doctors_list.result.forEach((user) {
+            print("------\n");
+            print(user.nAME);
+            print("------\n");
+            if(user.pERSONALPHOTO==null){
+              user.pERSONALPHOTO="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
+            }
+            bool isFavoured= myDoctors.contains(int.parse(user.iD));
+            _doctorsList.add(
+              new Doctor(
+                  user.nAME + " " + user.lASTNAME,
+                  " ${user.pERSONALPROFESSION} 26 years of experience ",
+                  user.pERSONALPHOTO,
+                  "Closed To day",
+                  Colors.green,
+                  user.iD,isFavoured,
+                  id),
+            );
+          });
+
+          serverResponse = _doctorsList[0];
+        } else {
+          
+          print(response.body);
+        }
+      } catch (error) {
+        print(error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    return serverResponse;
   }
 }
