@@ -72,20 +72,19 @@ class GroupVoiceCallsHandler {
 
   final Map<String, dynamic> _iceServers = {
     'iceServers': [
-      {'url': 'stun:stun.l.google.com:19302'},
+      {'url': 'stun:stun.digitat.info:3478'},
       {
-        'url': 'turn:95.217.132.49:80?transport=udp',
-        'username': 'c38d01c8',
-        'credential': 'f7bf2454'
+        'url': 'turn:turn.digitat.info:3478?transport=udp',
+        'username': 'digitat',
+        'credential': '@dmin123'
       },
       {
-        'url': 'turn:95.217.132.49:80?transport=tcp',
-        'username': 'c38d01c8',
-        'credential': 'f7bf2454'
+        'url': 'turn:turn.digitat.info:3478?transport=tcp',
+        'username': 'digitat',
+        'credential': '@dmin123'
       },
     ]
   };
-
   final Map<String, dynamic> _config = {
     'mandatory': {},
     'optional': [

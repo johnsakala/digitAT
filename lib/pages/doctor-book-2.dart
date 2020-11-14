@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/doc_booking.dart';
 import 'package:digitAT/models/medecine.dart';
 
@@ -328,5 +329,38 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
         image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover,)
       ),
     );
+  }
+     Future _createAppointmentConfirmation(Payments payments) async {
+//  showAlertDialog(context);
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+  int id= preferences.getInt('id');
+ //int result=0;
+ 
+     final http.Response response = await http.post(
+        '${webhook}tasks.task.add',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":'Appointment Confirmation',
+   "DESCRIPTION":payments.description,
+   "UF_AUTO_831530867848":payments.resId,
+   "UF_AUTO_197852543914":payments.medicines,
+  
+   "UF_AUTO_229319567783":"appointment",
+   "RESPONSIBLE_ID":payments.responsibleID
+  }
+
+})).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita'+responseBody.toString());
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
   }
 }
