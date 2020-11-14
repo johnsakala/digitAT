@@ -15,6 +15,7 @@ import 'package:digitAT/pages/lab_prescription.dart';
 import 'package:digitAT/pages/moneytel.dart';
 import 'package:digitAT/pages/partner/pages/Welcome.dart' as partnerWelcome;
 import 'package:digitAT/pages/hospitals.dart';
+import 'package:digitAT/pages/partner/pages/account_card_confirmed.dart';
 import 'package:digitAT/pages/partner/pages/imaging_centres.dart';
 import 'package:digitAT/pages/partner/pages/labs.dart';
 import 'package:digitAT/pages/my_payments.dart';
@@ -179,6 +180,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => Hospitals());
         case '/patientacc':
         return MaterialPageRoute(builder: (_) => PatientAccount(patient: args,));
+        case '/patientconfirmedacc':
+        return MaterialPageRoute(builder: (_) => AccountConfirmedCard(patient: args,));
         case '/hospitalreg':
         return MaterialPageRoute(builder: (_) => HospitalReg());
         case '/waitingroom':

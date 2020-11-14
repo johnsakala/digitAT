@@ -574,7 +574,7 @@ final fireStoreUtils = FireStoreUtils();
                   _buildCard(context, child: AppointmentCard(total: total,)),
                   SizedBox(height: 20),
                   Text(
-                    "Appointments",
+                    " Pending Appointments",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -585,6 +585,29 @@ final fireStoreUtils = FireStoreUtils();
             height: 200.0,
             child:FutureBuilder<List<Widget>>(
                 future: _fetchAppointment(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<Widget> data = snapshot.data;
+                    return _doctorsListView(data);
+                  } else if (snapshot.hasError) {
+                    return Text("Please check your internet connection! ${snapshot.error}");
+                  }
+                  return CircularProgressIndicator();
+                }),
+          ),
+          SizedBox(height: 20),
+          Text(
+                    "Confirmed Appointments",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+            height: 200.0,
+            child:FutureBuilder<List<Widget>>(
+                future: _fetchConfirmedAppointment(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List<Widget> data = snapshot.data;
@@ -725,6 +748,89 @@ final fireStoreUtils = FireStoreUtils();
 
     return legend.toList();
   }
+
+   Future <List<Widget>> _fetchConfirmedAppointment() async {
+     List<Widget> _applist=[];
+     SharedPreferences preferences= await SharedPreferences.getInstance();
+     int resposibleId=preferences.getInt('id');
+     print('----------$resposibleId');
+//  showAlertDialog(context);
+    final http.Response response = await http
+        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Doctor Appointment Booking&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
+    )  .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+    
+    List< dynamic> result=[];
+   
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+         
+              
+      result = responseBody["result"]["tasks"];
+         for(int i=0;i<result.length;i++){
+           final http.Response aids = await http
+        .get(
+          '${webhook}crm.lead.get?ID=${result[i]['ufAuto831530867848']}',
+        )
+        .catchError((error) => print(error));
+    Map<String, dynamic> aidsBody = jsonDecode(aids.body);
+    if (aids.statusCode == 200) {
+      List<Widget> _appList=[];
+      try {
+        if (aidsBody["result"] != null) {
+         
+        
+            
+            PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"]);
+            
+            _appList.add(
+                _buildCard(
+                    context,
+                    child: AccountCard(patient: patientCard,),
+            ));
+           _applist.addAll(_appList); 
+          
+        } else {
+          print('-----------------' + response.body);
+        }
+      } catch (error) {
+        print('-----------------' + error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+         }
+         
+   
+        } else {
+          
+          print('-----------------'+response.statusCode.toString());
+        }
+      } catch (error) {
+        print('-----------------'+error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    setState(() {
+      total=_applist.length;
+    });
+    return _applist;
+  }
+
    ListView _doctorsListView(data) {
     return ListView(
         
