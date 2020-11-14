@@ -21,12 +21,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Color primaryColor = Color(0xff0074ff);
-PatientCard patientCard =
-    PatientCard('20-Oct-2020', 'Lewis Moyo', false, 'harare', "1");
-PatientCard patientCard1 =
-    PatientCard('21-Sep-2020', ' Tinotenda Ruzane', false, 'haare', "2");
-PatientCard patientCard2 =
-    PatientCard('10-Jan-2021', 'Blessing Chamu', false, 'harare', "3");
+
 
 class PartnerLab extends StatefulWidget {
   final User user;
@@ -707,7 +702,7 @@ class PartnerLabState extends State<PartnerLab> {
                           aidsBody["result"]['LAST_NAME'],
                       false,
                       aidsBody["result"]["ADDRESS_CITY"],
-                      aidsBody["result"]["ID"]);
+                      aidsBody["result"]["ID"],"");
                   _appList.add(_buildCard(
                     context,
                     child: AccountCard(

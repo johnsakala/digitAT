@@ -114,7 +114,7 @@ class _AppointmentsListState extends State<AppointmentsList> {
         print(responseBody);
         
             result=responseBody['result'];
-            print("/////////////////////"+result['tasks'][0]['responsible']['name'].toString());
+            print("/////////////////////************"+result['tasks'][0]['responsible']['name'].toString());
           for(int i=0;i<result['tasks'].length;i++)
           {
              final http.Response response = await http
@@ -122,19 +122,12 @@ class _AppointmentsListState extends State<AppointmentsList> {
       '${webhook}user.get.json?UF_DEPARTMENT=$doctorsId&ID=${result['tasks'][i]['responsibleId']}',
     )
         .catchError((error) => print(error));
-    Map<String, dynamic> responseBody = jsonDecode(response.body);
-     DepartmentUsers doctors_list = DepartmentUsers.fromJson(responseBody);
-          serverResponse = doctors_list.result;
-          doctors_list.result.forEach((user) {
+      
             
-            if(user.pERSONALPHOTO==null){
-              user.pERSONALPHOTO="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU";
-            }
-            
-           Doctor doc= Doctor.app(result['tasks'][i]['responsible']['name'],user.pERSONALPHOTO);
+           Doctor doc= Doctor.app(result['tasks'][i]['responsible']['name'],"https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU");
             _doctorsList.add(Appointment(result['tasks'][i]['ufAuto206323634806'],doc));
             
-          });
+          
             
           }
         } else {

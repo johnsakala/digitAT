@@ -41,11 +41,11 @@ class _AppointmentsWidgetState extends State<AppointmentsWidget> {
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        Container(
+                       /* Container(
                           margin: const EdgeInsets.only(right: 25.0),
                           child: ball(widget.appointment.doctor.avatar),
                           
-                        ),
+                        ),*/
                         Container(
                           child:Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

@@ -126,7 +126,7 @@ final fireStoreUtils = FireStoreUtils();
          
             print("*************************"+ aidsBody["result"].toString());
         
-                        PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"]);
+                        PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],"");
                         _appList.add(
                 _buildCard(
                     context,

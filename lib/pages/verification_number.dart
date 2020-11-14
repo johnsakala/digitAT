@@ -337,13 +337,14 @@ class _VerificationNumberState extends State<VerificationNumber> {
         
         MyAppState.currentUser = fuser;
         fireStoreUser=fuser;
-  preferences.setInt('id', _id);
      preferences.setString('name',fname);
      preferences.setString('city','Harare');
      preferences.setString('user', jsonEncode( fuser.toJson()));
         if(!isPartner){
      _id= await _createLead( phone);
      await _createContact(widget.userPhoneNumber, fuser.userID);
+  preferences.setInt('id', _id);
+
    
   }
     isPartner?Navigator.of(context).pushNamed('/createAcount', arguments: [fuser.userID, widget.userPhoneNumber]):Navigator.of(context).pushNamed('/homePatient',
@@ -383,6 +384,7 @@ class _VerificationNumberState extends State<VerificationNumber> {
          }); 
          Map<String, dynamic> responseBody = jsonDecode(response.body);     
            result=responseBody['result'];
+           
         print("//////////"+result.toString());
  
        }

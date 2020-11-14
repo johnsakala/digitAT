@@ -101,7 +101,7 @@ class _PaymentRequestListState extends State<PaymentRequestList> {
   
     final http.Response response = await http
         .get(
-      '${webhook}tasks.task.list?filter[UF_AUTO_831530867848]=$id&filter[UF_AUTO_229319567783]=payment&select[]=RESPONSIBLE_ID&select[]=UF_AUTO_621898573172',
+      '${webhook}tasks.task.list?filter[UF_AUTO_831530867848]=$id&filter[TITLE]=Appointment Confirmation&select[]=RESPONSIBLE_ID&select[]=UF_AUTO_621898573172',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);

@@ -574,7 +574,7 @@ final fireStoreUtils = FireStoreUtils();
                   _buildCard(context, child: AppointmentCard(total: total,)),
                   SizedBox(height: 20),
                   Text(
-                    " Pending Appointments",
+                    "Appointments",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -595,7 +595,7 @@ final fireStoreUtils = FireStoreUtils();
                   return CircularProgressIndicator();
                 }),
           ),
-          SizedBox(height: 20),
+         /* SizedBox(height: 20),
           Text(
                     "Confirmed Appointments",
                     style: TextStyle(
@@ -617,7 +617,7 @@ final fireStoreUtils = FireStoreUtils();
                   }
                   return CircularProgressIndicator();
                 }),
-          ),
+          ),*/
                 ],
               ),
             ),
@@ -659,7 +659,7 @@ final fireStoreUtils = FireStoreUtils();
          
         
             
-            PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"]);
+            PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],"");
             
             _appList.add(
                 _buildCard(
@@ -782,7 +782,7 @@ final fireStoreUtils = FireStoreUtils();
          
         
             
-            PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"]);
+            PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],result[i]['DESCRIPTION']);
             
             _appList.add(
                 _buildCard(

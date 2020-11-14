@@ -20,9 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 Color primaryColor = Color(0xff0074ff);
-PatientCard patientCard= PatientCard('20-Oct-2020', 'Lewis Moyo', false, 'harare',"1");
-PatientCard patientCard1= PatientCard('21-Sep-2020',' Tinotenda Ruzane', false, 'haare',"2");
-PatientCard patientCard2= PatientCard('10-Jan-2021', 'Blessing Chamu', false, 'harare',"3");
+
 class PartnerScan extends StatefulWidget {
   final User user;
   const PartnerScan({Key key, this.user}) : super(key: key);
@@ -696,7 +694,7 @@ final fireStoreUtils = FireStoreUtils();
          
             print("*************************"+ aidsBody["result"].toString());
         
-                        PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"]);
+                        PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],"");
                         _appList.add(
                 _buildCard(
                     context,

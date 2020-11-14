@@ -38,6 +38,7 @@ class AccountCard extends StatefulWidget {
    String date;
   String hour;
   String id;
+  String confirmed;
   User user= User.init();
   ContactModel contactModel= ContactModel.init();
   final fireStoreUtils= FireStoreUtils();
@@ -97,6 +98,7 @@ Doctor doctor= Doctor.init();
     date= widget.patient.date;
     hour=widget.patient.hour;
     id=widget.patient.id;
+    confirmed=widget.patient.confirmed;
     _fetchDoctor().then((value){
       setState((){
   doctor=value;
@@ -166,7 +168,16 @@ Doctor doctor= Doctor.init();
         await  _fetchDetails();
          await _onContactButtonClicked(contactModel);
          ConfirmBooking confirmBooking= ConfirmBooking(doctor, widget.patient);
-         Navigator.of(context).pushNamed('/firstDoctorBook',arguments: confirmBooking) ;},
+
+       
+        if(confirmed==""){
+          Navigator.of(context).pushNamed('/firstDoctorBook',arguments: confirmBooking) ;
+         // await _updateAppointment();
+        }else{
+        Navigator.of(context).pushNamed('/patientacc',arguments: widget.patient);
+        }
+        
+        },
          // Navigator.of(context).pushNamed('/patientacc',arguments: widget.patient);        },
               child:
               Container(
@@ -227,6 +238,37 @@ Doctor doctor= Doctor.init();
         ),
       
     );
+  }
+  
+  Future _updateAppointment() async {
+
+
+ 
+     final http.Response response = await http.post(
+        '${webhook}tasks.task.update',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+  "fields":{ 
+   "TITLE":'Doctor Appointment Booking',
+   "DESCRIPTION":'',
+   "UF_AUTO_831530867848":id,
+   "UF_AUTO_621898573172":'',
+   "UF_AUTO_229319567783": "booking",
+   "UF_AUTO_206323634806":'',
+   "RESPONSIBLE_ID":''
+  }
+
+}),).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+        
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+      
   }
     Future<Doctor> _fetchDoctor() async {
 //  showAlertDialog(context);
