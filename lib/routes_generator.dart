@@ -12,6 +12,7 @@ import 'package:digitAT/pages/conversations.dart' as con;
 import 'package:digitAT/pages/home.dart';
 import 'package:digitAT/pages/hospital_options.dart';
 import 'package:digitAT/pages/lab_prescription.dart';
+import 'package:digitAT/pages/moneytel.dart';
 import 'package:digitAT/pages/partner/pages/Welcome.dart' as partnerWelcome;
 import 'package:digitAT/pages/hospitals.dart';
 import 'package:digitAT/pages/partner/pages/imaging_centres.dart';
@@ -129,11 +130,13 @@ class RouteGenerator {
       case '/doctorProfil':
         return MaterialPageRoute(builder: (_) => DoctorAcount(doctor: args,));
       case '/firstDoctorBook':
-        return MaterialPageRoute(builder: (_) => DoctorBookFirstStep(doctor: args,));
+        return MaterialPageRoute(builder: (_) => DoctorBookFirstStep(cbooking: args,));
       case '/secondeDoctorBook':
         return MaterialPageRoute(builder: (_) => DoctorBookSecondeStep(value: args));
       case '/offers':
         return MaterialPageRoute(builder: (_) => OffersList());
+        case '/moneytel':
+        return MaterialPageRoute(builder: (_) => PaymentRequestList());
       case '/bookTest':
         return MaterialPageRoute(builder: (_) => BookTestsOnline(pageNav: args));
       case '/secondeBookTest':

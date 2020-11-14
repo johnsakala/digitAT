@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:digitAT/api/url.dart';
-import 'package:digitAT/models/doc_booking.dart';
+import 'package:digitAT/models/partner/models/doc_booking.dart';
 import 'package:digitAT/models/medecine.dart';
 
 import 'package:digitAT/models/payment.dart';
@@ -89,12 +89,12 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            ball(widget.value.doctor.avatar, Colors.transparent),
+                            ball(widget.value.doctor.doctor.avatar, Colors.transparent),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 Text(
-                                  widget.value.doctor.name,
+                                  widget.value.doctor.doctor.name,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14.0,
@@ -105,7 +105,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                 Container(
                                   width: 200,
                                   child:Text(
-                                    widget.value.doctor.description,
+                                    widget.value.doctor.doctor.description,
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 12.0,
@@ -295,8 +295,9 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                       Medecine medecine= Medecine("Doctor Booking", "");
                      List<Medecine>  list=[];
                      list.add(medecine);
-                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+newFormat.format(widget.value.date), widget.value.doctor.userId,list,600.0, widget.value.date, widget.value.doctor.resId);
-                     // Navigator.of(context).pushNamed("/payments",arguments:payments);
+                     await _createAppointmentConfirmation();
+                     
+                     Navigator.of(context).pushNamed("/home");
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -330,24 +331,24 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
       ),
     );
   }
-     Future _createAppointmentConfirmation(Payments payments) async {
+     Future _createAppointmentConfirmation() async {
 //  showAlertDialog(context);
   SharedPreferences preferences= await SharedPreferences.getInstance();
   int id= preferences.getInt('id');
  //int result=0;
  
      final http.Response response = await http.post(
-        '${webhook}tasks.task.add',
+                '${webhook}tasks.task.add',
        headers: {"Content-Type": "application/json"},
        body: jsonEncode({
   "fields":{ 
    "TITLE":'Appointment Confirmation',
-   "DESCRIPTION":payments.description,
-   "UF_AUTO_831530867848":payments.resId,
-   "UF_AUTO_197852543914":payments.medicines,
+   "DESCRIPTION":widget.value.doctor.patient.name,
+   "UF_AUTO_831530867848":widget.value.doctor.patient.id,
+   "UF_AUTO_197852543914":widget.value.doctor.patient.hour,
   
-   "UF_AUTO_229319567783":"appointment",
-   "RESPONSIBLE_ID":payments.responsibleID
+   "UF_AUTO_229319567783":widget.value.doctor.patient.date,
+   "RESPONSIBLE_ID":widget.value.doctor.doctor.userId,
   }
 
 })).catchError((error) => print(error));

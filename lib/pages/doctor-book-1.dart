@@ -1,12 +1,13 @@
 import 'package:date_picker_timeline/date_picker_widget.dart';
-import 'package:digitAT/models/doc_booking.dart';
+import 'package:digitAT/models/partner/models/doc_booking.dart';
+import 'package:digitAT/models/partner/models/confirm_booking.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/doctor.dart';
 import 'package:digitAT/models/user.dart';
 import 'package:intl/intl.dart';
 class DoctorBookFirstStep extends StatefulWidget {
-    final Doctor doctor;
-  const DoctorBookFirstStep({Key key,this.doctor}) : super(key: key);
+    final ConfirmBooking cbooking;
+  const DoctorBookFirstStep({Key key,this.cbooking}) : super(key: key);
   @override
   _DoctorBookFirstStepState createState() => _DoctorBookFirstStepState();
 }
@@ -76,12 +77,12 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
-                          ball(widget.doctor.avatar, Colors.transparent),
+                          ball(widget.cbooking.doctor.avatar, Colors.transparent),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                widget.doctor.name,
+                                widget.cbooking.doctor.name,
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 14.0,
@@ -92,7 +93,7 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                               Container(
                                 width: 200,
                                 child:Text(
-                                  widget.doctor.description,
+                                  widget.cbooking.doctor.description,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 12.0,
@@ -304,7 +305,7 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                       if(selectedChoice==""){
                           await errorDialog(context);
                       }else{
-                      DoctorBooking doctorBooking= DoctorBooking(widget.doctor,selectedChoice, _selectedValue);
+                      DoctorBooking doctorBooking= DoctorBooking(widget.cbooking,selectedChoice, _selectedValue);
                       Navigator.of(context).pushNamed("/secondeDoctorBook" ,arguments: doctorBooking);
                     }
                     },

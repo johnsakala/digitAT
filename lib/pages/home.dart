@@ -157,7 +157,10 @@ class _HomeState extends State<Home> {
            ListTile(
             leading:Image(image: AssetImage('images/MoneyTel.png'),),
             title:Text('MoneyTel'),
+                   onTap: (){
+             Navigator.of(context).pushNamed('/moneytel');
 
+          },
           ),
     ],
   ),

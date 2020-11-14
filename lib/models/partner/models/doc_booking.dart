@@ -1,7 +1,8 @@
+import 'package:digitAT/models/partner/models/confirm_booking.dart';
 import 'package:digitAT/models/partner/models/doctor.dart' as model;
 
 class DoctorBooking{
-  model.Doctor doctor;
+  ConfirmBooking doctor;
   DateTime date;
   String timeSlot;
 

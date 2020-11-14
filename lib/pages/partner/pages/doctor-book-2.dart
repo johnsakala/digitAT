@@ -88,12 +88,12 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            ball(widget.value.doctor.avatar, Colors.transparent),
+                           // ball(widget.value.cbooking.doctor.avatar, Colors.transparent),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(
-                                  widget.value.doctor.name,
+                                Text("",
+                                 // widget.value.doctor.name,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14.0,
@@ -103,8 +103,8 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                 ),
                                 Container(
                                   width: 200,
-                                  child:Text(
-                                    widget.value.doctor.description,
+                                  child:Text("",
+                                   // widget.value.doctor.description,
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 12.0,
@@ -299,7 +299,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                      for(int i=0;i<list.length;i++){
                        medNames.add(list[i].name);
                      }
-                      Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+newFormat.format(widget.value.date), widget.value.doctor.userId,list,600.0, widget.value.date, widget.value.doctor.resId, medNames);
+                      //Payments payments= Payments("Doctor Appointment Booking", widget.value.timeSlot+ " "+newFormat.format(widget.value.date), widget.value.doctor.userId,list,600.0, widget.value.date, widget.value.doctor.resId, medNames);
                       await confirmDialog( context, 'Doctors booking');
                       Navigator.of(context).pushNamed('/patientacc');  
                     },

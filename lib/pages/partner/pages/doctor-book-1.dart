@@ -305,8 +305,8 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                       if(selectedChoice==""){
                           await errorDialog(context);
                       }else{
-                      DoctorBooking doctorBooking= DoctorBooking(widget.doctor,selectedChoice, _selectedValue);
-                      Navigator.of(context).pushNamed("/secondeDoctorBook" ,arguments: doctorBooking);
+                     // DoctorBooking doctorBooking= DoctorBooking(widget.doctor,selectedChoice, _selectedValue);
+                     // Navigator.of(context).pushNamed("/secondeDoctorBook" ,arguments: doctorBooking);
                     }
                     },
                     shape: RoundedRectangleBorder(

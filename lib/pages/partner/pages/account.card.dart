@@ -4,6 +4,7 @@ import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/model/ContactModel.dart';
 import 'package:digitAT/models/model/User.dart';
 import 'package:digitAT/models/partner/models/account_card.dart';
+import 'package:digitAT/models/partner/models/confirm_booking.dart';
 import 'package:digitAT/services/FirebaseHelper.dart';
 import 'package:digitAT/services/helper.dart';
 import 'package:flutter/material.dart';
@@ -164,8 +165,9 @@ Doctor doctor= Doctor.init();
         onTap: ()async{
         await  _fetchDetails();
          await _onContactButtonClicked(contactModel);
-        // Navigator.of(context).pushNamed('/firstDoctorBook',arguments: doctor) ;},
-          Navigator.of(context).pushNamed('/patientacc',arguments: widget.patient);        },
+         ConfirmBooking confirmBooking= ConfirmBooking(doctor, widget.patient);
+         Navigator.of(context).pushNamed('/firstDoctorBook',arguments: confirmBooking) ;},
+         // Navigator.of(context).pushNamed('/patientacc',arguments: widget.patient);        },
               child:
               Container(
                 width: MediaQuery.of(context).size.width/3,
