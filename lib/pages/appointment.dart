@@ -102,7 +102,7 @@ class _AppointmentsListState extends State<AppointmentsList> {
   
     final http.Response response = await http
         .get(
-      '${webhook}tasks.task.list?filter[UF_AUTO_831530867848]=$id&filter[TITLE]=Doctor Appointment Booking&filter[UF_AUTO_229319567783]=booking&select[]=RESPONSIBLE_ID&select[]=UF_AUTO_206323634806',
+      '${webhook}tasks.task.list?filter[UF_AUTO_831530867848]=$id&filter[DESCRIPTION]=confirmed&filter[UF_AUTO_206323634806]=paid&filter[TITLE]=Doctor Appointment Booking&select[]=ID&select[]=RESPONSIBLE_ID&select[]=UF_AUTO_206323634806',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
@@ -125,7 +125,7 @@ class _AppointmentsListState extends State<AppointmentsList> {
       
             
            Doctor doc= Doctor.app(result['tasks'][i]['responsible']['name'],"https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRQHLSQ97LiPFjzprrPgpFC83oCiRXC0LKoGQ&usqp=CAU");
-            _doctorsList.add(Appointment(result['tasks'][i]['ufAuto206323634806'],doc));
+            _doctorsList.add(Appointment(result['tasks'][i]['ufAuto206323634806'],doc,result['tasks'][i]['ufAuto206323634806'],result['tasks'][i]['ufAuto621898573172']));
             
           
             

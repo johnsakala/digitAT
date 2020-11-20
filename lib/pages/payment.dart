@@ -175,6 +175,37 @@ setState(() {
        }
       
   }
+    Future _paymentConfirmation() async {
+//  showAlertDialog(context);
+ 
+ //int result=0;
+ 
+     final http.Response response = await http.post(
+                '${webhook}tasks.task.update',
+       headers: {"Content-Type": "application/json"},
+       body: jsonEncode({
+         "taskId":widget..payment.taskId,
+  "fields":{ 
+   
+  
+   "UF_AUTO_206323634806":"paid"
+  
+   
+  }
+
+})).catchError((error) => print(error));
+       if(response.statusCode==200)
+       {
+         Map<String, dynamic> responseBody = jsonDecode(response.body);     
+           
+        print('//////////////////////////////zvaita'+responseBody.toString());
+ 
+       }
+       else{
+         print(response.statusCode);
+       }
+       //return responseBody['result'];
+  }
 
  @override
   void initState() {
@@ -493,6 +524,7 @@ setState(() {
                        String city= preferences.getString('city');
                        
                        Profile profile=Profile.min(id, name, city);
+                       await _paymentConfirmation();
                            
                        await confirmDialog(context);
                            Navigator.of(context).pushNamed("/homePatient",

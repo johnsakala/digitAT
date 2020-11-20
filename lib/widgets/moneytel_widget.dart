@@ -1,15 +1,16 @@
+import 'package:digitAT/models/payment.dart';
 import 'package:flutter/material.dart';
-import 'package:digitAT/models/partner/models/appointment.dart' as model;
-import 'package:digitAT/models/partner/models/user.dart';
-class AppointmentsWidget extends StatefulWidget {
+import 'package:digitAT/models/appointment.dart' as model;
+import 'package:digitAT/models/user.dart';
+class MoneytelWidget extends StatefulWidget {
   final model.Appointment appointment;
-  const AppointmentsWidget({Key key, this.appointment}) : super(key: key);
+  const MoneytelWidget({Key key, this.appointment}) : super(key: key);
   
   @override
-  _AppointmentsWidgetState createState() => _AppointmentsWidgetState();
+  _MoneytelWidgetState createState() => _MoneytelWidgetState();
 }
 
-class _AppointmentsWidgetState extends State<AppointmentsWidget> {
+class _MoneytelWidgetState extends State<MoneytelWidget> {
   User currentUser =new User.init().getCurrentUser();
   @override
   Widget build(BuildContext context) {
@@ -60,7 +61,7 @@ class _AppointmentsWidgetState extends State<AppointmentsWidget> {
                           ),
                               SizedBox(height: 12,),
                               Text(
-                           widget.appointment.date==null?'undated':'${widget.appointment.date}',
+                            '\$ ${widget.appointment.bill}',
                             style: TextStyle(
                               color: Colors.grey,
                               fontFamily: 'Poppins',
@@ -77,9 +78,10 @@ class _AppointmentsWidgetState extends State<AppointmentsWidget> {
                       child: IconButton(  
                         padding: EdgeInsets.all(0),
                         onPressed: (){
-                          //Navigator.of(context).pushNamed('/chat');
+                           Payments payments= Payments.app('Doctor Appointment Booking','', '',[],widget.appointment.bill,DateTime.now(), '', widget.appointment.taskId);
+                          Navigator.of(context).pushNamed('/payments', arguments: payments);
                         },
-                        icon: Icon(Icons.calendar_today),
+                        icon: Icon(Icons.payment),
                         iconSize: 20,
                         color: Theme.of(context).accentColor,
                       ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:digitAT/api/url.dart';
 import 'package:digitAT/models/appointment.dart';
+import 'package:digitAT/widgets/moneytel_widget.dart';
 import 'package:digitAT/widgets/my_paymentsWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:digitAT/models/appointment.dart' as model;
@@ -74,7 +75,7 @@ class _PaymentRequestListState extends State<PaymentRequestList> {
                 },
                 itemBuilder: (context,index){
                   
-                  return MyPaymentsWidget(
+                  return MoneytelWidget(
                     appointment: snapshot.data[index],
                   );
                 },
@@ -101,7 +102,7 @@ class _PaymentRequestListState extends State<PaymentRequestList> {
   
     final http.Response response = await http
         .get(
-      '${webhook}tasks.task.list?filter[UF_AUTO_831530867848]=$id&filter[TITLE]=Appointment Confirmation&select[]=RESPONSIBLE_ID&select[]=UF_AUTO_621898573172',
+      '${webhook}tasks.task.list?filter[UF_AUTO_831530867848]=$id&filter[DESCRIPTION]=confirmed&filter[TITLE]=Doctor Appointment Booking&select[]=ID&select[]=RESPONSIBLE_ID&select[]=UF_AUTO_621898573172',
     )
         .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
@@ -117,7 +118,7 @@ class _PaymentRequestListState extends State<PaymentRequestList> {
           for(int i=0;i<result['tasks'].length;i++)
           {
             Doctor doc= Doctor.app(result['tasks'][i]['responsible']['name'],result['tasks'][i]['responsible']['icon']);
-            _doctorsList.add(Appointment(result['tasks'][i]['ufAuto621898573172'],doc));
+            _doctorsList.add(Appointment(result['tasks'][i]['ufAuto229319567783'],doc,result['tasks'][i]['ID'],result['tasks'][i]['ufAuto621898573172']));
           }
         } else {
           serverResponse = [];

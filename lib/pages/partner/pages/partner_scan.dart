@@ -32,7 +32,7 @@ class PartnerScanState extends State<PartnerScan>{
 
 User user= User.init();
 int total=0, id;
-String docName;
+String docName, imageurl, url;
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
@@ -41,10 +41,41 @@ final fireStoreUtils = FireStoreUtils();
   Future<List<User>> _friendsFuture;
   Stream<List<HomeConversationModel>> _conversationsStream;
   TextEditingController controller = new TextEditingController();
-  
+   Future <String> _fetchProfile() async {
+String imageUrl;
+    final http.Response response = await http
+        .get(
+      '${webhook}disk.folder.getchildren?id=60&filter[NAME]=$id',
+    )
+        .catchError((error) => print(error));
+    Map<String, dynamic> responseBody = jsonDecode(response.body);
+   
+    if (response.statusCode == 200) {
+      try {
+        if (responseBody["result"] != null) {
+             imageUrl=responseBody['result'][0]['DOWNLOAD_URL'];
+        } else {
+          
+          print(response.body);
+        }
+      } catch (error) {
+        print(error);
+      }
+    } else {
+      print("Please check your internet connection ");
+      Fluttertoast.showToast(
+          msg: "Please check your internet connection ",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIos: 4,
+          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
+    }
+    return imageUrl;
+  }
 @override
   void initState(){
   super.initState();
+    
    SharedPreferences.getInstance().then((SharedPreferences sp) {
       String _name;
       int _testValue;
@@ -76,6 +107,12 @@ final fireStoreUtils = FireStoreUtils();
        
      });
    });*/
+
+    _fetchProfile().then((value) {
+  setState(() {
+    imageurl=value;
+  });
+    });
    
     fireStoreUtils.getBlocks().listen((shouldRefresh) {
       if (shouldRefresh) {
@@ -131,8 +168,8 @@ final fireStoreUtils = FireStoreUtils();
                   color: Colors.grey,
                   image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: AssetImage(
-                        "images/asset-1.png"),
+                    image: imageurl==null?AssetImage(
+                        "images/asset-1.png"):NetworkImage(imageurl),
                   ),
                 ),
               ),
@@ -665,10 +702,12 @@ final fireStoreUtils = FireStoreUtils();
      List<Widget> _applist=[];
      SharedPreferences preferences= await SharedPreferences.getInstance();
      int resposibleId=preferences.getInt('id');
+     String type= preferences.getString('type');
+     await _decideDepartment(type);
      print(resposibleId);
 //  showAlertDialog(context);
     final http.Response response = await http
-        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Booking&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
+        .get(url,
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
@@ -694,7 +733,7 @@ final fireStoreUtils = FireStoreUtils();
          
             print("*************************"+ aidsBody["result"].toString());
         
-                        PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],"");
+                        PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],"",result[i]['ufAuto831530867848']);
                         _appList.add(
                 _buildCard(
                     context,
@@ -882,5 +921,79 @@ Widget _buildConversationRow(HomeConversationModel homeConversationModel) {
       ),
     );
   }
+Future _decideDepartment(String departmentName) async{
+  SharedPreferences preferences= await SharedPreferences.getInstance();
+       int resposibleId=preferences.getInt('id');
 
+  switch(departmentName){
+    case "Doctor":{
+   setState(() {
+     url='${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806';
+   });
+    }
+    break;
+      case "Hospital":{
+    setState(() {
+          url='${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806';
+
+   });
+    }
+    break;
+
+       case "Clinic":{
+    setState(() {
+       url='${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806';
+
+   });
+    }
+    break;
+      case "Pharmacy":{
+     setState(() {
+     url= '${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Scan Booking&select[]=ID&select[]=DESCRIPTION&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806&select[]=UF_AUTO_229319567783';
+   });
+    }
+    break;
+      case "Laboratory":{
+      setState(() {
+       url='${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806';
+
+   });
+    }
+    break;
+      case "ImagingCentre":{
+      setState(() {
+     url='${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Scan Booking&select[]=ID&select[]=DESCRIPTION&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806&select[]=UF_AUTO_229319567783';
+   });
+    }
+    break;
+  case "FitnessCenter":{
+      setState(() {
+          url='${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806';
+
+   });
+    }
+    break;
+
+    case "Blood Bank":{
+      setState(() {
+         url='${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806';
+
+   });
+    }
+    break;
+    case "Ambulance":{
+      setState(() {
+         url='${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$docName&filter[TITLE]=Scan Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806';
+
+   });
+    }
+    break;
+    
+    default:{
+      print('no such user type');
+    }
+
+
+  }
+}
 }

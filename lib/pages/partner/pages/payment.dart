@@ -143,7 +143,6 @@ Pharmacist officer;
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     return officer;
   }
    Future _createTask() async {

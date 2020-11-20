@@ -24,11 +24,18 @@ class DoctorBookSecondeStep extends StatefulWidget {
 
 class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
 
-  String aid, number, name='',phone='',email='';
+  String aid, number, name='',phone='',email='', date;
+  double bill=0.0;
   bool _loading = false;
 
- 
-
+ @override
+  void initState()  {
+    super.initState();
+    setState((){
+   date=newFormat.format(widget.value.date);
+    });
+  } 
+final _formKey = GlobalKey<FormState>();
   User currentUser=new User.init().getCurrentUser();
   Doctor currentDoctor = new Doctor.init().getCurrentDoctor();
   TextEditingController emailController= new TextEditingController();
@@ -89,12 +96,12 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: <Widget>[
-                            ball(widget.value.doctor.doctor.avatar, Colors.transparent),
+                            //ball(widget.value.doctor.doctor.avatar, Colors.transparent),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(
-                                  widget.value.doctor.doctor.name,
+                                Text('',
+                                  //widget.value.doctor.doctor.name,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14.0,
@@ -105,7 +112,8 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                 Container(
                                   width: 200,
                                   child:Text(
-                                    widget.value.doctor.doctor.description,
+                                    '',
+                                    //widget.value.doctor.doctor.description,
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 12.0,
@@ -135,7 +143,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                                   ),
                                   SizedBox(height: 15.0,),
                                   Text(
-                                    "${newFormat.format(widget.value.date)} ${widget.value.timeSlot}",
+                                    "$date ${widget.value.timeSlot}",
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14.0,
@@ -237,18 +245,43 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                      
      
                         SizedBox(height: 25.0,),
-                        Container(
-                          child: Text(
-                            "By Booking this appointment you agree to the T&C",
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 11.0,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Poppins'
+                     Form(
+                      key: _formKey,
+                     
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 100.0,
+                            margin:  const EdgeInsets.only(top: 12.0),
+                            padding: const EdgeInsets.only(left: 12.0,right: 12.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 1.5,color: Colors.grey),
+                              borderRadius: BorderRadius.circular(12.0),
+                              color: Colors.grey.withOpacity(0.4)                          
                             ),
+                            child:
+                            
+                            TextFormField(
+                              
+                                  decoration: InputDecoration(
+                               labelText: 'Consultation Fee',
+                               
 
-                          ),
-                        ),
+                                            ),
+                                            
+                             onChanged: (value){
+                               setState(() {
+                                 bill= double.parse(value);
+                               });  
+                               },     
+                        validator: (value) {
+                      if (value.isEmpty) {
+                       return 'Consultation Fee can not be empty!';
+                         }
+                             return null;
+                                  },
+                            )),
+                        ])),
                     ],
                   ),
                 ),
@@ -292,12 +325,17 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                      /*  if(result!=null){
                        print('*********************************appointment created');
                       }*/
+                        if (_formKey.currentState.validate()) {
+                          setState((){
+   _loading=true;
+ });
                       Medecine medecine= Medecine("Doctor Booking", "");
                      List<Medecine>  list=[];
                      list.add(medecine);
                      await _createAppointmentConfirmation();
                      
                      Navigator.of(context).pushNamed("/home");
+                        }
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0)
@@ -306,7 +344,7 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
                     child:Container(
                       margin: EdgeInsets.only(left: 55.0,right: 55.0,top: 12,bottom: 12),
                       child:Text(
-                        'Book',
+                        'Submit',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
@@ -333,29 +371,28 @@ class _DoctorBookSecondeStepState extends State<DoctorBookSecondeStep> {
   }
      Future _createAppointmentConfirmation() async {
 //  showAlertDialog(context);
-  SharedPreferences preferences= await SharedPreferences.getInstance();
-  int id= preferences.getInt('id');
- //int result=0;
  
+ //int result=0;
+  print('*****************'+widget.value.doctor.patient.taskId);
      final http.Response response = await http.post(
-                '${webhook}tasks.task.add',
+                '${webhook}tasks.task.update',
        headers: {"Content-Type": "application/json"},
        body: jsonEncode({
+         "taskId":widget.value.doctor.patient.taskId,
   "fields":{ 
-   "TITLE":'Appointment Confirmation',
-   "DESCRIPTION":widget.value.doctor.patient.name,
-   "UF_AUTO_831530867848":widget.value.doctor.patient.id,
-   "UF_AUTO_197852543914":widget.value.doctor.patient.hour,
-  
-   "UF_AUTO_229319567783":widget.value.doctor.patient.date,
-   "RESPONSIBLE_ID":widget.value.doctor.doctor.userId,
+"DESCRIPTION":"confirmed",
+   "UF_AUTO_621898573172":bill, 
+   "UF_AUTO_229319567783": date+' '+ widget.value.timeSlot
+   
   }
 
 })).catchError((error) => print(error));
        if(response.statusCode==200)
        {
          Map<String, dynamic> responseBody = jsonDecode(response.body);     
-           
+           setState((){
+   _loading=false;
+ });
         print('//////////////////////////////zvaita'+responseBody.toString());
  
        }

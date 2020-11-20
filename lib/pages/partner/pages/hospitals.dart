@@ -51,7 +51,6 @@ class _HospitalsState extends State<Hospitals> {
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     return result;
   }
       

@@ -699,7 +699,7 @@ String getStatusByType(ContactType type) {
         //showProgress(context, 'please wait...', false);
        print(contact.user.userID);
         await fireStoreUtils.sendFriendRequest(contact.user);
-       contact.type = ContactType.PENDING;
+       contact.type = ContactType.ACCEPT;
         break;
     }
   }

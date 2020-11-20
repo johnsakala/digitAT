@@ -53,7 +53,6 @@ class _HospitalOptionsState extends State<HospitalOptions> {
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     return result;
   }
       
@@ -265,7 +264,6 @@ class _HospitalOptionsState extends State<HospitalOptions> {
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     
   }
 }

@@ -38,7 +38,7 @@ class _CovIDServicesState extends State<CovIDServices> {
    
         } else {
           
-          print('-----------------'+response.body);
+          
         }
       } catch (error) {
         print('-----------------'+error);
@@ -52,7 +52,6 @@ class _CovIDServicesState extends State<CovIDServices> {
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     return result;
   }
       

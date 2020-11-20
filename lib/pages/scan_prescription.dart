@@ -155,7 +155,7 @@ String searchString, id;
                   user['TITLE'] ,
                   " ",
                   user['TITLE'],
-                  "Closed To day",
+                  "",
                   Colors.green,
                   user['ID'],false,
                   '1'),

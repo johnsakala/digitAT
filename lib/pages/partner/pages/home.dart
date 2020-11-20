@@ -32,7 +32,7 @@ class _HospitalDashboardHomeState extends State<HospitalDashboardHome>{
    
 
 User user=User();
-String id, imageurl;
+String id, imageurl, type;
 
 int total=0, pid;
 List<User> _friendsSearchResult = [];
@@ -61,7 +61,8 @@ final fireStoreUtils = FireStoreUtils();
        user=User.fromJson(jsonDecode(sp.getString('user')));
        id= user.userID;
        pid=sp.getInt('id');
-       print('*********************************************userr'+user.userID.toString());
+       type= sp.getString('type');
+      
      });
    });
    
@@ -590,7 +591,7 @@ final fireStoreUtils = FireStoreUtils();
                     List<Widget> data = snapshot.data;
                     return _doctorsListView(data);
                   } else if (snapshot.hasError) {
-                    return Text("Please check your internet connection! ${snapshot.error}");
+                    return Text("Something wromg happened whilst fetching data! ${snapshot.error}");
                   }
                   return CircularProgressIndicator();
                 }),
@@ -630,11 +631,12 @@ final fireStoreUtils = FireStoreUtils();
      List<Widget> _applist=[];
      SharedPreferences preferences= await SharedPreferences.getInstance();
      int resposibleId=preferences.getInt('id');
-     print('----------$resposibleId');
+     
 //  showAlertDialog(context);
     final http.Response response = await http
-        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Doctor Appointment Booking&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
-    )  .catchError((error) => print(error));
+        .get(
+          '${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Doctor Appointment Booking&select[]=ID&select[]=DESCRIPTION&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806&select[]=UF_AUTO_229319567783',
+    )  .catchError((error) => print('////'+error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
     List< dynamic> result=[];
@@ -645,6 +647,7 @@ final fireStoreUtils = FireStoreUtils();
          
               
       result = responseBody["result"]["tasks"];
+      print(result);
          for(int i=0;i<result.length;i++){
            final http.Response aids = await http
         .get(
@@ -659,7 +662,7 @@ final fireStoreUtils = FireStoreUtils();
          
         
             
-            PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],"");
+            PatientCard patientCard= PatientCard.home(result[i]['ufAuto229319567783'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],result[i]['description'],result[i]['id'],result[i]['ufAuto206323634806'].toString());
             
             _appList.add(
                 _buildCard(
@@ -669,7 +672,7 @@ final fireStoreUtils = FireStoreUtils();
            _applist.addAll(_appList); 
           
         } else {
-          print('-----------------' + response.body);
+          
         }
       } catch (error) {
         print('-----------------' + error);
@@ -749,88 +752,7 @@ final fireStoreUtils = FireStoreUtils();
     return legend.toList();
   }
 
-   Future <List<Widget>> _fetchConfirmedAppointment() async {
-     List<Widget> _applist=[];
-     SharedPreferences preferences= await SharedPreferences.getInstance();
-     int resposibleId=preferences.getInt('id');
-     print('----------$resposibleId');
-//  showAlertDialog(context);
-    final http.Response response = await http
-        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Doctor Appointment Booking&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806',
-    )  .catchError((error) => print(error));
-    Map<String, dynamic> responseBody = jsonDecode(response.body);
-    
-    List< dynamic> result=[];
    
-    if (response.statusCode == 200) {
-      try {
-        if (responseBody["result"] != null) {
-         
-              
-      result = responseBody["result"]["tasks"];
-         for(int i=0;i<result.length;i++){
-           final http.Response aids = await http
-        .get(
-          '${webhook}crm.lead.get?ID=${result[i]['ufAuto831530867848']}',
-        )
-        .catchError((error) => print(error));
-    Map<String, dynamic> aidsBody = jsonDecode(aids.body);
-    if (aids.statusCode == 200) {
-      List<Widget> _appList=[];
-      try {
-        if (aidsBody["result"] != null) {
-         
-        
-            
-            PatientCard patientCard= PatientCard(result[i]['ufAuto206323634806'], aidsBody["result"]['NAME']+aidsBody["result"]['LAST_NAME'], false, aidsBody["result"]["ADDRESS_CITY"],aidsBody["result"]["ID"],result[i]['DESCRIPTION']);
-            
-            _appList.add(
-                _buildCard(
-                    context,
-                    child: AccountCard(patient: patientCard,),
-            ));
-           _applist.addAll(_appList); 
-          
-        } else {
-          print('-----------------' + response.body);
-        }
-      } catch (error) {
-        print('-----------------' + error);
-      }
-    } else {
-      print("Please check your internet connection ");
-      Fluttertoast.showToast(
-          msg: "Please check your internet connection ",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 4,
-          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
-    }
-         }
-         
-   
-        } else {
-          
-          print('-----------------'+response.statusCode.toString());
-        }
-      } catch (error) {
-        print('-----------------'+error);
-      }
-    } else {
-      print("Please check your internet connection ");
-      Fluttertoast.showToast(
-          msg: "Please check your internet connection ",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 4,
-          fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
-    }
-    setState(() {
-      total=_applist.length;
-    });
-    return _applist;
-  }
-
    ListView _doctorsListView(data) {
     return ListView(
         
@@ -993,7 +915,7 @@ String imageUrl;
     if (response.statusCode == 200) {
       try {
         if (responseBody["result"] != null) {
-             imageUrl=responseBody['result'][0]['DETAIL_URL'];
+             imageUrl=responseBody['result'][0]['DOWNLOAD_URL'];
         } else {
           
           print(response.body);

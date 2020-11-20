@@ -55,7 +55,6 @@ class _PharmaciesState extends State<Pharmacies> {
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     return result;
   }
       

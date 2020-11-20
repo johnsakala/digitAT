@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:digitAT/api/url.dart';
 import 'package:digitAT/config/constants.dart';
+import 'package:digitAT/models/model/User.dart';
 import 'package:flutter_country_picker/flutter_country_picker.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -41,6 +42,7 @@ class _CreateAcountState extends State<CreateAcount> {
    bool _load= false;
    
     DateTime birthDate;
+    User user= User.init();
  
    Future _getPhoto() async{
     print('picking image');
@@ -608,7 +610,7 @@ final http.Response response = await http.post(
                   ),
                 ),
                 onPressed: () async{
-
+                  
                   _onFormSaved();
                    if (_formKey.currentState.validate()) {
                   setState(() {
@@ -622,14 +624,20 @@ final http.Response response = await http.post(
                  contactID =  await _createContact(widget.accountInfo[1],widget.accountInfo[0].userID,_result.toString());           
                     SharedPreferences.getInstance().then(( SharedPreferences sp){
                      sp.setInt('contactID', contactID);
+                     sp.setString('type', type);
+                     setState(() {
+                       user=User.fromJson(jsonDecode(sp.getString('user')));
+                     });
+                    
                     });
                      await setDetails(_result, fname+" "+lname,phoneNo,city);
                    int cid=  await _createCompany(cname,physicalAddress,city, contactID);
                     
                   await uploadImage(_result,imageName,baseImage);
                   
-                     await confirmDialog(context); 
-                     Navigator.of(context).pushNamed('/home'); 
+                     await confirmDialog(context);
+                     await _decideLandingPage(type, context, user); 
+                     //Navigator.of(context).pushNamed('/home'); 
                     //Navigator.of(context).pushNamed('/home',arguments:[fname+' '+lname,_result,city]);
                   }
                 },
@@ -892,20 +900,20 @@ Future _decideDepartment(String departmentName){
    });
     }
     break;
-      case "Imaging Centre":{
+      case "ImagingCentre":{
       setState(() {
      userDepartment=24;
    });
     }
     break;
-  case "Fitness Center":{
+  case "FitnessCenter":{
       setState(() {
      userDepartment=1528;
    });
     }
     break;
 
-    case "Blood Bank":{
+    case "BloodBank":{
       setState(() {
      userDepartment=1530;
    });
@@ -924,5 +932,57 @@ Future _decideDepartment(String departmentName){
 
 
   }
+}
+Future _decideLandingPage(String departmentName, BuildContext context, User usr) async{
+  
+
+  switch(departmentName){
+    case "Doctor":{
+ Navigator.of(context).pushNamed('/home',arguments: usr); 
+    }
+    break;
+      case "Hospital":{
+    Navigator.of(context).pushNamed('/home'); 
+    }
+    break;
+
+       case "Clinic":{
+ Navigator.of(context).pushNamed('/home'); 
+    }
+    break;
+      case "Pharmacy":{
+   Navigator.of(context).pushNamed('/partnerpharmacy',arguments: usr);
+    }
+    break;
+      case "Laboratory":{
+   Navigator.of(context).pushNamed('/partnerlab',arguments: usr);
+    }
+    break;
+      case "ImagingCentre":{
+   Navigator.of(context).pushNamed('/partnerscan',arguments: usr);
+    }
+    break;
+  case "FitnessCenter":{
+   Navigator.of(context).pushNamed('/home'); 
+    }
+    break;
+
+    case "BloodBank":{
+      
+   Navigator.of(context).pushNamed('/home'); 
+    }
+    break;
+    case "Ambulance":{
+ Navigator.of(context).pushNamed('/home'); 
+    }
+    break;
+    
+    default:{
+      print('no  such route');
+    }
+
+
+  }
+
 }
 }

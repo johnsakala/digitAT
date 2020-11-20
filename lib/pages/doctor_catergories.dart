@@ -53,7 +53,6 @@ class _DoctorsCatState extends State<DoctorsCat> {
           timeInSecForIos: 4,
           fontSize: ScreenUtil(allowFontScaling: false).setSp(16));
     }
-    print('response //////////////////////////////'+result.toString());
     return result;
   }
       

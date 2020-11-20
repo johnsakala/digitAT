@@ -39,6 +39,7 @@ class AccountCard extends StatefulWidget {
   String hour;
   String id;
   String confirmed;
+  String paid;
   User user= User.init();
   ContactModel contactModel= ContactModel.init();
   final fireStoreUtils= FireStoreUtils();
@@ -99,6 +100,7 @@ Doctor doctor= Doctor.init();
     hour=widget.patient.hour;
     id=widget.patient.id;
     confirmed=widget.patient.confirmed;
+    paid=widget.patient.paid;
     _fetchDoctor().then((value){
       setState((){
   doctor=value;
@@ -124,12 +126,22 @@ Doctor doctor= Doctor.init();
         
         break;
       case ContactType.PENDING:
-        
+        showProgress(context, 'acceptingFriendship', false);
+        await fireStoreUtils.onFriendAccept(contact.user, MyAppState.currentUser);
+        contact.type= ContactType.FRIEND;
+        hideProgress();
         break;
       case ContactType.BLOCKED:
+      showProgress(context, 'acceptingFriendship', false);
+        await fireStoreUtils.onFriendAccept(contact.user, MyAppState.currentUser);
+        contact.type= ContactType.FRIEND;
+        hideProgress();
         break;
       case ContactType.UNKNOWN:
-        
+        showProgress(context, 'acceptingFriendship', false);
+        await fireStoreUtils.onFriendAccept(contact.user, MyAppState.currentUser);
+        contact.type= ContactType.FRIEND;
+        hideProgress();
         break;
     }
   }
@@ -173,7 +185,7 @@ Doctor doctor= Doctor.init();
         if(confirmed==""){
           Navigator.of(context).pushNamed('/firstDoctorBook',arguments: confirmBooking) ;
          // await _updateAppointment();
-        }else{
+        }else if(paid=="paid"){
         Navigator.of(context).pushNamed('/patientacc',arguments: widget.patient);
         }
         
@@ -184,12 +196,12 @@ Doctor doctor= Doctor.init();
                 width: MediaQuery.of(context).size.width/3,
                 child: ListTile(
                   title: Text(
-                    name,
+                    '$name',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  subtitle: Text(date),
+                  subtitle: Text('${date.toString()}'),
                 ),
               )),
               Row(
@@ -197,7 +209,7 @@ Doctor doctor= Doctor.init();
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    hour,
+                    '${hour.toString()}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                     ),

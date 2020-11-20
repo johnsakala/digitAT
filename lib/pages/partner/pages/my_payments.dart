@@ -117,7 +117,7 @@ class _PaymentsListState extends State<PaymentsList> {
           for(int i=0;i<result['tasks'].length;i++)
           {
             Doctor doc= Doctor.app(result['tasks'][i]['responsible']['name'],result['tasks'][i]['responsible']['icon']);
-            _doctorsList.add(Appointment(result['tasks'][i]['ufAuto621898573172'],doc));
+            _doctorsList.add(Appointment(result['tasks'][i]['ufAuto621898573172'],doc,result['tasks'][i]['ID']));
           }
         } else {
           serverResponse = [];

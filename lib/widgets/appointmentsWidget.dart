@@ -60,7 +60,8 @@ class _AppointmentsWidgetState extends State<AppointmentsWidget> {
                           ),
                               SizedBox(height: 12,),
                               Text(
-                            '${widget.appointment.date}',
+                                widget.appointment.date==null?'undated':'${widget.appointment.date}',
+                            //widget.appointment.date==null?'undated':'${widget.appointment.date}',
                             style: TextStyle(
                               color: Colors.grey,
                               fontFamily: 'Poppins',

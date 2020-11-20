@@ -77,12 +77,13 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
-                          ball(widget.cbooking.doctor.avatar, Colors.transparent),
+                          //ball(widget.cbooking.doctor.avatar, Colors.transparent),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                widget.cbooking.doctor.name,
+                                '',
+                                //widget.cbooking.doctor.name,
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 14.0,
@@ -93,7 +94,8 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                               Container(
                                 width: 200,
                                 child:Text(
-                                  widget.cbooking.doctor.description,
+                                  '',
+                                 // widget.cbooking.doctor.description,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 12.0,
@@ -316,7 +318,7 @@ var newFormat = DateFormat("dd-MMM-yyyy");
                     child:Container(
                       margin: EdgeInsets.only(left: 55.0,right: 55.0,top: 12,bottom: 12),
                       child:Text(
-                        'Book',
+                        'Next',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12.0,
