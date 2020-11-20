@@ -135,15 +135,15 @@ String imageUrl;
     
      List<Widget> _applist=[];
      SharedPreferences preferences= await SharedPreferences.getInstance();
-     int resposibleId=preferences.getInt('id');
+     int responsibleId=preferences.getInt('id');
      
-      await _decideDepartment(type);
+     // await _decideDepartment(type);
      //  showAlertDialog(context);
-          print('--------------------------------------------------url'+url);
+        
 
   
     final http.Response response = await http
-        .get(url
+        .get('${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$responsibleId&filter[TITLE]=Medicines Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806'
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
@@ -990,7 +990,7 @@ Future _decideDepartment(String departmentName) async{
     break;
     case "Ambulance":{
       setState(() {
-     url= '${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Medicines Order&select[]=ID&select[]=DESCRIPTION&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806&select[]=UF_AUTO_229319567783';
+          url= '${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$resposibleId&filter[TITLE]=Medicines Order&select[]=ID&select[]=DESCRIPTION&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806&select[]=UF_AUTO_229319567783';
 
    });
     }

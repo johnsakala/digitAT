@@ -32,7 +32,7 @@ class PartnerScanState extends State<PartnerScan>{
 
 User user= User.init();
 int total=0, id;
-String docName, imageurl, url;
+String docName, imageurl, url, title='';
 List<User> _friendsSearchResult = [];
 List<HomeConversationModel> _conversationsSearchResult = [];
 List<User> _friends = [];
@@ -701,13 +701,14 @@ String imageUrl;
   Future <List<Widget>> _fetchOrders() async {
      List<Widget> _applist=[];
      SharedPreferences preferences= await SharedPreferences.getInstance();
-     int resposibleId=preferences.getInt('id');
+     int responsibleId=preferences.getInt('id');
      String type= preferences.getString('type');
-     await _decideDepartment(type);
-     print(resposibleId);
+    // await _decideDepartment(type);
+   
 //  showAlertDialog(context);
     final http.Response response = await http
-        .get(url,
+        .get(  '${webhook}tasks.task.list?filter[RESPONSIBLE_ID]=$responsibleId&filter[TITLE]=Scan Prescription&select[]=UF_AUTO_831530867848&select[]=UF_AUTO_206323634806'
+
     )  .catchError((error) => print(error));
     Map<String, dynamic> responseBody = jsonDecode(response.body);
     
